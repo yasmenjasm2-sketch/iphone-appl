@@ -2,510 +2,389 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>نظام Fawakih AI | الإصدار 2.0</title>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;500;700;900&display=swap" rel="stylesheet">
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام تحليل الفاكهة الذكي</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
     <style>
-        /* * ==========================================
-         * 1. DESIGN SYSTEM (نظام التصميم)
-         * ==========================================
-         */
         :root {
-            --bg-dark: #09090b;
-            --glass-bg: rgba(30, 30, 35, 0.7);
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --primary: #8b5cf6; /* بنفسجي */
-            --primary-glow: rgba(139, 92, 246, 0.4);
-            --accent: #10b981; /* أخضر */
-            --danger: #ef4444;
-            --text-main: #ffffff;
-            --text-muted: #a1a1aa;
-            --radius: 24px;
+            --primary: #00ff88;
+            --secondary: #7000ff;
+            --bg: #1a1a2e;
+            --card-bg: #16213e;
+            --text: #ffffff;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
         body {
-            font-family: 'Tajawal', sans-serif;
-            background-color: var(--bg-dark);
-            background-image: 
-                radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.15) 0%, transparent 40%),
-                radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.1) 0%, transparent 40%);
-            color: var(--text-main);
-            height: 100vh;
+            margin: 0;
+            background-color: var(--bg);
+            color: var(--text);
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
+            justify-content: center;
+            min-height: 100vh;
             overflow: hidden;
         }
 
-        /* حاوية التطبيق */
-        .app-container {
+        /* حاوية المحاكاة */
+        .device-container {
             width: 100%;
-            max-width: 420px;
-            height: 100vh;
-            max-height: 850px;
-            position: relative;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        /* البطاقات الزجاجية */
-        .card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius);
-            padding: 30px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-            text-align: center;
-            position: absolute;
-            width: calc(100% - 40px);
-            left: 20px;
-            opacity: 0;
-            pointer-events: none;
-            transform: scale(0.95) translateY(10px);
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .card.active {
-            opacity: 1;
-            pointer-events: all;
-            transform: scale(1) translateY(0);
-            z-index: 10;
-        }
-
-        /* العناصر النصية */
-        h1, h2 { font-weight: 900; margin-bottom: 10px; letter-spacing: -0.5px; }
-        h1 { font-size: 28px; background: linear-gradient(to right, #fff, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        p { color: var(--text-muted); font-size: 14px; margin-bottom: 25px; line-height: 1.6; }
-
-        /* حقول الإدخال */
-        .input-box {
-            position: relative;
-            margin-bottom: 20px;
-        }
-        .input-box i {
-            position: absolute;
-            top: 50%;
-            right: 15px;
-            transform: translateY(-50%);
-            color: var(--text-muted);
-            font-size: 18px;
-        }
-        input {
-            width: 100%;
-            background: rgba(0,0,0,0.3);
-            border: 2px solid var(--glass-border);
-            border-radius: 12px;
-            padding: 16px 50px 16px 16px;
-            color: white;
-            font-size: 16px;
-            font-family: inherit;
-            transition: 0.3s;
-        }
-        input:focus { border-color: var(--primary); box-shadow: 0 0 15px var(--primary-glow); }
-
-        /* الأزرار */
-        .btn-main {
-            width: 100%;
-            padding: 18px;
-            background: linear-gradient(135deg, var(--primary), #6d28d9);
-            border: none;
-            border-radius: 12px;
-            color: white;
-            font-weight: 700;
-            font-size: 16px;
-            cursor: pointer;
-            position: relative;
+            max-width: 400px;
+            background: #0f0f1a;
+            border-radius: 30px;
+            border: 2px solid #333;
+            box-shadow: 0 0 50px rgba(112, 0, 255, 0.2);
             overflow: hidden;
-            transition: 0.3s;
-            box-shadow: 0 4px 15px var(--primary-glow);
-        }
-        .btn-main:active { transform: scale(0.98); }
-        .btn-main:disabled { background: #333; cursor: not-allowed; box-shadow: none; color: #666; }
-
-        /* منطقة النتيجة */
-        .result-area {
-            margin: 30px 0;
-            padding: 20px;
-            background: rgba(0,0,0,0.2);
-            border-radius: 20px;
-            min-height: 180px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            border: 1px dashed var(--glass-border);
+            position: relative;
         }
 
-        .fruit-icon {
-            font-size: 80px;
-            filter: drop-shadow(0 0 20px rgba(255,255,255,0.2));
-            transition: transform 0.3s;
-        }
-        
-        .fruit-name {
-            font-size: 24px;
-            font-weight: 700;
-            margin-top: 15px;
-            color: var(--text-main);
-        }
-
-        /* التحميل (Loader) */
-        .ai-loader {
-            width: 60px;
-            height: 60px;
-            border: 4px solid rgba(139, 92, 246, 0.1);
-            border-left-color: var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            display: none;
-        }
-
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-        
-        /* تذييل */
-        .footer-info {
-            margin-top: 20px;
-            font-size: 12px;
-            color: #555;
+        /* رأس التطبيق */
+        .header-bar {
+            padding: 15px;
+            background: linear-gradient(90deg, #2a2a4a, #1a1a2e);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border-bottom: 1px solid #333;
+            font-size: 14px;
         }
 
-        .status-badge {
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-            display: none;
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #ccc;
         }
-        .status-badge.error { display:block; background: rgba(239, 68, 68, 0.2); color: var(--danger); }
-        .status-badge.success { display:block; background: rgba(16, 185, 129, 0.2); color: var(--accent); }
+
+        /* منطقة الصورة (المحاكاة) */
+        .image-analysis-area {
+            position: relative;
+            padding: 20px;
+            background: radial-gradient(circle at center, #2c2c54 0%, #0f0f1a 100%);
+            min-height: 400px;
+        }
+
+        /* تأثير المسح الضوئي */
+        .scanner-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--primary);
+            box-shadow: 0 0 10px var(--primary);
+            z-index: 10;
+            display: none;
+            animation: scan 1.5s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { top: 0; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+
+        /* شبكة الفواكه */
+        .fruits-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* 4 فواكه كما طلبت */
+            gap: 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .fruit-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            position: relative;
+            border: 1px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .fruit-card img {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+            filter: drop-shadow(0 5px 5px rgba(0,0,0,0.5));
+        }
+
+        .fruit-info {
+            margin-top: 10px;
+        }
+
+        .fruit-name {
+            font-size: 16px;
+            font-weight: bold;
+            display: block;
+        }
+
+        .fruit-count {
+            font-size: 12px;
+            color: #aaa;
+            background: rgba(0,0,0,0.3);
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-top: 5px;
+            display: inline-block;
+        }
+
+        /* مربع التركيز الذكي (AI Box) */
+        .focus-box {
+            position: absolute;
+            border: 2px solid var(--primary);
+            background: rgba(0, 255, 136, 0.1);
+            border-radius: 15px;
+            pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 5;
+            display: none; /* مخفي افتراضياً */
+            box-shadow: 0 0 20px var(--primary);
+        }
+
+        /* علامات الزوايا للمربع */
+        .focus-box::before, .focus-box::after {
+            content: '';
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border: 2px solid var(--primary);
+            transition: 0.3s;
+        }
+        .focus-box::before { top: -2px; left: -2px; border-right: 0; border-bottom: 0; }
+        .focus-box::after { bottom: -2px; right: -2px; border-left: 0; border-top: 0; }
+
+        .confidence-label {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary);
+            color: #000;
+            font-weight: bold;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            white-space: nowrap;
+        }
+
+        /* لوحة التحكم السفلية */
+        .controls {
+            padding: 20px;
+            background: #16213e;
+            text-align: center;
+        }
+
+        .btn-upload {
+            background: linear-gradient(135deg, var(--secondary), #9d4edd);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(112, 0, 255, 0.4);
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: 0.2s;
+        }
+
+        .btn-upload:active {
+            transform: scale(0.98);
+        }
+
+        .btn-upload:disabled {
+            background: #444;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* نص الحالة */
+        .status-text {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 12px;
+            color: var(--primary);
+            margin-top: 10px;
+            min-height: 15px;
+        }
 
     </style>
 </head>
 <body>
 
-    <div class="app-container">
-        
-        <div id="login-screen" class="card">
-            <div style="margin-bottom: 20px;">
-                <i class="fa-solid fa-fingerprint" style="font-size: 40px; color: var(--primary);"></i>
+    <div class="device-container">
+        <div class="header-bar">
+            <div class="file-info">
+                <i class="fa-regular fa-image"></i>
+                <span>Screenshot_2026.jpg</span>
             </div>
-            <h1>بوابة المشتركين</h1>
-            <p>النظام محمي. يرجى إدخال مفتاح الترخيص الخاص بك للمتابعة.</p>
-
-            <div class="input-box">
-                <i class="fa-solid fa-key"></i>
-                <input type="text" id="license-code" placeholder="XXXX-XXXX-XXXX" autocomplete="off">
+            <div style="color: var(--primary); font-size: 10px;">
+                <i class="fa-solid fa-circle"></i> AI ACTIVE
             </div>
+        </div>
 
-            <button class="btn-main" onclick="SubscriptionManager.validate()">
-                تحقق ودخول <i class="fa-solid fa-arrow-left" style="margin-right:8px"></i>
-            </button>
-
-            <div id="login-status" class="status-badge" style="margin-top: 15px;"></div>
+        <div class="image-analysis-area" id="analysisArea">
+            <div class="scanner-line" id="scanner"></div>
             
-            <div class="footer-info" style="justify-content: center; margin-top: 20px;">
-                <span style="opacity: 0.5;">ID: <span id="did-display">Checking...</span></span>
-            </div>
-        </div>
-
-        <div id="game-screen" class="card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                <span style="font-size: 12px; color: var(--primary); font-weight: bold;">FAWAKIH AI V2.0</span>
-                <button onclick="SubscriptionManager.logout()" style="background:none; border:none; color:var(--text-muted); cursor:pointer;">
-                    <i class="fa-solid fa-power-off"></i>
-                </button>
+            <div class="focus-box" id="focusBox">
+                <span class="confidence-label">CONFIDENCE: 98%</span>
             </div>
 
-            <h2>الخوارزمية الذكية</h2>
-            <p style="margin-bottom: 15px;">انقر أدناه لتحليل النمط وتوقع النتيجة التالية</p>
-
-            <div class="result-area">
-                <div class="ai-loader" id="loader"></div>
-                <div id="result-content">
-                    <div class="fruit-icon" id="fruit-icon">🎲</div>
-                    <div class="fruit-name" id="fruit-text">جاهز للتخمين</div>
+            <div class="fruits-grid" id="grid">
                 </div>
-            </div>
-
-            <button class="btn-main" id="guess-btn" onclick="GameEngine.predict()">
-                <i class="fa-solid fa-wand-magic-sparkles"></i> تحليل وتخمين
-            </button>
-
-            <div class="footer-info">
-                <span><i class="fa-regular fa-clock"></i> الصلاحية: <span id="days-left" style="color:white">--</span> يوم</span>
-                <span>الحالة: <span style="color:var(--accent)">نشط</span></span>
-            </div>
         </div>
 
+        <div class="controls">
+            <div class="status-text" id="statusText">جاهز للتحليل...</div>
+            <button class="btn-upload" onclick="startAnalysis()" id="analyzeBtn">
+                <i class="fa-solid fa-crosshairs"></i> تحليل وتخمين
+            </button>
+            <button onclick="resetData()" style="background:transparent; border:none; color:#555; font-size:10px; margin-top:10px; cursor:pointer;">
+                إعادة ضبط الذاكرة
+            </button>
+        </div>
     </div>
 
-<script>
-/**
- * ==========================================
- * CORE SYSTEM KERNEL
- * (نفس منطق الكود الأصلي مع تحسين الهيكلية)
- * ==========================================
- */
+    <script>
+        // 1. البيانات (تم استبعاد المانجو والفراولة)
+        // يتم استخدام روابط صور خارجية كأمثلة، يمكنك تغييرها لصورك المحلية
+        const fruitsData = [
+            { id: 'apple', name: 'تفاح', icon: 'https://cdn-icons-png.flaticon.com/512/415/415733.png' },
+            { id: 'orange', name: 'برتقال', icon: 'https://cdn-icons-png.flaticon.com/512/135/135620.png' },
+            { id: 'watermelon', name: 'بطيخ', icon: 'https://cdn-icons-png.flaticon.com/512/415/415709.png' },
+            { id: 'grapes', name: 'عنب', icon: 'https://cdn-icons-png.flaticon.com/512/415/415755.png' }
+        ];
 
-/* --- 1. Security Module --- */
-const Security = {
-    getDeviceID: function() {
-        let id = localStorage.getItem('fwh_device_id');
-        if (!id) {
-            id = 'DEV-' + Math.random().toString(36).substr(2, 9).toUpperCase();
-            localStorage.setItem('fwh_device_id', id);
-        }
-        return id;
-    },
-    hash: function(str) {
-        let hash = 0;
-        for (let i = 0; i < str.length; i++) {
-            hash = ((hash << 5) - hash) + str.charCodeAt(i);
-            hash |= 0;
-        }
-        return hash.toString();
-    }
-};
+        // 2. تحميل الذاكرة
+        let memory = JSON.parse(localStorage.getItem('fruitAI_Memory')) || {};
 
-/* --- 2. Subscription Module --- */
-const SubscriptionManager = {
-    // قاعدة بيانات الأكواد (للمحاكاة)
-    validCodes: {
-        'VIP-2024': 30,
-        'ADMIN-KEY': 365,
-        'TEST': 1
-    },
-
-    init: function() {
-        document.getElementById('did-display').innerText = Security.getDeviceID();
-        const savedSub = JSON.parse(localStorage.getItem('fwh_sub_data') || '{}');
-        
-        if (savedSub && savedSub.expiry && savedSub.deviceID === Security.getDeviceID()) {
-            if (Date.now() < savedSub.expiry) {
-                this.switchToGame(savedSub.expiry);
-                return;
-            } else {
-                localStorage.removeItem('fwh_sub_data');
-            }
-        }
-        document.getElementById('login-screen').classList.add('active');
-    },
-
-    validate: function() {
-        const input = document.getElementById('license-code').value.trim();
-        const statusEl = document.getElementById('login-status');
-        
-        // محاكاة التحقق من السيرفر
-        if (this.validCodes.hasOwnProperty(input)) {
-            const days = this.validCodes[input];
-            const expiryTime = Date.now() + (days * 86400000);
+        function initGrid() {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
             
-            const subData = {
-                codeHash: Security.hash(input),
-                expiry: expiryTime,
-                deviceID: Security.getDeviceID()
-            };
+            fruitsData.forEach((fruit, index) => {
+                // التأكد من وجود سجل
+                if (!memory[fruit.id]) memory[fruit.id] = 0;
 
-            localStorage.setItem('fwh_sub_data', JSON.stringify(subData));
+                const card = document.createElement('div');
+                card.className = 'fruit-card';
+                card.id = `card-${index}`;
+                
+                card.innerHTML = `
+                    <img src="${fruit.icon}" alt="${fruit.name}">
+                    <div class="fruit-info">
+                        <span class="fruit-name">${fruit.name}</span>
+                        <span class="fruit-count" id="count-${fruit.id}">${memory[fruit.id]} مرة</span>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // 3. منطق التحليل والتخمين
+        function startAnalysis() {
+            const btn = document.getElementById('analyzeBtn');
+            const scanner = document.getElementById('scanner');
+            const status = document.getElementById('statusText');
+            const focusBox = document.getElementById('focusBox');
+
+            if (btn.disabled) return;
+
+            // إعداد الحالة
+            btn.disabled = true;
+            scanner.style.display = 'block';
+            focusBox.style.display = 'none';
+            status.innerText = "جاري تحليل الصورة...";
+            status.style.color = "#ccc";
+
+            // محاكاة التفكير والمسح (تأخير 2 ثانية)
+            let steps = 0;
+            const interval = setInterval(() => {
+                steps++;
+                status.innerText = `جاري معالجة البيانات... ${steps * 20}%`;
+                
+                // وميض عشوائي للكروت أثناء المسح
+                const randomIdx = Math.floor(Math.random() * fruitsData.length);
+                const card = document.getElementById(`card-${randomIdx}`);
+                card.style.background = 'rgba(255,255,255,0.1)';
+                setTimeout(() => card.style.background = 'rgba(255,255,255,0.05)', 200);
+
+                if (steps >= 5) {
+                    clearInterval(interval);
+                    finalizeGuess();
+                }
+            }, 400);
+        }
+
+        function finalizeGuess() {
+            const scanner = document.getElementById('scanner');
+            const status = document.getElementById('statusText');
+            const focusBox = document.getElementById('focusBox');
+            const btn = document.getElementById('analyzeBtn');
+
+            scanner.style.display = 'none';
+
+            // اختيار الفائز (عشوائي حالياً، يمكن ربطه بالذكاء لاحقاً)
+            const winnerIndex = Math.floor(Math.random() * fruitsData.length);
+            const winnerFruit = fruitsData[winnerIndex];
+            const winnerCard = document.getElementById(`card-${winnerIndex}`);
+
+            // تحديث الذاكرة
+            memory[winnerFruit.id]++;
+            localStorage.setItem('fruitAI_Memory', JSON.stringify(memory));
+            document.getElementById(`count-${winnerFruit.id}`).innerText = `${memory[winnerFruit.id]} مرة`;
+
+            // رسم المربع حول الفائز
+            // حساب موقع الكرت بالنسبة للحاوية
+            const containerRect = document.getElementById('analysisArea').getBoundingClientRect();
+            const cardRect = winnerCard.getBoundingClientRect();
+
+            const top = cardRect.top - containerRect.top;
+            const left = cardRect.left - containerRect.left;
+            const width = cardRect.width;
+            const height = cardRect.height;
+
+            focusBox.style.width = `${width}px`;
+            focusBox.style.height = `${height}px`;
+            focusBox.style.top = `${top}px`;
+            focusBox.style.left = `${left}px`;
+            focusBox.style.display = 'block';
+
+            // تأثير النجاح
+            status.innerText = `تم تحديد الهدف: ${winnerFruit.name}`;
+            status.style.color = "var(--primary)";
             
-            statusEl.className = 'status-badge success';
-            statusEl.innerText = 'تم التفعيل بنجاح! جاري التوجيه...';
+            btn.innerHTML = `<i class="fa-solid fa-check"></i> تم التخمين`;
             
             setTimeout(() => {
-                document.getElementById('login-screen').classList.remove('active');
-                this.switchToGame(expiryTime);
-            }, 1500);
-        } else {
-            statusEl.className = 'status-badge error';
-            statusEl.innerText = 'الكود غير صالح أو منتهي';
-            
-            // تأثير اهتزاز للحقل
-            const inputField = document.querySelector('.input-box');
-            inputField.style.animation = 'shake 0.5s';
-            setTimeout(() => inputField.style.animation = '', 500);
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fa-solid fa-crosshairs"></i> تحليل وتخمين`;
+            }, 2000);
         }
-    },
 
-    switchToGame: function(expiry) {
-        const daysLeft = Math.ceil((expiry - Date.now()) / 86400000);
-        document.getElementById('days-left').innerText = daysLeft;
-        
-        document.getElementById('game-screen').classList.add('active');
-        GameEngine.init();
-    },
-
-    logout: function() {
-        if(confirm('هل تريد تسجيل الخروج وحذف الترخيص من هذا الجهاز؟')) {
-            localStorage.removeItem('fwh_sub_data');
-            location.reload();
-        }
-    }
-};
-
-/* --- 3. Game Engine (Smali Logic Port) --- */
-const GameEngine = {
-    fruits: [
-        { id: 'apple', name: 'تفاحة', icon: '🍎' },
-        { id: 'banana', name: 'موز', icon: '🍌' },
-        { id: 'orange', name: 'برتقال', icon: '🍊' },
-        { id: 'grape', name: 'عنب', icon: '🍇' },
-        { id: 'strawberry', name: 'فراولة', icon: '🍓' },
-        { id: 'watermelon', name: 'بطيخ', icon: '🍉' },
-        { id: 'cherry', name: 'كرز', icon: '🍒' },
-        { id: 'mango', name: 'مانجو', icon: '🥭' }
-    ],
-
-    // ثوابت النظام
-    KEYS: { LEARNED: 'aiLearnedFruits', RESET_FULL: 'LastFullResetTime', RESET_LIST: 'LastListResetTime' },
-    TIME: { FULL_RESET: 172800000, LIST_AGE: 10800000 },
-
-    history: [],
-
-    init: function() {
-        try {
-            this.history = JSON.parse(localStorage.getItem(this.KEYS.LEARNED) || '[]');
-        } catch(e) { this.history = []; }
-        this.checkTimers();
-    },
-
-    updateWeightedList: function() {
-        const weightedList = [];
-        const fruitMap = {}; 
-        
-        this.fruits.forEach(f => {
-            fruitMap[f.id] = f;
-            weightedList.push(f); // الوزن الأساسي
-        });
-
-        // حساب التكرار
-        const frequency = {};
-        this.history.forEach(id => frequency[id] = (frequency[id] || 0) + 1);
-
-        const lastFruit = this.history.length > 0 ? this.history[this.history.length - 1] : "";
-        
-        // خوارزمية الأوزان (آخر 20 عنصر)
-        const limit = Math.min(this.history.length, 20);
-        
-        for (let i = 0; i < limit; i++) {
-            const idx = this.history.length - i - 1;
-            const fruitId = this.history[idx];
-            
-            if (fruitMap[fruitId]) {
-                let weight = 18 - i;
-                if (weight < 2) weight = 2;
-
-                const bonus = Math.min((frequency[fruitId] || 0) * 2, 12);
-                weight += bonus;
-
-                if (fruitId === lastFruit) weight = Math.floor(weight / 3);
-                if (fruitId === 'cherry') weight = 1;
-                if (weight > 35) weight = 35;
-
-                for (let k = 0; k < weight; k++) {
-                    weightedList.push(fruitMap[fruitId]);
-                }
+        function resetData() {
+            if(confirm('هل تريد تصفير العدادات؟')) {
+                localStorage.removeItem('fruitAI_Memory');
+                memory = {};
+                initGrid();
             }
         }
 
-        // خلط القائمة (Fisher-Yates)
-        for (let i = weightedList.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [weightedList[i], weightedList[j]] = [weightedList[j], weightedList[i]];
-        }
+        // تشغيل عند البدء
+        initGrid();
 
-        return weightedList;
-    },
-
-    checkTimers: function() {
-        const now = Date.now();
-        const lastFull = parseInt(localStorage.getItem(this.KEYS.RESET_FULL) || '0');
-        const lastList = parseInt(localStorage.getItem(this.KEYS.RESET_LIST) || '0');
-
-        if (now - lastFull > this.TIME.FULL_RESET) {
-            this.history = [];
-            this.saveHistory();
-            localStorage.setItem(this.KEYS.RESET_FULL, now);
-        } else if (now - lastList > this.TIME.LIST_AGE) {
-            if (this.history.length > 0) {
-                this.history.splice(0, Math.floor(this.history.length / 2));
-                this.saveHistory();
-            }
-            localStorage.setItem(this.KEYS.RESET_LIST, now);
-        }
-    },
-
-    saveHistory: function() {
-        localStorage.setItem(this.KEYS.LEARNED, JSON.stringify(this.history));
-    },
-
-    predict: function() {
-        const elements = {
-            btn: document.getElementById('guess-btn'),
-            icon: document.getElementById('fruit-icon'),
-            text: document.getElementById('fruit-text'),
-            loader: document.getElementById('loader'),
-            content: document.getElementById('result-content')
-        };
-
-        // تفعيل وضع التحميل
-        elements.btn.disabled = true;
-        elements.btn.innerHTML = '<i class="fa-solid fa-microchip"></i> جاري المعالجة...';
-        elements.content.style.display = 'none';
-        elements.loader.style.display = 'block';
-
-        // محاكاة وقت المعالجة
-        setTimeout(() => {
-            this.checkTimers();
-            const list = this.updateWeightedList();
-            const winner = list[Math.floor(Math.random() * list.length)];
-
-            this.history.push(winner.id);
-            this.saveHistory();
-
-            // عرض النتيجة
-            elements.loader.style.display = 'none';
-            elements.content.style.display = 'block';
-            
-            elements.icon.innerText = winner.icon;
-            elements.text.innerText = winner.name;
-            elements.text.style.color = 'var(--accent)';
-
-            elements.btn.disabled = false;
-            elements.btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> تخمين التالي';
-
-        }, 1200);
-    }
-};
-
-// بدء التطبيق
-window.onload = function() {
-    SubscriptionManager.init();
-    
-    // تعريف حركة الاهتزاز في CSS عبر JS (اختياري)
-    const style = document.createElement('style');
-    style.innerHTML = `
-        @keyframes shake {
-            0% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            50% { transform: translateX(5px); }
-            75% { transform: translateX(-5px); }
-            100% { transform: translateX(0); }
-        }
-    `;
-    document.head.appendChild(style);
-};
-</script>
+    </script>
 </body>
 </html>
