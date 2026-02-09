@@ -422,6 +422,12 @@
         border: 3px solid var(--accent-color);
         margin: 0 auto 15px;
         display: block;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .profile-avatar:hover {
+        transform: scale(1.05);
     }
 
     .profile-name {
@@ -438,6 +444,7 @@
         font-size: 14px;
         margin: 10px 0;
         display: inline-block;
+        direction: ltr;
     }
 
     .profile-bio {
@@ -448,6 +455,13 @@
         padding: 15px;
         background: rgba(0,0,0,0.3);
         border-radius: 10px;
+        min-height: 50px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .profile-bio:hover {
+        background: rgba(0,0,0,0.5);
     }
 
     .profile-stats {
@@ -591,54 +605,46 @@
         text-align: center;
         font-size: 16px;
         margin: 15px 0;
+        direction: ltr;
     }
 
-    /* مودال الأدمن */
-    .admin-tools {
-        display: grid;
+    /* مودال تعديل البروفايل */
+    #edit-profile-modal .modal-content {
+        max-width: 400px;
+    }
+
+    .edit-form {
+        display: flex;
+        flex-direction: column;
         gap: 15px;
-        margin: 20px 0;
     }
 
-    .admin-tool {
-        background: rgba(255,68,68,0.1);
-        border: 1px solid rgba(255,68,68,0.3);
+    .avatar-upload {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .avatar-preview {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin: 0 auto 10px;
+        border: 3px solid var(--accent-color);
+        cursor: pointer;
+    }
+
+    .edit-textarea {
+        width: 100%;
+        padding: 12px;
+        background: rgba(0,0,0,0.3);
+        border: 1px solid rgba(255,255,255,0.1);
         border-radius: 10px;
-        padding: 15px;
-        cursor: pointer;
-        transition: 0.3s;
-    }
-
-    .admin-tool:hover {
-        background: rgba(255,68,68,0.2);
-        transform: translateX(-5px);
-    }
-
-    .search-user {
-        display: flex;
-        gap: 10px;
-        margin: 20px 0;
-    }
-
-    .search-results {
-        max-height: 200px;
-        overflow-y: auto;
-        margin-top: 20px;
-        border-top: 1px solid rgba(255,255,255,0.1);
-        padding-top: 20px;
-    }
-
-    .user-result {
-        padding: 10px;
-        border-bottom: 1px solid rgba(255,255,255,0.1);
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .user-result:hover {
-        background: rgba(255,255,255,0.05);
+        color: white;
+        font-size: 14px;
+        min-height: 100px;
+        resize: vertical;
+        font-family: 'Tajawal', sans-serif;
     }
 
     /* زر شراء مميز في الهيدر */
@@ -765,6 +771,36 @@
         background-clip: content-box, border-box;
         animation: glow 2s infinite;
     }
+
+    /* مؤشر التحميل */
+    .loading {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.8);
+        z-index: 3000;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .loader {
+        width: 50px;
+        height: 50px;
+        border: 5px solid rgba(255,255,255,0.1);
+        border-top: 5px solid var(--accent-color);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
 </style>
 </head>
 <body>
@@ -847,6 +883,12 @@
 <!-- إشعارات -->
 <div class="notification" id="notification"></div>
 
+<!-- مؤشر التحميل -->
+<div class="loading" id="loading">
+    <div class="loader"></div>
+    <div id="loading-text">جاري التحميل...</div>
+</div>
+
 <!-- مودال بروفايل المستخدم -->
 <div class="modal" id="profile-modal">
     <div class="modal-content">
@@ -858,6 +900,40 @@
         <div class="modal-body">
             <div class="profile-container" id="profile-container">
                 <!-- سيتم ملؤه ديناميكياً -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- مودال تعديل البروفايل -->
+<div class="modal" id="edit-profile-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2><i class="fas fa-edit"></i> تعديل البروفايل</h2>
+            <button class="close-btn" onclick="closeModal()">×</button>
+        </div>
+        
+        <div class="modal-body">
+            <div class="edit-form">
+                <div class="avatar-upload">
+                    <img id="edit-avatar-preview" src="" class="avatar-preview" onclick="document.getElementById('edit-avatar-input').click()">
+                    <input type="file" id="edit-avatar-input" accept="image/*" style="display: none;" onchange="previewEditAvatar(event)">
+                    <p style="color: rgba(255,255,255,0.7); font-size: 12px; margin-top: 5px;">انقر على الصورة لتغييرها</p>
+                </div>
+                
+                <div>
+                    <label style="display: block; margin-bottom: 5px; color: rgba(255,255,255,0.7);">الاسم الظاهر:</label>
+                    <input type="text" id="edit-display-name" class="login-input" placeholder="الاسم الظاهر">
+                </div>
+                
+                <div>
+                    <label style="display: block; margin-bottom: 5px; color: rgba(255,255,255,0.7);">النبذة الشخصية:</label>
+                    <textarea id="edit-bio" class="edit-textarea" placeholder="اكتب نبذة عن نفسك..."></textarea>
+                </div>
+                
+                <button class="btn btn-login" onclick="saveProfileChanges()">
+                    <i class="fas fa-save"></i> حفظ التغييرات
+                </button>
             </div>
         </div>
     </div>
@@ -1015,40 +1091,6 @@
                     <p>إحصائيات النظام والاستخدام</p>
                 </div>
             </div>
-            
-            <!-- إدارة المستخدمين -->
-            <div id="user-management" style="display: none; margin-top: 20px;">
-                <div class="search-user">
-                    <input type="text" id="search-user-input" class="login-input" placeholder="ابحث عن مستخدم...">
-                    <button class="btn" onclick="searchUser()" style="background: var(--accent-color);">
-                        <i class="fas fa-search"></i>
-                    </button>
-                </div>
-                
-                <div class="search-results" id="search-results">
-                    <!-- نتائج البحث ستظهر هنا -->
-                </div>
-            </div>
-            
-            <!-- توليد الأكواد -->
-            <div id="code-generator" style="display: none; margin-top: 20px;">
-                <h3><i class="fas fa-magic"></i> توليد أكواد اشتراك</h3>
-                <div style="margin: 15px 0;">
-                    <label style="display: block; margin-bottom: 5px;">عدد الأكواد:</label>
-                    <input type="number" id="code-count" class="login-input" value="5" min="1" max="50">
-                </div>
-                
-                <div style="margin: 15px 0;">
-                    <label style="display: block; margin-bottom: 5px;">مدة الصلاحية (أيام):</label>
-                    <input type="number" id="code-days" class="login-input" value="30" min="1" max="365">
-                </div>
-                
-                <button class="btn" onclick="generateCodes()" style="background: linear-gradient(45deg, #ffd700, #ff9800);">
-                    <i class="fas fa-bolt"></i> توليد أكواد
-                </button>
-                
-                <div id="generated-codes" style="margin-top: 20px;"></div>
-            </div>
         </div>
     </div>
 </div>
@@ -1161,6 +1203,7 @@ let currentUser = {
 
 let selectedGradient = 1;
 let selectedUserProfile = null;
+let editAvatarBase64 = null;
 
 // عند تحميل الصفحة
 document.addEventListener('DOMContentLoaded', () => {
@@ -1187,6 +1230,35 @@ async function checkSavedLogin() {
         document.getElementById('password').value = savedPass;
         await login();
     }
+}
+
+// ضغط الصور
+function compressImage(file, maxWidth, quality, callback) {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = event => {
+        const img = new Image();
+        img.src = event.target.result;
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const ratio = maxWidth / img.width;
+            canvas.width = maxWidth;
+            canvas.height = img.height * ratio;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            callback(canvas.toDataURL('image/jpeg', quality));
+        };
+    };
+}
+
+// عرض التحميل
+function showLoading(text = 'جاري التحميل...') {
+    document.getElementById('loading-text').textContent = text;
+    document.getElementById('loading').style.display = 'flex';
+}
+
+function hideLoading() {
+    document.getElementById('loading').style.display = 'none';
 }
 
 // تسجيل الدخول
@@ -1240,6 +1312,7 @@ async function login() {
     }
     
     try {
+        showLoading('جاري تسجيل الدخول...');
         const userSnap = await get(child(usersRef, username));
         
         if (userSnap.exists()) {
@@ -1268,20 +1341,6 @@ async function login() {
                     displayName: currentUser.displayName,
                     isOnline: true
                 });
-                
-                // تحديث حالة الاتصال
-                const userOnlineRef = child(onlineRef, currentUser.id);
-                await set(userOnlineRef, {
-                    userId: currentUser.id,
-                    username: currentUser.username,
-                    displayName: currentUser.displayName,
-                    isPremium: currentUser.isPremium,
-                    isAdmin: currentUser.isAdmin,
-                    lastSeen: Date.now()
-                });
-                
-                // عند الانفصال
-                onDisconnect(userOnlineRef).remove();
                 
                 startChat();
             } else {
@@ -1325,26 +1384,14 @@ async function login() {
                 isOnline: true
             });
             
-            // تحديث حالة الاتصال
-            const userOnlineRef = child(onlineRef, currentUser.id);
-            await set(userOnlineRef, {
-                userId: currentUser.id,
-                username: currentUser.username,
-                displayName: currentUser.displayName,
-                isPremium: false,
-                isAdmin: false,
-                lastSeen: Date.now()
-            });
-            
-            // عند الانفصال
-            onDisconnect(userOnlineRef).remove();
-            
             startChat();
             showNotification('مرحباً بك! تم إنشاء حسابك بنجاح', 'success');
         }
     } catch (error) {
         showNotification('حدث خطأ في الاتصال', 'error');
         console.error(error);
+    } finally {
+        hideLoading();
     }
 }
 
@@ -1376,9 +1423,6 @@ function startChat() {
         const message = snapshot.val();
         displayMessage(message, snapshot.key);
     });
-    
-    // تحديث قائمة المستخدمين النشطين
-    monitorOnlineUsers();
     
     showNotification(`مرحباً ${currentUser.displayName}!`, 'success');
 }
@@ -1425,13 +1469,6 @@ function updatePremiumStatus() {
     }
 }
 
-// مراقبة المستخدمين المتصلين
-function monitorOnlineUsers() {
-    onValue(onlineRef, (snapshot) => {
-        // يمكن استخدام هذه البيانات لعرض المستخدمين النشطين
-    });
-}
-
 // إرسال رسالة
 async function sendMessage() {
     const input = document.getElementById('message-input');
@@ -1458,7 +1495,7 @@ async function sendMessage() {
         text: text,
         timestamp: Date.now(),
         isPremium: currentUser.isPremium && currentUser.premiumUntil > Date.now(),
-        premiumId: currentUser.premiumId,
+        premiumId: currentUser.isPremium && currentUser.premiumUntil > Date.now() ? currentUser.premiumId : currentUser.id,
         gradient: currentUser.gradient,
         isAdmin: currentUser.isAdmin,
         isSuperAdmin: currentUser.isSuperAdmin
@@ -1481,6 +1518,7 @@ async function sendMessage() {
 // تحميل الرسائل القديمة
 async function loadMessages() {
     try {
+        showLoading('جاري تحميل الرسائل...');
         const messagesSnap = await get(query(messagesRef, orderByChild('timestamp'), limitToLast(100)));
         const messages = [];
         
@@ -1498,6 +1536,8 @@ async function loadMessages() {
         }
     } catch (error) {
         console.error('Error loading messages:', error);
+    } finally {
+        hideLoading();
     }
 }
 
@@ -1588,11 +1628,18 @@ async function activatePremium() {
     const premiumUntil = Date.now() + (30 * 24 * 60 * 60 * 1000);
     
     try {
+        showLoading('جاري تفعيل الاشتراك...');
+        
+        // إذا كان premiumId غير موجود، استخدم الـ ID الحالي
+        if (!currentUser.premiumId) {
+            currentUser.premiumId = currentUser.id;
+        }
+        
         // حفظ بيانات الاشتراك
         await set(child(premiumRef, currentUser.id), {
             isPremium: true,
             premiumUntil: premiumUntil,
-            premiumId: currentUser.premiumId || currentUser.id,
+            premiumId: currentUser.premiumId,
             gradient: currentUser.gradient,
             activatedAt: Date.now(),
             activatedBy: currentUser.username,
@@ -1603,14 +1650,13 @@ async function activatePremium() {
         await update(child(usersRef, currentUser.username), {
             isPremium: true,
             premiumUntil: premiumUntil,
-            premiumId: currentUser.premiumId || currentUser.id,
+            premiumId: currentUser.premiumId,
             gradient: currentUser.gradient
         });
         
         // تحديث البيانات المحلية
         currentUser.isPremium = true;
         currentUser.premiumUntil = premiumUntil;
-        currentUser.premiumId = currentUser.premiumId || currentUser.id;
         
         // حفظ الكود كمستخدم
         await set(child(codesRef, code), {
@@ -1644,6 +1690,8 @@ async function activatePremium() {
     } catch (error) {
         showNotification('حدث خطأ في تفعيل الاشتراك', 'error');
         console.error(error);
+    } finally {
+        hideLoading();
     }
 }
 
@@ -1685,6 +1733,8 @@ async function setCustomId() {
     }
     
     try {
+        showLoading('جاري تحديث ID...');
+        
         // تحديث الـ ID في قاعدة البيانات
         await update(child(premiumRef, currentUser.id), {
             premiumId: customId
@@ -1700,8 +1750,8 @@ async function setCustomId() {
         // تحديث الواجهة
         updatePremiumStatus();
         
-        // تحديث جميع الرسائل القديمة لهذا المستخدم (بشكل اختياري)
-        updateUserMessagesPremiumId(customId);
+        // تحديث جميع الرسائل القديمة لهذا المستخدم
+        await updateUserMessagesPremiumId(customId);
         
         showNotification(`تم تعيين ID المميز إلى: ${customId}`, 'success');
         
@@ -1717,10 +1767,13 @@ async function setCustomId() {
         
     } catch (error) {
         showNotification('حدث خطأ في تعيين ID', 'error');
+        console.error(error);
+    } finally {
+        hideLoading();
     }
 }
 
-// تحديث ID المميز في الرسائل القديمة (وظيفة اختيارية)
+// تحديث ID المميز في الرسائل القديمة
 async function updateUserMessagesPremiumId(newId) {
     try {
         const messagesSnap = await get(query(messagesRef, orderByChild('senderId'), equalTo(currentUser.id)));
@@ -1729,7 +1782,7 @@ async function updateUserMessagesPremiumId(newId) {
         if (messagesSnap.exists()) {
             messagesSnap.forEach((child) => {
                 const message = child.val();
-                if (message.isPremium) {
+                if (message.senderId === currentUser.id) {
                     updates[`${child.key}/premiumId`] = newId;
                 }
             });
@@ -1774,6 +1827,8 @@ async function saveGradientSettings() {
     }
     
     try {
+        showLoading('جاري حفظ الإعدادات...');
+        
         // تحديث التدرج في قاعدة البيانات
         await update(child(premiumRef, currentUser.id), {
             gradient: selectedGradient
@@ -1795,6 +1850,9 @@ async function saveGradientSettings() {
         }, 1000);
     } catch (error) {
         showNotification('حدث خطأ في حفظ الإعدادات', 'error');
+        console.error(error);
+    } finally {
+        hideLoading();
     }
 }
 
@@ -1807,7 +1865,7 @@ async function updateUserMessagesGradient(newGradient) {
         if (messagesSnap.exists()) {
             messagesSnap.forEach((child) => {
                 const message = child.val();
-                if (message.isPremium) {
+                if (message.senderId === currentUser.id && message.isPremium) {
                     updates[`${child.key}/gradient`] = newGradient;
                 }
             });
@@ -1824,6 +1882,8 @@ async function updateUserMessagesGradient(newGradient) {
 // عرض بروفايل المستخدم
 async function showUserProfile(userId) {
     try {
+        showLoading('جاري تحميل البروفايل...');
+        
         // البحث عن المستخدم بالـ ID
         const usersSnap = await get(usersRef);
         let userData = null;
@@ -1849,6 +1909,7 @@ async function showUserProfile(userId) {
         const isPremium = premiumSnap.exists() && premiumSnap.val().isPremium && 
                          premiumSnap.val().premiumUntil > Date.now();
         const premiumId = premiumSnap.exists() ? premiumSnap.val().premiumId : userId;
+        const gradient = premiumSnap.exists() ? premiumSnap.val().gradient : 1;
         
         // تحضير بيانات البروفايل
         const profileData = {
@@ -1857,6 +1918,7 @@ async function showUserProfile(userId) {
             photo: userData.photo || "https://cdn-icons-png.flaticon.com/512/149/149071.png",
             id: userId,
             premiumId: premiumId,
+            gradient: gradient,
             bio: userData.bio || "لم يقم بإضافة نبذة عن نفسه",
             isPremium: isPremium,
             isAdmin: userData.isAdmin || false,
@@ -1871,6 +1933,8 @@ async function showUserProfile(userId) {
     } catch (error) {
         console.error('Error loading user profile:', error);
         showNotification('حدث خطأ في تحميل البروفايل', 'error');
+    } finally {
+        hideLoading();
     }
 }
 
@@ -1882,6 +1946,7 @@ function showMyProfile() {
         photo: currentUser.photo,
         id: currentUser.id,
         premiumId: currentUser.premiumId,
+        gradient: currentUser.gradient,
         bio: currentUser.bio,
         isPremium: currentUser.isPremium && currentUser.premiumUntil > Date.now(),
         isAdmin: currentUser.isAdmin,
@@ -1926,8 +1991,9 @@ function displayProfile(profileData) {
             ${profileData.isPremium ? '🆔 ' : ''}${profileData.isPremium ? profileData.premiumId : profileData.id}
         </div>
         
-        <div class="profile-bio">
+        <div class="profile-bio" onclick="${profileData.username === currentUser.username ? 'showEditProfileModal()' : ''}">
             ${profileData.bio}
+            ${profileData.username === currentUser.username ? '<div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 5px;">انقر للتعديل</div>' : ''}
         </div>
         
         <div class="profile-stats">
@@ -1947,7 +2013,7 @@ function displayProfile(profileData) {
         
         ${profileData.username === currentUser.username ? `
             <div style="margin-top: 20px;">
-                <button class="btn" onclick="editMyProfile()" style="background: var(--accent-color);">
+                <button class="btn" onclick="showEditProfileModal()" style="background: var(--accent-color);">
                     <i class="fas fa-edit"></i> تعديل البروفايل
                 </button>
             </div>
@@ -1965,22 +2031,116 @@ function displayProfile(profileData) {
     document.getElementById('profile-modal').style.display = 'flex';
 }
 
-// تحرير البروفايل
-async function editMyProfile() {
-    const newBio = prompt('أدخل النبذة الجديدة:', currentUser.bio);
-    if (newBio !== null) {
-        try {
-            await update(child(usersRef, currentUser.username), {
-                bio: newBio
+// عرض مودال تعديل البروفايل
+function showEditProfileModal() {
+    document.getElementById('edit-display-name').value = currentUser.displayName;
+    document.getElementById('edit-bio').value = currentUser.bio;
+    document.getElementById('edit-avatar-preview').src = currentUser.photo;
+    editAvatarBase64 = null;
+    
+    document.getElementById('edit-profile-modal').style.display = 'flex';
+    closeModal(); // إغلاق مودال البروفايل الحالي
+}
+
+// معاينة الصورة المحددة
+function previewEditAvatar(event) {
+    const file = event.target.files[0];
+    if (file) {
+        compressImage(file, 300, 0.8, (base64) => {
+            editAvatarBase64 = base64;
+            document.getElementById('edit-avatar-preview').src = base64;
+        });
+    }
+}
+
+// حفظ تغييرات البروفايل
+async function saveProfileChanges() {
+    const newDisplayName = document.getElementById('edit-display-name').value.trim();
+    const newBio = document.getElementById('edit-bio').value.trim();
+    
+    if (!newDisplayName) {
+        showNotification('الرجاء إدخال اسم ظاهر', 'warning');
+        return;
+    }
+    
+    try {
+        showLoading('جاري حفظ التغييرات...');
+        
+        const updates = {
+            displayName: newDisplayName,
+            bio: newBio || "مرحباً! أنا جديد في شات بلس"
+        };
+        
+        // إذا تم اختيار صورة جديدة
+        if (editAvatarBase64) {
+            updates.photo = editAvatarBase64;
+            currentUser.photo = editAvatarBase64;
+            
+            // تحديث الصورة في الهيدر
+            document.querySelector('.user-avatar').src = editAvatarBase64;
+        }
+        
+        // تحديث البيانات المحلية
+        currentUser.displayName = newDisplayName;
+        currentUser.bio = newBio || "مرحباً! أنا جديد في شات بلس";
+        
+        // تحديث قاعدة البيانات
+        await update(child(usersRef, currentUser.username), updates);
+        
+        // تحديث جميع الرسائل القديمة لهذا المستخدم
+        await updateUserMessagesProfile(newDisplayName, editAvatarBase64);
+        
+        // إغلاق المودال
+        closeModal();
+        
+        // إعادة عرض البروفايل المحدث
+        showMyProfile();
+        
+        showNotification('تم تحديث البروفايل بنجاح', 'success');
+        
+    } catch (error) {
+        showNotification('حدث خطأ في تحديث البروفايل', 'error');
+        console.error(error);
+    } finally {
+        hideLoading();
+    }
+}
+
+// تحديث البروفايل في الرسائل القديمة
+async function updateUserMessagesProfile(newDisplayName, newPhoto) {
+    try {
+        const messagesSnap = await get(query(messagesRef, orderByChild('senderId'), equalTo(currentUser.id)));
+        const updates = {};
+        
+        if (messagesSnap.exists()) {
+            messagesSnap.forEach((child) => {
+                const message = child.val();
+                if (message.senderId === currentUser.id) {
+                    updates[`${child.key}/senderName`] = newDisplayName;
+                    if (newPhoto) {
+                        updates[`${child.key}/senderPhoto`] = newPhoto;
+                    }
+                }
             });
             
-            currentUser.bio = newBio;
-            showMyProfile();
-            showNotification('تم تحديث البروفايل بنجاح', 'success');
-        } catch (error) {
-            showNotification('حدث خطأ في تحديث البروفايل', 'error');
+            if (Object.keys(updates).length > 0) {
+                await update(messagesRef, updates);
+                
+                // تحديث عرض الرسائل في الواجهة
+                updateMessagesDisplay();
+            }
         }
+    } catch (error) {
+        console.error('Error updating messages profile:', error);
     }
+}
+
+// تحديث عرض الرسائل في الواجهة
+function updateMessagesDisplay() {
+    // يمكن إعادة تحميل الرسائل أو تحديثها ديناميكياً
+    // لهذه البساطة، سنقوم بإعادة تحميل الرسائل
+    document.getElementById('chat-container').innerHTML = '';
+    loadMessages();
 }
 
 // إجراءات الأدمن
@@ -1992,6 +2152,7 @@ async function adminActions(userId) {
 2. منح صلاحية أدمن
 3. إلغاء صلاحية أدمن
 4. تفعيل اشتراك مميز
+5. تغيير ID مميز
 
 أدخل رقم الإجراء:`);
     
@@ -2020,6 +2181,13 @@ async function adminActions(userId) {
                 await grantPremium(userId, parseInt(days));
             }
             break;
+            
+        case '5':
+            const newId = prompt('ID المميز الجديد:');
+            if (newId) {
+                await changeUserPremiumId(userId, newId);
+            }
+            break;
     }
 }
 
@@ -2038,6 +2206,65 @@ async function banUser(userId, reason, days) {
         showNotification('تم حظر المستخدم بنجاح', 'success');
     } catch (error) {
         showNotification('حدث خطأ في حظر المستخدم', 'error');
+    }
+}
+
+// تغيير ID مميز لمستخدم (للأدمن)
+async function changeUserPremiumId(userId, newId) {
+    try {
+        // تحديث الـ ID في قاعدة البيانات
+        await update(child(premiumRef, userId), {
+            premiumId: newId
+        });
+        
+        // البحث عن اسم المستخدم بالـ ID
+        const usersSnap = await get(usersRef);
+        let username = null;
+        
+        if (usersSnap.exists()) {
+            usersSnap.forEach((child) => {
+                const data = child.val();
+                if (data.id === userId) {
+                    username = child.key;
+                }
+            });
+        }
+        
+        if (username) {
+            await update(child(usersRef, username), {
+                premiumId: newId
+            });
+            
+            // تحديث الرسائل القديمة
+            await updateUserMessagesPremiumIdForUser(userId, newId);
+            
+            showNotification(`تم تغيير ID المميز إلى: ${newId}`, 'success');
+        }
+    } catch (error) {
+        showNotification('حدث خطأ في تغيير ID', 'error');
+    }
+}
+
+// تحديث ID في رسائل مستخدم معين
+async function updateUserMessagesPremiumIdForUser(userId, newId) {
+    try {
+        const messagesSnap = await get(query(messagesRef, orderByChild('senderId'), equalTo(userId)));
+        const updates = {};
+        
+        if (messagesSnap.exists()) {
+            messagesSnap.forEach((child) => {
+                const message = child.val();
+                if (message.senderId === userId) {
+                    updates[`${child.key}/premiumId`] = newId;
+                }
+            });
+            
+            if (Object.keys(updates).length > 0) {
+                await update(messagesRef, updates);
+            }
+        }
+    } catch (error) {
+        console.error('Error updating user messages premiumId:', error);
     }
 }
 
@@ -2086,7 +2313,8 @@ async function revokeAdmin(userId) {
         
         if (username) {
             await update(child(usersRef, username), {
-                isAdmin: false
+                isAdmin: false,
+                isSuperAdmin: false
             });
             
             showNotification('تم إلغاء صلاحية الأدمن بنجاح', 'success');
@@ -2101,12 +2329,14 @@ async function grantPremium(userId, days) {
     try {
         const usersSnap = await get(usersRef);
         let username = null;
+        let currentPremiumId = userId;
         
         if (usersSnap.exists()) {
             usersSnap.forEach((child) => {
                 const data = child.val();
                 if (data.id === userId) {
                     username = child.key;
+                    currentPremiumId = data.premiumId || userId;
                 }
             });
         }
@@ -2117,7 +2347,7 @@ async function grantPremium(userId, days) {
             await set(child(premiumRef, userId), {
                 isPremium: true,
                 premiumUntil: premiumUntil,
-                premiumId: userId,
+                premiumId: currentPremiumId,
                 gradient: 1,
                 activatedAt: Date.now(),
                 activatedBy: currentUser.username,
@@ -2126,7 +2356,8 @@ async function grantPremium(userId, days) {
             
             await update(child(usersRef, username), {
                 isPremium: true,
-                premiumUntil: premiumUntil
+                premiumUntil: premiumUntil,
+                premiumId: currentPremiumId
             });
             
             showNotification(`تم تفعيل اشتراك مميز لمدة ${days} يوم`, 'success');
@@ -2146,114 +2377,6 @@ async function adminLogin() {
         showAdminModal();
     } else {
         showNotification('بيانات الدخول غير صحيحة للأدمن', 'error');
-    }
-}
-
-async function generateCodes() {
-    if (!currentUser.isAdmin) {
-        showNotification('غير مصرح لك بهذا الإجراء', 'error');
-        return;
-    }
-    
-    const count = parseInt(document.getElementById('code-count').value) || 5;
-    const days = parseInt(document.getElementById('code-days').value) || 30;
-    
-    const codesContainer = document.getElementById('generated-codes');
-    codesContainer.innerHTML = '<h4>الأكواد المولدة:</h4>';
-    
-    for (let i = 0; i < count; i++) {
-        const code = generateRandomCode();
-        const validUntil = Date.now() + (days * 24 * 60 * 60 * 1000);
-        
-        await set(child(codesRef, code), {
-            generatedAt: Date.now(),
-            validUntil: validUntil,
-            generatedBy: currentUser.username,
-            daysValid: days
-        });
-        
-        const codeDiv = document.createElement('div');
-        codeDiv.className = 'code-display';
-        codeDiv.textContent = code;
-        codeDiv.style.cursor = 'pointer';
-        codeDiv.onclick = () => {
-            navigator.clipboard.writeText(code);
-            showNotification('تم نسخ الكود', 'success');
-        };
-        
-        codesContainer.appendChild(codeDiv);
-    }
-    
-    showNotification(`تم توليد ${count} كود اشتراك`, 'success');
-}
-
-function generateRandomCode() {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    const sections = [];
-    
-    for (let i = 0; i < 4; i++) {
-        let section = '';
-        for (let j = 0; j < 4; j++) {
-            section += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        sections.push(section);
-    }
-    
-    return `FAI-TRIAL-${sections.join('-')}`;
-}
-
-// البحث عن مستخدم (للأدمن)
-async function searchUser() {
-    if (!currentUser.isAdmin) return;
-    
-    const searchTerm = document.getElementById('search-user-input').value.trim();
-    if (!searchTerm) return;
-    
-    try {
-        const usersSnap = await get(usersRef);
-        const results = [];
-        
-        if (usersSnap.exists()) {
-            usersSnap.forEach((child) => {
-                const user = child.val();
-                if (user.displayName.includes(searchTerm) || 
-                    user.id.includes(searchTerm) || 
-                    child.key.includes(searchTerm)) {
-                    results.push({
-                        username: child.key,
-                        ...user
-                    });
-                }
-            });
-        }
-        
-        const resultsDiv = document.getElementById('search-results');
-        resultsDiv.innerHTML = '';
-        
-        if (results.length === 0) {
-            resultsDiv.innerHTML = '<p style="text-align: center; color: #888;">لا توجد نتائج</p>';
-            return;
-        }
-        
-        results.forEach(user => {
-            const userDiv = document.createElement('div');
-            userDiv.className = 'user-result';
-            userDiv.innerHTML = `
-                <img src="${user.photo}" style="width: 40px; height: 40px; border-radius: 50%;">
-                <div style="flex: 1;">
-                    <div style="font-weight: bold;">${user.displayName}</div>
-                    <div style="font-size: 12px; color: #888;">
-                        @${user.username} • ID: ${user.id}
-                    </div>
-                </div>
-                <button class="btn" onclick="adminActions('${user.id}')" style="padding: 5px 10px; font-size: 12px;">
-                    <i class="fas fa-cog"></i>
-                </button>
-            `;
-            resultsDiv.appendChild(userDiv);
-        });
-    } catch (error) {
-        console.error('Error searching users:', error);
     }
 }
 
@@ -2292,7 +2415,7 @@ function showPremiumModal() {
 
 function showPremiumSettingsModal() {
     if (currentUser.isPremium && currentUser.premiumUntil > Date.now()) {
-        document.getElementById('custom-id-input').value = currentUser.premiumId;
+        document.getElementById('custom-id-input').value = currentUser.premiumId || '';
         selectGradient(currentUser.gradient);
         document.getElementById('premium-settings-modal').style.display = 'flex';
     } else {
@@ -2334,13 +2457,12 @@ function contactAdmin() {
 async function logout() {
     try {
         // تحديث حالة الاتصال
-        await update(child(usersRef, currentUser.username), {
-            isOnline: false,
-            lastSeen: Date.now()
-        });
-        
-        // إزالة من قائمة المتصلين
-        await remove(child(onlineRef, currentUser.id));
+        if (currentUser.username) {
+            await update(child(usersRef, currentUser.username), {
+                isOnline: false,
+                lastSeen: Date.now()
+            });
+        }
     } catch (error) {
         console.error('Error updating logout status:', error);
     }
@@ -2366,10 +2488,11 @@ window.setCustomId = setCustomId;
 window.selectGradient = selectGradient;
 window.saveGradientSettings = saveGradientSettings;
 window.adminLogin = adminLogin;
-window.generateCodes = generateCodes;
-window.searchUser = searchUser;
 window.showUserProfile = showUserProfile;
 window.showMyProfile = showMyProfile;
+window.showEditProfileModal = showEditProfileModal;
+window.previewEditAvatar = previewEditAvatar;
+window.saveProfileChanges = saveProfileChanges;
 </script>
 </body>
 </html>
