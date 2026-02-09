@@ -6,21 +6,22 @@
     <title>نظام المحلل الذكي | AI Vision</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* --- التصميم الأساسي --- */
+        /* --- التصميم الأساسي (Theme) --- */
         :root {
             --primary: #00ff9d; /* لون أخضر تقني */
             --accent: #bc13fe;  /* لون بنفسجي للذكاء */
             --bg-dark: #050505;
-            --panel-bg: rgba(20, 20, 25, 0.9);
+            --panel-bg: rgba(20, 20, 25, 0.95);
             --border: rgba(255, 255, 255, 0.1);
         }
 
         body {
             margin: 0;
             background-color: #000;
+            /* خلفية تقنية خارج الهاتف */
             background-image: 
-                linear-gradient(rgba(0, 255, 157, 0.05) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 255, 157, 0.05) 1px, transparent 1px);
+                linear-gradient(rgba(0, 255, 157, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 157, 0.03) 1px, transparent 1px);
             background-size: 30px 30px;
             color: white;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -31,15 +32,15 @@
             overflow: hidden;
         }
 
-        /* حاوية الهاتف/التطبيق */
+        /* حاوية التطبيق */
         .app-shell {
             width: 100%;
-            max-width: 420px;
+            max-width: 420px; /* عرض الجوال */
             height: 90vh;
             background: var(--bg-dark);
             border-radius: 25px;
-            border: 1px solid #333;
-            box-shadow: 0 0 40px rgba(0, 255, 157, 0.15);
+            border: 2px solid #333;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
             display: flex;
             flex-direction: column;
             position: relative;
@@ -49,7 +50,7 @@
         /* الشريط العلوي */
         .status-bar {
             padding: 15px;
-            background: rgba(255,255,255,0.05);
+            background: rgba(20, 20, 20, 0.8);
             backdrop-filter: blur(10px);
             display: flex;
             justify-content: space-between;
@@ -63,15 +64,16 @@
         .file-badge {
             background: rgba(0, 255, 157, 0.1);
             color: var(--primary);
-            padding: 4px 8px;
+            padding: 4px 10px;
             border-radius: 4px;
             font-family: monospace;
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 8px;
+            border: 1px solid rgba(0, 255, 157, 0.2);
         }
 
-        /* منطقة العرض والتحليل */
+        /* منطقة العرض (الكاميرا/الصورة) */
         .viewport {
             flex: 1;
             position: relative;
@@ -80,28 +82,29 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            background: #111;
         }
 
-        /* صورة الخلفية (يتم استدعاء الصورة المطلوبة هنا) */
+        /* الصورة المستدعاة (board.jpg) */
         .target-image {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            object-fit: cover;
-            opacity: 0.3; /* شفافية لتظهر الواجهة فوقها */
+            object-fit: cover; /* تغطية كامل الشاشة */
+            opacity: 0.4; /* تخفيف سطوع الصورة لتظهر القوائم */
             z-index: 0;
-            filter: grayscale(80%) contrast(1.2);
+            transition: 0.5s;
         }
 
-        /* خط المسح الضوئي */
+        /* خط المسح الضوئي (Scanner) */
         .scanner-beam {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
-            height: 3px;
+            height: 4px;
             background: var(--primary);
             box-shadow: 0 0 15px var(--primary), 0 0 30px var(--primary);
             z-index: 2;
@@ -128,37 +131,39 @@
         }
 
         .option-card {
-            background: rgba(30, 30, 35, 0.6);
+            background: rgba(30, 30, 35, 0.7);
             border: 1px solid var(--border);
             border-radius: 12px;
             padding: 15px;
             text-align: center;
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(8px);
             transition: 0.3s;
             position: relative;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
 
         .option-card img {
-            width: 50px;
-            height: 50px;
+            width: 55px;
+            height: 55px;
             filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
+            transition: transform 0.2s;
         }
 
         .option-name {
             display: block;
-            margin-top: 8px;
-            font-size: 14px;
+            margin-top: 10px;
+            font-size: 15px;
             font-weight: bold;
         }
 
         .option-count {
-            font-size: 10px;
+            font-size: 11px;
             color: #888;
             margin-top: 4px;
             display: block;
         }
 
-        /* مربع التركيز (Bounding Box) - أهم جزء */
+        /* مربع التركيز (Bounding Box) */
         .bounding-box {
             position: absolute;
             border: 2px solid var(--primary);
@@ -171,17 +176,18 @@
             transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
         }
 
-        /* تفاصيل تقنية حول المربع */
+        /* زوايا المربع وتفاصيله */
         .box-label {
             position: absolute;
-            bottom: -25px;
-            right: 0;
+            top: -20px;
+            left: 0;
             background: var(--primary);
             color: black;
             font-size: 10px;
-            font-weight: bold;
+            font-weight: 800;
             padding: 2px 6px;
             font-family: monospace;
+            border-radius: 2px;
         }
 
         .box-corner {
@@ -196,7 +202,7 @@
         .bl { bottom: -2px; left: -2px; border-top: 0; border-right: 0; }
         .br { bottom: -2px; right: -2px; border-top: 0; border-left: 0; }
 
-        /* منطقة التحكم */
+        /* منطقة التحكم السفلية */
         .control-panel {
             padding: 20px;
             background: #111;
@@ -208,7 +214,7 @@
         .main-btn {
             width: 100%;
             padding: 16px;
-            background: linear-gradient(135deg, var(--primary), #00cb7c);
+            background: linear-gradient(135deg, var(--primary), #008f58);
             color: #000;
             font-weight: 900;
             font-size: 16px;
@@ -219,8 +225,9 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
-            box-shadow: 0 4px 15px rgba(0, 255, 157, 0.3);
+            box-shadow: 0 4px 15px rgba(0, 255, 157, 0.2);
             transition: 0.2s;
+            text-transform: uppercase;
         }
 
         .main-btn:active { transform: scale(0.98); }
@@ -231,9 +238,11 @@
             font-size: 11px;
             color: var(--primary);
             text-align: left;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             min-height: 14px;
             opacity: 0.8;
+            border-left: 2px solid var(--primary);
+            padding-left: 8px;
         }
 
     </style>
@@ -243,24 +252,24 @@
     <div class="app-shell">
         <div class="status-bar">
             <div class="file-badge">
-                <i class="fa-regular fa-image"></i>
-                <span>Screenshot_٢٠٢٦٠٢٠٩...jpg</span>
+                <i class="fa-regular fa-folder-open"></i>
+                <span>board.jpg</span>
             </div>
             <div>
-                <i class="fa-solid fa-wifi" style="margin-left:5px"></i>
-                <span>AI READY</span>
+                <i class="fa-solid fa-satellite-dish" style="font-size:10px; color:#00ff9d; margin-left:5px"></i>
+                <span>ONLINE</span>
             </div>
         </div>
 
         <div class="viewport" id="viewport">
-            <img src="Screenshot_٢٠٢٦٠٢٠٩-١١٥٤٢٦.jpg" class="target-image" onerror="this.style.display='none';">
+            <img src="board.jpg" class="target-image" id="bgImage" onerror="this.style.display='none'; document.getElementById('log').innerText='> Error: board.jpg not found!';">
             
             <div class="scanner-beam" id="scanner"></div>
 
             <div class="bounding-box" id="aiBox">
                 <div class="box-corner tl"></div><div class="box-corner tr"></div>
                 <div class="box-corner bl"></div><div class="box-corner br"></div>
-                <div class="box-label">MATCH 99%</div>
+                <div class="box-label">CONFIDENCE 99.8%</div>
             </div>
 
             <div class="overlay-grid" id="fruitsGrid">
@@ -268,71 +277,82 @@
         </div>
 
         <div class="control-panel">
-            <div class="log-text" id="log">> System Idle...</div>
+            <div class="log-text" id="log">> System Ready. Waiting for input...</div>
             <button class="main-btn" onclick="runPrediction()" id="actionBtn">
-                <i class="fa-solid fa-crosshairs"></i> تحليل وتخمين
+                <i class="fa-solid fa-crosshairs"></i> START ANALYSIS
             </button>
-            <div style="margin-top:10px; font-size:10px; color:#555; cursor:pointer;" onclick="clearMemory()">
-                [ Reset Memory ]
+            <div style="margin-top:15px; font-size:11px; color:#555; cursor:pointer; text-decoration:underline;" onclick="clearMemory()">
+                Reset Learning Data
             </div>
         </div>
     </div>
 
     <script>
-        // --- 1. إعداد البيانات (بدون مانجو أو فراولة) ---
+        // ---------------------------------------------------------
+        // 1. البيانات والإعدادات
+        // ---------------------------------------------------------
+        
+        // القائمة المسموح بها (تم حذف الفراولة والمانجو)
         const fruits = [
-            { id: 'apple', name: 'تفاح أحمر', icon: 'https://cdn-icons-png.flaticon.com/128/415/415733.png' },
+            { id: 'apple', name: 'تفاح', icon: 'https://cdn-icons-png.flaticon.com/128/415/415733.png' },
             { id: 'orange', name: 'برتقال', icon: 'https://cdn-icons-png.flaticon.com/128/415/415736.png' },
             { id: 'watermelon', name: 'بطيخ', icon: 'https://cdn-icons-png.flaticon.com/128/415/415709.png' },
             { id: 'grapes', name: 'عنب', icon: 'https://cdn-icons-png.flaticon.com/128/415/415755.png' }
         ];
 
-        // تحميل الذاكرة
+        // استدعاء الذاكرة من المتصفح
         let memory = JSON.parse(localStorage.getItem('Fawakih_AI_Data')) || {};
 
-        // تهيئة الشبكة
+        // دالة التهيئة والرسم
         function init() {
             const grid = document.getElementById('fruitsGrid');
             grid.innerHTML = '';
             
             fruits.forEach((fruit, index) => {
-                // التأكد من وجود سجل
+                // إنشاء سجل إذا لم يوجد
                 if(!memory[fruit.id]) memory[fruit.id] = 0;
 
                 const card = document.createElement('div');
                 card.className = 'option-card';
-                card.id = `fruit-card-${index}`; // معرف مهم لتحديد الموقع
+                card.id = `fruit-card-${index}`; // ID مهم لتحديد الموقع
                 
                 card.innerHTML = `
                     <img src="${fruit.icon}" alt="${fruit.name}">
                     <span class="option-name">${fruit.name}</span>
-                    <span class="option-count" id="count-${fruit.id}">تم الاختيار: ${memory[fruit.id]}</span>
+                    <span class="option-count" id="count-${fruit.id}">Total: ${memory[fruit.id]}</span>
                 `;
                 grid.appendChild(card);
             });
         }
 
-        // --- 2. محرك الذكاء والمسح ---
+        // ---------------------------------------------------------
+        // 2. المحرك المنطقي (Core Engine)
+        // ---------------------------------------------------------
+
         function runPrediction() {
             const btn = document.getElementById('actionBtn');
             const scanner = document.getElementById('scanner');
             const box = document.getElementById('aiBox');
             const log = document.getElementById('log');
+            const bgImage = document.getElementById('bgImage');
 
             if(btn.disabled) return;
 
-            // بدء الحالة
+            // تفعيل وضع التحليل
             btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> جاري المعالجة...';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> PROCESSING...';
             scanner.style.display = 'block';
-            box.style.display = 'none';
+            box.style.display = 'none'; // إخفاء المربع القديم
             
-            // محاكاة قراءة ملف الكود (Logs)
+            // سطوع الصورة يتغير قليلاً للمحاكاة
+            bgImage.style.filter = "grayscale(0%) contrast(1.1)";
+
+            // محاكاة قراءة ملف board.jpg
             const logs = [
-                "> Reading file: Screenshot_٢٠٢٦٠٢٠٩...",
-                "> Analyzing pixel data...",
-                "> Detecting objects...",
-                "> Calculating probabilities..."
+                "> Loading source: board.jpg...",
+                "> Scanning pixels [1920x1080]...",
+                "> Identifying patterns...",
+                "> Object match found."
             ];
 
             let logIndex = 0;
@@ -341,23 +361,27 @@
                     log.innerText = logs[logIndex];
                     logIndex++;
                 }
-            }, 400);
+            }, 500);
 
-            // التأخير للمحاكاة (2.5 ثانية)
+            // الانتظار ثم إظهار النتيجة
             setTimeout(() => {
                 clearInterval(logInterval);
                 scanner.style.display = 'none';
+                bgImage.style.filter = ""; // استعادة الفلتر الأصلي
                 makeDecision();
             }, 2500);
         }
 
-        // --- 3. اتخاذ القرار ورسم المربع ---
+        // ---------------------------------------------------------
+        // 3. اتخاذ القرار ورسم المربع
+        // ---------------------------------------------------------
+
         function makeDecision() {
             const btn = document.getElementById('actionBtn');
             const box = document.getElementById('aiBox');
             const log = document.getElementById('log');
 
-            // اختيار عشوائي (الذكاء)
+            // الخوارزمية (اختيار عشوائي حالياً)
             const winnerIndex = Math.floor(Math.random() * fruits.length);
             const winnerData = fruits[winnerIndex];
             const targetElement = document.getElementById(`fruit-card-${winnerIndex}`);
@@ -365,50 +389,54 @@
             // 1. تحديث الذاكرة
             memory[winnerData.id]++;
             localStorage.setItem('Fawakih_AI_Data', JSON.stringify(memory));
-            document.getElementById(`count-${winnerData.id}`).innerText = `تم الاختيار: ${memory[winnerData.id]}`;
+            document.getElementById(`count-${winnerData.id}`).innerText = `Total: ${memory[winnerData.id]}`;
 
-            // 2. حساب موقع المربع (Bounding Box Calculation)
-            // هذه أهم خطوة لجعل المربع يأتي فوق الفاكهة بالضبط
+            // 2. حساب الرياضيات لرسم المربع فوق العنصر بالضبط
             const parentRect = document.getElementById('viewport').getBoundingClientRect();
             const targetRect = targetElement.getBoundingClientRect();
 
-            // حساب الإحداثيات النسبية للحاوية
+            // حساب الموقع النسبي
             const top = targetRect.top - parentRect.top;
             const left = targetRect.left - parentRect.left;
             
-            // تطبيق الإحداثيات على المربع
-            box.style.width = (targetRect.width - 4) + 'px'; // -4 للحدود
-            box.style.height = (targetRect.height - 4) + 'px';
+            // تطبيق الأبعاد
+            box.style.width = (targetRect.width - 6) + 'px';
+            box.style.height = (targetRect.height - 6) + 'px';
             box.style.top = top + 'px';
             box.style.left = left + 'px';
             
             // إظهار المربع
             box.style.display = 'block';
 
-            // إنهاء
-            log.innerText = `> Object Detected: ${winnerData.name.toUpperCase()}`;
+            // إنهاء العملية
+            log.innerText = `> Result: ${winnerData.name.toUpperCase()} DETECTED`;
             log.style.color = '#00ff9d';
             
-            btn.innerHTML = '<i class="fa-solid fa-check"></i> تم التحديد';
-            btn.style.background = 'white';
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> COMPLETE';
+            btn.style.background = '#fff';
+            btn.style.color = '#000';
             
+            // إعادة الزر للوضع الطبيعي
             setTimeout(() => {
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-crosshairs"></i> تحليل وتخمين';
+                btn.innerHTML = '<i class="fa-solid fa-crosshairs"></i> START ANALYSIS';
                 btn.style.background = ''; 
+                btn.style.color = '#000';
                 log.style.color = 'var(--primary)';
             }, 2000);
         }
 
+        // مسح الذاكرة
         function clearMemory() {
-            if(confirm('مسح ذاكرة الذكاء الاصطناعي؟')) {
+            if(confirm('هل أنت متأكد من مسح جميع البيانات المحفوظة؟')) {
                 localStorage.removeItem('Fawakih_AI_Data');
                 memory = {};
                 init();
+                document.getElementById('log').innerText = "> Memory formatted successfully.";
             }
         }
 
-        // تشغيل النظام
+        // تشغيل عند البدء
         init();
 
     </script>
