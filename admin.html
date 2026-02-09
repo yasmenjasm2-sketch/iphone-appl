@@ -1,0 +1,774 @@
+                  // البحث في قاعدة البيانات
+                  const userSnap = await get(query(usersRef, orderByChild('uid'), equalTo(uid)));
+                  if(userSnap.exists()) {
+                      userSnap.forEach((childSnap) => {
+                          username = childSnap.key;
+                          displayName = childSnap.val().displayName;
+                      });
+                  }
+                  
+                  const daysLeft = Math.ceil((sub.premiumUntil - Date.now()) / (1000 * 60 * 60 * 24));
+                  
+                  const row = document.createElement("tr");
+                  row.innerHTML = `
+                      <td>
+                          <strong>${displayName}</strong><br>
+                          <small style="color:#888;">@${username}</small>
+                      </td>
+                      <td><code>${sub.premiumId || uid}</code></td>
+                      <td>${formatDate(sub.activatedAt || sub.premiumUntil - (30 * 24 * 60 * 60 * 1000))}</td>
+                      <td>${formatDate(sub.premiumUntil)}</td>
+                      <td>
+                          <span style="color:${daysLeft > 7 ? '#00c853' : daysLeft > 3 ? '#ff9800' : '#ff4444'}">
+                              ${daysLeft > 0 ? `${daysLeft} يوم` : 'منتهي'}
+                          </span>
+                      </td>
+                      <td>
+                          <button class="btn btn-warning" onclick="extendPremium('${uid}', 30)">
+                              <i class="fas fa-plus"></i> تجديد
+                          </button>
+                          <button class="btn btn-danger" onclick="cancelPremium('${uid}')">
+                              <i class="fas fa-times"></i> إلغاء
+                          </button>
+                      </td>
+                  `;
+                  
+                  container.appendChild(row);
+              }
+          }
+      }
+  }
+
+  async function loadCodes() {
+      const codesSnap = await get(codesRef);
+      const container = document.getElementById("used-codes-list");
+      container.innerHTML = "";
+      
+      if(codesSnap.exists()) {
+          const codesData = codesSnap.val();
+          
+          for(const code in codesData) {
+              const codeData = codesData[code];
+              
+              const row = document.createElement("tr");
+              row.innerHTML = `
+                  <td><code>${code}</code></td>
+                  <td>${codeData.usedBy || 'غير مستخدم'}</td>
+                  <td>${codeData.usedAt ? formatDate(codeData.usedAt) : 'غير مستخدم'}</td>
+                  <td>${codeData.validUntil ? formatDate(codeData.validUntil) : 'غير محدد'}</td>
+              `;
+              
+              container.appendChild(row);
+          }
+      }
+  }
+
+  async function loadBans() {
+      const bansSnap = await get(bansRef);
+      const container = document.getElementById("bans-list");
+      container.innerHTML = "";
+      
+      if(bansSnap.exists()) {
+          const bansData = bansSnap.val();
+          
+          for(const uid in bansData) {
+              const ban = bansData[uid];
+              
+              // البحث عن بيانات المستخدم
+              let displayName = "مستخدم محذوف";
+              const userSnap = await get(query(usersRef, orderByChild('uid'), equalTo(uid)));
+              if(userSnap.exists()) {
+                  userSnap.forEach((childSnap) => {
+                      displayName = childSnap.val().displayName;
+                  });
+              }
+              
+              const timeLeft = ban.until > Date.now() ? formatTimeLeft(ban.until) : 'منتهي';
+              const row = document.createElement("tr");
+              row.innerHTML = `
+                  <td>${displayName}<br><small style="color:#888;">ID: ${uid}</small></td>
+                  <td>${ban.reason || 'بدون سبب'}</td>
+                  <td>${formatDate(ban.bannedAt || ban.until)}</td>
+                  <td>
+                      ${ban.until === 'permanent' ? 'دائم' : 
+                        ban.until > Date.now() ? formatDate(ban.until) : 'منتهي'}
+                  </td>
+                  <td>${ban.bannedBy || 'نظام'}</td>
+                  <td>
+                      ${ban.until > Date.now() ? `
+                          <button class="btn btn-success" onclick="unbanUser('${uid}')">
+                              <i class="fas fa-check"></i> فك الحظر
+                          </button>
+                      ` : ''}
+                  </td>
+              `;
+              
+              container.appendChild(row);
+          }
+      }
+  }
+
+  async function loadMessages() {
+      const messagesSnap = await get(query(messagesRef, limitToLast(100)));
+      allMessages = [];
+      
+      if(messagesSnap.exists()) {
+          messagesSnap.forEach((childSnap) => {
+              allMessages.push({
+                  key: childSnap.key,
+                  ...childSnap.val()
+              });
+          });
+          
+          displayMessages(allMessages);
+      }
+  }
+
+  function displayMessages(messages) {
+      const container = document.getElementById("messages-container");
+      container.innerHTML = "";
+      
+      messages.reverse().forEach(msg => {
+          if(msg.type === "msg") {
+              const div = document.createElement("div");
+              div.style.padding = "10px";
+              div.style.marginBottom = "10px";
+              div.style.background = "#222";
+              div.style.borderRadius = "8px";
+              div.style.borderLeft = "4px solid " + (msg.isPremium ? "#ffd700" : msg.isAdmin ? "#ff4444" : "#00bcd4");
+              
+              div.innerHTML = `
+                  <div style="display:flex; justify-content:space-between;">
+                      <div>
+                          <strong style="color:${msg.isAdmin ? '#ff4444' : msg.isPremium ? '#ffd700' : '#00bcd4'}">
+                              ${msg.isAdmin ? '👑 ' : msg.isPremium ? '👑 ' : ''}${msg.senderName}
+                          </strong>
+                          <small style="color:#888; margin-right:10px;">ID: ${msg.uid}</small>
+                      </div>
+                      <small style="color:#888;">${formatDate(msg.time, true)}</small>
+                  </div>
+                  <div style="margin-top:8px;">
+                      ${msg.text ? `<p>${msg.text}</p>` : ''}
+                      ${msg.image ? `<img src="${msg.image}" style="max-width:200px; border-radius:5px; margin-top:5px;">` : ''}
+                  </div>
+                  <button class="btn btn-danger" style="font-size:10px; padding:3px 8px; margin-top:5px;" 
+                          onclick="deleteMessage('${msg.key}')">
+                      <i class="fas fa-trash"></i> حذف
+                  </button>
+              `;
+              
+              container.appendChild(div);
+          }
+      });
+  }
+
+  // وظائف التبويب
+  window.openTab = (tabName) => {
+      // إخفاء جميع التبويبات
+      document.querySelectorAll('.tab-content').forEach(tab => {
+          tab.classList.remove('active');
+      });
+      
+      // إزالة النشط من جميع الأزرار
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+          btn.classList.remove('active');
+      });
+      
+      // إظهار التبويب المطلوب
+      document.getElementById(`${tabName}-tab`).classList.add('active');
+      
+      // تفعيل الزر
+      event.target.classList.add('active');
+      
+      // تحديث بيانات التبويب إذا لزم
+      if(tabName === 'users') loadUsers();
+      if(tabName === 'premium') loadPremiumSubscriptions();
+      if(tabName === 'bans') loadBans();
+      if(tabName === 'messages') loadMessages();
+  };
+
+  // البحث عن المستخدمين
+  window.filterUsers = () => {
+      const searchTerm = document.getElementById('search-user').value.toLowerCase();
+      const filtered = allUsers.filter(user => 
+          user.displayName.toLowerCase().includes(searchTerm) ||
+          user.username.toLowerCase().includes(searchTerm) ||
+          user.uid.includes(searchTerm) ||
+          (user.bio && user.bio.toLowerCase().includes(searchTerm))
+      );
+      
+      displayUsers(filtered);
+  };
+
+  // إدارة الاشتراكات المميزة
+  window.openAddPremiumModal = () => {
+      document.getElementById('add-premium-modal').style.display = 'flex';
+  };
+
+  window.addPremiumSubscription = async () => {
+      const username = document.getElementById('add-premium-username').value.trim();
+      const days = parseInt(document.getElementById('add-premium-days').value) || 30;
+      const customId = document.getElementById('add-premium-id').value.trim();
+      
+      if(!username) {
+          alert('الرجاء إدخال اسم المستخدم');
+          return;
+      }
+      
+      // البحث عن المستخدم
+      const userSnap = await get(child(usersRef, username));
+      if(!userSnap.exists()) {
+          alert('المستخدم غير موجود');
+          return;
+      }
+      
+      const userData = userSnap.val();
+      const premiumUntil = Date.now() + (days * 24 * 60 * 60 * 1000);
+      
+      await set(child(premiumRef, userData.uid), {
+          isPremium: true,
+          premiumUntil: premiumUntil,
+          premiumId: customId || userData.uid,
+          premiumGradient: 1,
+          activatedAt: Date.now(),
+          activatedBy: currentUser.username,
+          manualAdd: true
+      });
+      
+      // إضافة رسالة في الشات
+      await set(child(ref(db, 'messages'), Date.now().toString()), {
+          text: `🎉 ${userData.displayName} حصل على اشتراك مميز لمدة ${days} يوم!`,
+          type: "system",
+          time: Date.now()
+      });
+      
+      closeModal();
+      loadPremiumSubscriptions();
+      updateStats();
+      
+      await logEvent('اشتراك', `تم إضافة اشتراك مميز لـ ${username} لمدة ${days} يوم`);
+      alert('تم إضافة الاشتراك المميز بنجاح');
+  };
+
+  window.extendPremium = async (uid, days) => {
+      const premiumSnap = await get(child(premiumRef, uid));
+      if(premiumSnap.exists()) {
+          const data = premiumSnap.val();
+          const newUntil = Math.max(data.premiumUntil, Date.now()) + (days * 24 * 60 * 60 * 1000);
+          
+          await update(child(premiumRef, uid), {
+              premiumUntil: newUntil
+          });
+          
+          loadPremiumSubscriptions();
+          await logEvent('اشتراك', `تم تمديد اشتراك ${uid} لمدة ${days} يوم`);
+          alert('تم تمديد الاشتراك بنجاح');
+      }
+  };
+
+  window.cancelPremium = async (uid) => {
+      if(confirm('هل أنت متأكد من إلغاء الاشتراك المميز؟')) {
+          await update(child(premiumRef, uid), {
+              isPremium: false
+          });
+          
+          loadPremiumSubscriptions();
+          updateStats();
+          await logEvent('اشتراك', `تم إلغاء اشتراك ${uid}`);
+          alert('تم إلغاء الاشتراك بنجاح');
+      }
+  };
+
+  // إدارة الأكواد
+  window.generateCodes = async () => {
+      const count = parseInt(document.getElementById('code-count').value) || 5;
+      const days = parseInt(document.getElementById('code-days').value) || 30;
+      
+      const codesContainer = document.getElementById('generated-codes');
+      codesContainer.innerHTML = '<h3>الأكواد المولدة:</h3>';
+      
+      for(let i = 0; i < count; i++) {
+          const code = generateCode();
+          const validUntil = Date.now() + (days * 24 * 60 * 60 * 1000);
+          
+          // حفظ الكود في قاعدة البيانات
+          await set(child(codesRef, code), {
+              generatedAt: Date.now(),
+              validUntil: validUntil,
+              generatedBy: currentUser.username,
+              daysValid: days
+          });
+          
+          const codeDiv = document.createElement('div');
+          codeDiv.className = 'code-display';
+          codeDiv.textContent = code;
+          codeDiv.style.cursor = 'pointer';
+          codeDiv.onclick = () => {
+              navigator.clipboard.writeText(code);
+              alert('تم نسخ الكود: ' + code);
+          };
+          
+          codesContainer.appendChild(codeDiv);
+      }
+      
+      await logEvent('أكواد', `تم توليد ${count} كود اشتراك`);
+      alert(`تم توليد ${count} كود اشتراك بنجاح`);
+  };
+
+  function generateCode() {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      const sections = [];
+      
+      for(let i = 0; i < 5; i++) {
+          let section = '';
+          for(let j = 0; j < 4; j++) {
+              section += chars.charAt(Math.floor(Math.random() * chars.length));
+          }
+          sections.push(section);
+      }
+      
+      return `FAI-TRIAL-${sections.join('-')}`;
+  }
+
+  // إدارة الحظر
+  window.banUser = async () => {
+      const usernameOrId = document.getElementById('ban-username').value.trim();
+      const duration = document.getElementById('ban-duration').value;
+      const reason = document.getElementById('ban-reason').value.trim() || 'بدون سبب';
+      
+      if(!usernameOrId) {
+          alert('الرجاء إدخال اسم المستخدم أو ID');
+          return;
+      }
+      
+      let uid = null;
+      let displayName = '';
+      
+      // البحث عن المستخدم
+      if(usernameOrId.startsWith('@')) {
+          const userSnap = await get(child(usersRef, usernameOrId.substring(1)));
+          if(userSnap.exists()) {
+              uid = userSnap.val().uid;
+              displayName = userSnap.val().displayName;
+          }
+      } else {
+          // البحث بالـ ID
+          const userSnap = await get(query(usersRef, orderByChild('uid'), equalTo(usernameOrId)));
+          if(userSnap.exists()) {
+              userSnap.forEach((childSnap) => {
+                  uid = childSnap.val().uid;
+                  displayName = childSnap.val().displayName;
+              });
+          }
+      }
+      
+      if(!uid) {
+          alert('المستخدم غير موجود');
+          return;
+      }
+      
+      const banData = {
+          reason: reason,
+          bannedBy: currentUser.username,
+          bannedAt: Date.now()
+      };
+      
+      if(duration === 'permanent') {
+          banData.until = 'permanent';
+      } else {
+          const hours = parseInt(duration);
+          banData.until = Date.now() + (hours * 60 * 60 * 1000);
+      }
+      
+      await set(child(bansRef, uid), banData);
+      
+      // إضافة رسالة في الشات
+      await set(child(ref(db, 'messages'), Date.now().toString()), {
+          text: `⛔ ${displayName} تم حظره ${duration === 'permanent' ? 'بشكل دائم' : `لمدة ${duration} ساعة`} - السبب: ${reason}`,
+          type: "system",
+          time: Date.now()
+      });
+      
+      // تنظيف الحقول
+      document.getElementById('ban-username').value = '';
+      document.getElementById('ban-reason').value = '';
+      
+      loadBans();
+      updateStats();
+      
+      await logEvent('حظر', `تم حظر ${displayName} (${uid}) - السبب: ${reason}`);
+      alert('تم حظر المستخدم بنجاح');
+  };
+
+  window.unbanUser = async (uid) => {
+      if(confirm('هل أنت متأكد من فك حظر هذا المستخدم؟')) {
+          await remove(child(bansRef, uid));
+          
+          loadBans();
+          updateStats();
+          
+          await logEvent('حظر', `تم فك حظر ${uid}`);
+          alert('تم فك الحظر بنجاح');
+      }
+  };
+
+  // إدارة الرسائل
+  window.searchMessages = () => {
+      const searchTerm = document.getElementById('message-search').value.toLowerCase();
+      const filtered = allMessages.filter(msg => 
+          msg.type === "msg" && (
+              msg.text?.toLowerCase().includes(searchTerm) ||
+              msg.senderName?.toLowerCase().includes(searchTerm) ||
+              msg.uid?.includes(searchTerm)
+          )
+      );
+      
+      displayMessages(filtered);
+  };
+
+  window.deleteMessage = async (messageKey) => {
+      if(confirm('هل أنت متأكد من حذف هذه الرسالة؟')) {
+          await remove(child(messagesRef, messageKey));
+          
+          loadMessages();
+          await logEvent('رسائل', `تم حذف رسالة ${messageKey}`);
+          alert('تم حذف الرسالة بنجاح');
+      }
+  };
+
+  window.clearMessages = async () => {
+      if(confirm('⚠️ تحذير: سيتم حذف جميع الرسائل. هل أنت متأكد؟')) {
+          await remove(messagesRef);
+          
+          loadMessages();
+          await logEvent('رسائل', 'تم حذف جميع الرسائل');
+          alert('تم حذف جميع الرسائل بنجاح');
+      }
+  };
+
+  // إدارة المستخدمين
+  window.editUser = async (username) => {
+      const userSnap = await get(child(usersRef, username));
+      if(userSnap.exists()) {
+          const user = userSnap.val();
+          
+          const modalContent = `
+              <div class="form-group">
+                  <label style="color:#ccc;">اسم العرض:</label>
+                  <input type="text" id="edit-display-name" class="form-control" value="${user.displayName}">
+              </div>
+              
+              <div class="form-group">
+                  <label style="color:#ccc;">السيرة الذاتية:</label>
+                  <textarea id="edit-bio" class="form-control" rows="3">${user.bio || ''}</textarea>
+              </div>
+              
+              <div class="form-group">
+                  <label style="color:#ccc;">
+                      <input type="checkbox" id="edit-is-admin" ${user.isAdmin ? 'checked' : ''}>
+                      صلاحية الأدمن
+                  </label>
+              </div>
+              
+              <div class="form-group">
+                  <label style="color:#ccc;">كلمة المرور الجديدة (اتركه فارغاً للحفاظ على القديمة):</label>
+                  <input type="password" id="edit-password" class="form-control" placeholder="كلمة المرور الجديدة">
+              </div>
+              
+              <button class="btn btn-success" onclick="saveUserChanges('${username}')" style="width:100%;">
+                  <i class="fas fa-save"></i> حفظ التغييرات
+              </button>
+              
+              <button class="btn btn-danger" onclick="forceLogout('${username}')" style="width:100%; margin-top:10px;">
+                  <i class="fas fa-sign-out-alt"></i> تسجيل الخروج القسري
+              </button>
+          `;
+          
+          document.getElementById('edit-user-content').innerHTML = modalContent;
+          document.getElementById('edit-user-modal').style.display = 'flex';
+      }
+  };
+
+  window.saveUserChanges = async (username) => {
+      const updates = {};
+      const displayName = document.getElementById('edit-display-name').value.trim();
+      const bio = document.getElementById('edit-bio').value.trim();
+      const isAdmin = document.getElementById('edit-is-admin').checked;
+      const password = document.getElementById('edit-password').value.trim();
+      
+      if(displayName) updates.displayName = displayName;
+      if(bio !== undefined) updates.bio = bio;
+      updates.isAdmin = isAdmin;
+      if(password) updates.password = password;
+      
+      await update(child(usersRef, username), updates);
+      
+      closeModal();
+      loadUsers();
+      
+      await logEvent('مستخدمين', `تم تعديل بيانات ${username}`);
+      alert('تم حفظ التغييرات بنجاح');
+  };
+
+  window.deleteUser = async (username) => {
+      if(confirm(`⚠️ تحذير: سيتم حذف المستخدم ${username} بشكل دائم. هل أنت متأكد؟`)) {
+          const userSnap = await get(child(usersRef, username));
+          if(userSnap.exists()) {
+              const uid = userSnap.val().uid;
+              
+              // حذف من المستخدمين
+              await remove(child(usersRef, username));
+              
+              // حذف من المشتركين المميزين
+              await remove(child(premiumRef, uid));
+              
+              // حذف من المحظورين
+              await remove(child(bansRef, uid));
+              
+              loadUsers();
+              loadPremiumSubscriptions();
+              loadBans();
+              updateStats();
+              
+              await logEvent('مستخدمين', `تم حذف المستخدم ${username} بشكل دائم`);
+              alert('تم حذف المستخدم بنجاح');
+          }
+      }
+  };
+
+  window.forceLogout = async (username) => {
+      // في تطبيق حقيقي، هنا يتم إجبار تسجيل الخروج من جميع الجلسات
+      // يمكن تحقيق ذلك بإضافة token إلى قاعدة البيانات وعند محاولة إرسال رسالة التحقق منه
+      
+      await logEvent('جلسات', `تم إجبار ${username} على تسجيل الخروج`);
+      alert('تم إرسال أمر تسجيل الخروج');
+  };
+
+  // السجلات والأحداث
+  async function logEvent(type, message) {
+      const logEntry = {
+          type: type,
+          message: message,
+          admin: currentUser.username,
+          timestamp: Date.now()
+      };
+      
+      await push(logsRef, logEntry);
+      
+      // تحديث عرض السجلات
+      const logsDiv = document.getElementById('admin-logs');
+      const logDiv = document.createElement('div');
+      logDiv.className = 'log-entry';
+      logDiv.innerHTML = `
+          <span class="log-time">[${new Date().toLocaleString()}]</span>
+          <span class="log-${type === 'خطأ' ? 'error' : type === 'نجاح' ? 'success' : 'info'}">
+              ${message}
+          </span>
+      `;
+      
+      logsDiv.prepend(logDiv);
+  }
+
+  window.exportLogs = async () => {
+      const logsSnap = await get(logsRef);
+      let logsText = "سجل أحداث الأدمن - شات بلس\n";
+      logsText += "=".repeat(50) + "\n\n";
+      
+      if(logsSnap.exists()) {
+          const logs = [];
+          logsSnap.forEach((childSnap) => {
+              logs.push(childSnap.val());
+          });
+          
+          logs.sort((a, b) => b.timestamp - a.timestamp);
+          
+          logs.forEach(log => {
+              logsText += `[${new Date(log.timestamp).toLocaleString()}] ${log.type}: ${log.message} (بواسطة: ${log.admin})\n`;
+          });
+      }
+      
+      const blob = new Blob([logsText], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `admin-logs-${new Date().toISOString().split('T')[0]}.txt`;
+      a.click();
+      URL.revokeObjectURL(url);
+  };
+
+  window.clearLogs = async () => {
+      if(confirm('هل أنت متأكد من مسح جميع السجلات؟')) {
+          await remove(logsRef);
+          document.getElementById('admin-logs').innerHTML = `
+              <div class="log-entry">
+                  <span class="log-time">[${new Date().toLocaleString()}]</span>
+                  <span class="log-info"> تم مسح جميع السجلات</span>
+              </div>
+          `;
+          
+          await logEvent('سجلات', 'تم مسح جميع السجلات');
+      }
+  };
+
+  // الإعدادات
+  window.saveSecuritySettings = () => {
+      const maxAttempts = document.getElementById('max-attempts').value;
+      const lockDuration = document.getElementById('lock-duration').value;
+      
+      // هنا يمكن حفظ الإعدادات في قاعدة بيانات منفصلة
+      localStorage.setItem('admin_maxAttempts', maxAttempts);
+      localStorage.setItem('admin_lockDuration', lockDuration);
+      
+      alert('تم حفظ إعدادات الأمان بنجاح');
+  };
+
+  window.resetSystem = async () => {
+      if(confirm('⚠️ تحذير شديد: سيتم إعادة ضبط النظام بالكامل وحذف جميع البيانات. هل أنت متأكد؟')) {
+          if(prompt('اكتب "تأكيد" للمتابعة:') === 'تأكيد') {
+              // حذف جميع البيانات (في تطبيق حقيقي كن حذراً جداً)
+              await Promise.all([
+                  remove(usersRef),
+                  remove(premiumRef),
+                  remove(bansRef),
+                  remove(messagesRef),
+                  remove(codesRef)
+              ]);
+              
+              // إعادة إنشاء حساب الأدمن
+              await set(child(usersRef, "texn"), {
+                  password: "hamzagmail34567",
+                  uid: "1111",
+                  displayName: "𝐑𝐄𝐌𝐀𝐒 ༗",
+                  photo: "https://i.pinimg.com/736x/8b/16/7a/8b167af653c2399dd93b952a48740620.jpg",
+                  bio: "مدير النظام",
+                  isAdmin: true,
+                  joinedAt: Date.now()
+              });
+              
+              await logEvent('نظام', 'تم إعادة ضبط النظام بالكامل');
+              alert('تم إعادة ضبط النظام. سيتم إعادة تحميل الصفحة...');
+              location.reload();
+          }
+      }
+  };
+
+  window.deleteInactiveUsers = async () => {
+      const cutoffDate = Date.now() - (30 * 24 * 60 * 60 * 1000); // 30 يوم
+      let deletedCount = 0;
+      
+      const usersSnap = await get(usersRef);
+      if(usersSnap.exists()) {
+          const users = usersSnap.val();
+          
+          for(const username in users) {
+              if(username === "texn") continue; // لا تحذف الأدمن
+              
+              const user = users[username];
+              const lastActive = user.lastActive || user.joinedAt;
+              
+              if(lastActive < cutoffDate) {
+                  const uid = user.uid;
+                  
+                  // حذف المستخدم
+                  await remove(child(usersRef, username));
+                  
+                  // حذف البيانات المرتبطة
+                  await remove(child(premiumRef, uid));
+                  await remove(child(bansRef, uid));
+                  
+                  deletedCount++;
+              }
+          }
+      }
+      
+      await logEvent('نظافة', `تم حذف ${deletedCount} مستخدم غير نشط`);
+      alert(`تم حذف ${deletedCount} مستخدم غير نشط`);
+      loadUsers();
+      updateStats();
+  };
+
+  // وظائف مساعدة
+  function formatDate(timestamp, showTime = false) {
+      if(!timestamp) return 'غير معروف';
+      
+      const date = new Date(parseInt(timestamp));
+      if(showTime) {
+          return date.toLocaleString('ar-SA');
+      }
+      return date.toLocaleDateString('ar-SA');
+  }
+
+  function formatTimeLeft(timestamp) {
+      const diff = timestamp - Date.now();
+      if(diff <= 0) return 'منتهي';
+      
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      
+      if(days > 0) return `${days} يوم و ${hours} ساعة`;
+      return `${hours} ساعة`;
+  }
+
+  function setupRealtimeUpdates() {
+      // تحديث الإحصائيات تلقائياً
+      onValue(usersRef, updateStats);
+      onValue(premiumRef, updateStats);
+      onValue(bansRef, updateStats);
+      onValue(messagesRef, () => {
+          loadMessages();
+          updateStats();
+      });
+      
+      // تحديث قوائم المستخدمين
+      onValue(usersRef, loadUsers);
+      onValue(premiumRef, loadPremiumSubscriptions);
+      onValue(bansRef, loadBans);
+      onValue(codesRef, loadCodes);
+      
+      // تحديث السجلات
+      onValue(logsRef, (snap) => {
+          const logsDiv = document.getElementById('admin-logs');
+          if(snap.exists()) {
+              const logs = [];
+              snap.forEach((childSnap) => {
+                  logs.push(childSnap.val());
+              });
+              
+              logs.sort((a, b) => b.timestamp - a.timestamp);
+              
+              let logsHTML = '';
+              logs.slice(0, 50).forEach(log => {
+                  const logClass = log.type === 'خطأ' ? 'log-error' : 
+                                 log.type === 'نجاح' ? 'log-success' : 'log-info';
+                  logsHTML += `
+                      <div class="log-entry">
+                          <span class="log-time">[${new Date(log.timestamp).toLocaleString()}]</span>
+                          <span class="${logClass}">${log.message}</span>
+                      </div>
+                  `;
+              });
+              
+              logsDiv.innerHTML = logsHTML;
+          }
+      });
+  }
+
+  window.refreshAll = () => {
+      loadDashboard();
+      alert('تم تحديث جميع البيانات');
+  };
+
+  window.closeModal = () => {
+      document.querySelectorAll('.modal').forEach(modal => {
+          modal.style.display = 'none';
+      });
+  };
+
+  window.logout = () => {
+      localStorage.removeItem('admin_user');
+      localStorage.removeItem('admin_pass');
+      window.location.href = 'index.html';
+  };
+</script>
+</body>
+</html>
