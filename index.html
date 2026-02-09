@@ -2,222 +2,290 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تخمين الفواكه - Fawakih AI</title>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>نظام Fawakih AI | الإصدار 2.0</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;500;700;900&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
+        /* * ==========================================
+         * 1. DESIGN SYSTEM (نظام التصميم)
+         * ==========================================
+         */
         :root {
-            --primary: #6c5ce7;
-            --secondary: #a29bfe;
-            --bg: #0f0f13;
-            --surface: #1e1e24;
-            --text: #ffffff;
-            --error: #ff7675;
-            --success: #00b894;
+            --bg-dark: #09090b;
+            --glass-bg: rgba(30, 30, 35, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --primary: #8b5cf6; /* بنفسجي */
+            --primary-glow: rgba(139, 92, 246, 0.4);
+            --accent: #10b981; /* أخضر */
+            --danger: #ef4444;
+            --text-main: #ffffff;
+            --text-muted: #a1a1aa;
+            --radius: 24px;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
+
         body {
             font-family: 'Tajawal', sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.1) 0%, transparent 40%);
+            color: var(--text-main);
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
             overflow: hidden;
         }
 
-        .container {
+        /* حاوية التطبيق */
+        .app-container {
             width: 100%;
-            max-width: 450px;
-            padding: 20px;
+            max-width: 420px;
+            height: 100vh;
+            max-height: 850px;
             position: relative;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
-        /* Screens */
-        .screen {
-            background: var(--surface);
+        /* البطاقات الزجاجية */
+        .card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius);
             padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
             text-align: center;
-            display: none; /* Hidden by default */
+            position: absolute;
+            width: calc(100% - 40px);
+            left: 20px;
             opacity: 0;
-            transition: opacity 0.5s ease;
+            pointer-events: none;
+            transform: scale(0.95) translateY(10px);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .screen.active {
-            display: block;
+        .card.active {
             opacity: 1;
-            animation: slideUp 0.5s ease forwards;
+            pointer-events: all;
+            transform: scale(1) translateY(0);
+            z-index: 10;
         }
 
-        @keyframes slideUp {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
+        /* العناصر النصية */
+        h1, h2 { font-weight: 900; margin-bottom: 10px; letter-spacing: -0.5px; }
+        h1 { font-size: 28px; background: linear-gradient(to right, #fff, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        p { color: var(--text-muted); font-size: 14px; margin-bottom: 25px; line-height: 1.6; }
 
-        /* Login Elements */
-        h1, h2 { margin-bottom: 20px; color: var(--secondary); }
-        
-        .input-group { margin-bottom: 20px; text-align: right; }
-        
+        /* حقول الإدخال */
+        .input-box {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .input-box i {
+            position: absolute;
+            top: 50%;
+            right: 15px;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 18px;
+        }
         input {
             width: 100%;
-            padding: 15px;
-            border-radius: 10px;
-            border: 2px solid #333;
-            background: #2d2d35;
+            background: rgba(0,0,0,0.3);
+            border: 2px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 16px 50px 16px 16px;
             color: white;
             font-size: 16px;
             font-family: inherit;
-            outline: none;
             transition: 0.3s;
         }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 15px var(--primary-glow); }
 
-        input:focus { border-color: var(--primary); }
-
-        .btn {
+        /* الأزرار */
+        .btn-main {
             width: 100%;
-            padding: 15px;
-            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            padding: 18px;
+            background: linear-gradient(135deg, var(--primary), #6d28d9);
             border: none;
-            border-radius: 10px;
+            border-radius: 12px;
             color: white;
-            font-weight: bold;
-            font-size: 18px;
+            font-weight: 700;
+            font-size: 16px;
             cursor: pointer;
-            transition: transform 0.2s;
+            position: relative;
+            overflow: hidden;
+            transition: 0.3s;
+            box-shadow: 0 4px 15px var(--primary-glow);
         }
+        .btn-main:active { transform: scale(0.98); }
+        .btn-main:disabled { background: #333; cursor: not-allowed; box-shadow: none; color: #666; }
 
-        .btn:active { transform: scale(0.98); }
-
-        .status-msg {
-            margin-top: 15px;
-            font-size: 14px;
-            min-height: 20px;
-        }
-        .error { color: var(--error); }
-        .success { color: var(--success); }
-
-        /* Game Elements */
-        .fruit-display {
-            font-size: 80px;
+        /* منطقة النتيجة */
+        .result-area {
             margin: 30px 0;
-            min-height: 120px;
+            padding: 20px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 20px;
+            min-height: 180px;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            filter: drop-shadow(0 0 15px rgba(108, 92, 231, 0.5));
+            border: 1px dashed var(--glass-border);
         }
 
+        .fruit-icon {
+            font-size: 80px;
+            filter: drop-shadow(0 0 20px rgba(255,255,255,0.2));
+            transition: transform 0.3s;
+        }
+        
         .fruit-name {
             font-size: 24px;
-            color: #ccc;
-            margin-bottom: 30px;
+            font-weight: 700;
+            margin-top: 15px;
+            color: var(--text-main);
         }
 
-        .magic-circle {
-            width: 150px;
-            height: 150px;
-            border: 3px solid transparent;
-            border-top-color: var(--primary);
+        /* التحميل (Loader) */
+        .ai-loader {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(139, 92, 246, 0.1);
+            border-left-color: var(--primary);
             border-radius: 50%;
-            margin: 0 auto 30px;
             animation: spin 1s linear infinite;
             display: none;
         }
 
         @keyframes spin { 100% { transform: rotate(360deg); } }
-
-        .device-id {
-            position: absolute;
-            bottom: 10px;
-            left: 0;
-            width: 100%;
-            text-align: center;
-            font-size: 10px;
-            color: #444;
+        
+        /* تذييل */
+        .footer-info {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #555;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
+
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            display: none;
+        }
+        .status-badge.error { display:block; background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+        .status-badge.success { display:block; background: rgba(16, 185, 129, 0.2); color: var(--accent); }
 
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div id="login-screen" class="screen">
+    <div class="app-container">
+        
+        <div id="login-screen" class="card">
+            <div style="margin-bottom: 20px;">
+                <i class="fa-solid fa-fingerprint" style="font-size: 40px; color: var(--primary);"></i>
+            </div>
             <h1>بوابة المشتركين</h1>
-            <p style="margin-bottom: 20px; color: #888;">أدخل كود الاشتراك الخاص بك</p>
-            
-            <div class="input-group">
+            <p>النظام محمي. يرجى إدخال مفتاح الترخيص الخاص بك للمتابعة.</p>
+
+            <div class="input-box">
+                <i class="fa-solid fa-key"></i>
                 <input type="text" id="license-code" placeholder="XXXX-XXXX-XXXX" autocomplete="off">
             </div>
 
-            <button class="btn" onclick="SubscriptionManager.validate()">دخول</button>
-            <div id="login-status" class="status-msg"></div>
-            <div class="device-id">Device ID: <span id="did-display"></span></div>
+            <button class="btn-main" onclick="SubscriptionManager.validate()">
+                تحقق ودخول <i class="fa-solid fa-arrow-left" style="margin-right:8px"></i>
+            </button>
+
+            <div id="login-status" class="status-badge" style="margin-top: 15px;"></div>
+            
+            <div class="footer-info" style="justify-content: center; margin-top: 20px;">
+                <span style="opacity: 0.5;">ID: <span id="did-display">Checking...</span></span>
+            </div>
         </div>
 
-        <div id="game-screen" class="screen">
+        <div id="game-screen" class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <span style="font-size: 12px; color: var(--primary); font-weight: bold;">FAWAKIH AI V2.0</span>
+                <button onclick="SubscriptionManager.logout()" style="background:none; border:none; color:var(--text-muted); cursor:pointer;">
+                    <i class="fa-solid fa-power-off"></i>
+                </button>
+            </div>
+
             <h2>الخوارزمية الذكية</h2>
-            
-            <div class="magic-circle" id="loader"></div>
-            
-            <div id="result-container">
-                <div class="fruit-display" id="fruit-icon">❓</div>
-                <div class="fruit-name" id="fruit-text">اضغط للتخمين</div>
+            <p style="margin-bottom: 15px;">انقر أدناه لتحليل النمط وتوقع النتيجة التالية</p>
+
+            <div class="result-area">
+                <div class="ai-loader" id="loader"></div>
+                <div id="result-content">
+                    <div class="fruit-icon" id="fruit-icon">🎲</div>
+                    <div class="fruit-name" id="fruit-text">جاهز للتخمين</div>
+                </div>
             </div>
 
-            <button class="btn" id="guess-btn" onclick="GameEngine.predict()">تخمين التالي</button>
-            
-            <div style="margin-top: 20px; font-size: 12px; color: #555;">
-                مدة الاشتراك المتبقية: <span id="days-left">--</span> يوم
+            <button class="btn-main" id="guess-btn" onclick="GameEngine.predict()">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> تحليل وتخمين
+            </button>
+
+            <div class="footer-info">
+                <span><i class="fa-regular fa-clock"></i> الصلاحية: <span id="days-left" style="color:white">--</span> يوم</span>
+                <span>الحالة: <span style="color:var(--accent)">نشط</span></span>
             </div>
-            <button onclick="SubscriptionManager.logout()" style="background:none; border:none; color:#555; margin-top:10px; cursor:pointer; font-size:12px;">تسجيل خروج</button>
         </div>
+
     </div>
 
 <script>
 /**
- * 1. Security & Device Binding Module
- * حماية وتوليد بصمة الجهاز
+ * ==========================================
+ * CORE SYSTEM KERNEL
+ * (نفس منطق الكود الأصلي مع تحسين الهيكلية)
+ * ==========================================
  */
+
+/* --- 1. Security Module --- */
 const Security = {
     getDeviceID: function() {
         let id = localStorage.getItem('fwh_device_id');
         if (!id) {
-            // توليد معرف فريد للجهاز
-            id = 'DEV-' + Math.random().toString(36).substr(2, 9).toUpperCase() + '-' + Date.now().toString(36).toUpperCase();
+            id = 'DEV-' + Math.random().toString(36).substr(2, 9).toUpperCase();
             localStorage.setItem('fwh_device_id', id);
         }
         return id;
     },
-    
-    // تشفير بسيط للبيانات
     hash: function(str) {
         let hash = 0;
         for (let i = 0; i < str.length; i++) {
-            const char = str.charCodeAt(i);
-            hash = ((hash << 5) - hash) + char;
+            hash = ((hash << 5) - hash) + str.charCodeAt(i);
             hash |= 0;
         }
         return hash.toString();
     }
 };
 
-/**
- * 2. Subscription Manager
- * إدارة الاشتراكات والأكواد
- */
+/* --- 2. Subscription Module --- */
 const SubscriptionManager = {
-    // قائمة الأكواد الصالحة (في الواقع يجب أن تكون في قاعدة بيانات، هنا محاكاة)
-    // الكود: VIP-2024
+    // قاعدة بيانات الأكواد (للمحاكاة)
     validCodes: {
-        'VIP-2024': 30, // 30 Days
+        'VIP-2024': 30,
         'ADMIN-KEY': 365,
-        'TEST-CODE': 1
+        'TEST': 1
     },
 
     init: function() {
@@ -226,69 +294,67 @@ const SubscriptionManager = {
         
         if (savedSub && savedSub.expiry && savedSub.deviceID === Security.getDeviceID()) {
             if (Date.now() < savedSub.expiry) {
-                this.showGame(savedSub.expiry);
+                this.switchToGame(savedSub.expiry);
                 return;
             } else {
-                localStorage.removeItem('fwh_sub_data'); // حذف الاشتراك المنتهي
+                localStorage.removeItem('fwh_sub_data');
             }
         }
-        
         document.getElementById('login-screen').classList.add('active');
     },
 
     validate: function() {
         const input = document.getElementById('license-code').value.trim();
-        const status = document.getElementById('login-status');
-        const deviceID = Security.getDeviceID();
-
+        const statusEl = document.getElementById('login-status');
+        
+        // محاكاة التحقق من السيرفر
         if (this.validCodes.hasOwnProperty(input)) {
-            // Check if code is already bound to another device (Simulated logic)
-            // In a real server, you check DB. Here we bind current session.
-            
             const days = this.validCodes[input];
-            const expiryTime = Date.now() + (days * 24 * 60 * 60 * 1000);
+            const expiryTime = Date.now() + (days * 86400000);
             
             const subData = {
-                code: Security.hash(input), // Store hash only
+                codeHash: Security.hash(input),
                 expiry: expiryTime,
-                deviceID: deviceID
+                deviceID: Security.getDeviceID()
             };
 
             localStorage.setItem('fwh_sub_data', JSON.stringify(subData));
             
-            status.className = 'status-msg success';
-            status.innerText = 'تم تفعيل الاشتراك بنجاح!';
+            statusEl.className = 'status-badge success';
+            statusEl.innerText = 'تم التفعيل بنجاح! جاري التوجيه...';
             
             setTimeout(() => {
                 document.getElementById('login-screen').classList.remove('active');
-                this.showGame(expiryTime);
-            }, 1000);
-
+                this.switchToGame(expiryTime);
+            }, 1500);
         } else {
-            status.className = 'status-msg error';
-            status.innerText = 'الكود غير صحيح أو منتهي الصلاحية';
+            statusEl.className = 'status-badge error';
+            statusEl.innerText = 'الكود غير صالح أو منتهي';
+            
+            // تأثير اهتزاز للحقل
+            const inputField = document.querySelector('.input-box');
+            inputField.style.animation = 'shake 0.5s';
+            setTimeout(() => inputField.style.animation = '', 500);
         }
     },
 
-    showGame: function(expiry) {
-        document.getElementById('game-screen').classList.add('active');
-        const daysLeft = Math.ceil((expiry - Date.now()) / (1000 * 60 * 60 * 24));
+    switchToGame: function(expiry) {
+        const daysLeft = Math.ceil((expiry - Date.now()) / 86400000);
         document.getElementById('days-left').innerText = daysLeft;
+        
+        document.getElementById('game-screen').classList.add('active');
         GameEngine.init();
     },
 
     logout: function() {
-        if(confirm('هل أنت متأكد؟ سيتم حذف بيانات الاشتراك.')) {
+        if(confirm('هل تريد تسجيل الخروج وحذف الترخيص من هذا الجهاز؟')) {
             localStorage.removeItem('fwh_sub_data');
             location.reload();
         }
     }
 };
 
-/**
- * 3. The Core Logic (Ported from Smali)
- * تحويل خوارزمية updateWeightedList بدقة
- */
+/* --- 3. Game Engine (Smali Logic Port) --- */
 const GameEngine = {
     fruits: [
         { id: 'apple', name: 'تفاحة', icon: '🍎' },
@@ -297,174 +363,149 @@ const GameEngine = {
         { id: 'grape', name: 'عنب', icon: '🍇' },
         { id: 'strawberry', name: 'فراولة', icon: '🍓' },
         { id: 'watermelon', name: 'بطيخ', icon: '🍉' },
-        { id: 'cherry', name: 'كرز', icon: '🍒' }, // Special logic in Smali
+        { id: 'cherry', name: 'كرز', icon: '🍒' },
         { id: 'mango', name: 'مانجو', icon: '🥭' }
     ],
 
-    // Local Storage Keys
-    KEY_LEARNED: 'aiLearnedFruits',
-    KEY_RESET_FULL: 'LastFullResetTime',
-    KEY_RESET_LIST: 'LastListResetTime',
+    // ثوابت النظام
+    KEYS: { LEARNED: 'aiLearnedFruits', RESET_FULL: 'LastFullResetTime', RESET_LIST: 'LastListResetTime' },
+    TIME: { FULL_RESET: 172800000, LIST_AGE: 10800000 },
 
-    // Smali Constants
-    TIME_48H: 172800000, // 0xa4cb800
-    TIME_3H: 10800000,   // 0xa4cb80 (Note: Smali hex 0xa4cb80 is ~3 hours, not 24h)
-
-    aiLearnedFruits: [], // History list
+    history: [],
 
     init: function() {
-        // Load history
         try {
-            this.aiLearnedFruits = JSON.parse(localStorage.getItem(this.KEY_LEARNED) || '[]');
-        } catch(e) { this.aiLearnedFruits = []; }
-        
+            this.history = JSON.parse(localStorage.getItem(this.KEYS.LEARNED) || '[]');
+        } catch(e) { this.history = []; }
         this.checkTimers();
     },
 
-    // Method private updateWeightedList() implementation
     updateWeightedList: function() {
-        const weightedFruitViews = [];
+        const weightedList = [];
         const fruitMap = {}; 
         
-        // 1. Initial Fill (Line 81 in Smali)
         this.fruits.forEach(f => {
             fruitMap[f.id] = f;
-            weightedFruitViews.push(f); // Add base weight 1
+            weightedList.push(f); // الوزن الأساسي
         });
 
-        // 2. Calculate Frequencies (Line 108)
-        const frequencyMap = {};
-        this.aiLearnedFruits.forEach(fruitId => {
-            frequencyMap[fruitId] = (frequencyMap[fruitId] || 0) + 1;
-        });
+        // حساب التكرار
+        const frequency = {};
+        this.history.forEach(id => frequency[id] = (frequency[id] || 0) + 1);
 
-        // 3. Last Item Logic (Line 137)
-        let lastFruit = "";
-        if (this.aiLearnedFruits.length > 0) {
-            lastFruit = this.aiLearnedFruits[this.aiLearnedFruits.length - 1];
-        }
-
-        // 4. Weight Calculation Loop (Line 151)
-        // Loop max 20 recent items
-        const loopLimit = Math.min(this.aiLearnedFruits.length, 20);
+        const lastFruit = this.history.length > 0 ? this.history[this.history.length - 1] : "";
         
-        for (let i = 0; i < loopLimit; i++) {
-            // Get item from end backwards
-            const index = this.aiLearnedFruits.length - i - 1;
-            const fruitId = this.aiLearnedFruits[index];
-            const fruitObj = fruitMap[fruitId];
-
-            if (fruitObj) {
-                // Calculate Weight
-                // Smali: const/16 v7, 0x12 (18) - i
+        // خوارزمية الأوزان (آخر 20 عنصر)
+        const limit = Math.min(this.history.length, 20);
+        
+        for (let i = 0; i < limit; i++) {
+            const idx = this.history.length - i - 1;
+            const fruitId = this.history[idx];
+            
+            if (fruitMap[fruitId]) {
                 let weight = 18 - i;
-                if (weight < 2) weight = 2; // Min weight base
+                if (weight < 2) weight = 2;
 
-                // Add frequency bonus: count * 2, min(result, 12)
-                const freq = frequencyMap[fruitId] || 0;
-                const freqBonus = Math.min(freq * 2, 12);
-                weight += freqBonus;
+                const bonus = Math.min((frequency[fruitId] || 0) * 2, 12);
+                weight += bonus;
 
-                // Anti-repetition: if same as last fruit, divide by 3
-                if (fruitId === lastFruit) {
-                    weight = Math.floor(weight / 3);
-                }
-
-                // Cherry Rule (Smali Line 128): if cherry, set weight = 1
-                if (fruitId === 'cherry') {
-                    weight = 1;
-                }
-
-                // Cap at 35 (0x23)
+                if (fruitId === lastFruit) weight = Math.floor(weight / 3);
+                if (fruitId === 'cherry') weight = 1;
                 if (weight > 35) weight = 35;
 
-                // Add to list 'weight' times
                 for (let k = 0; k < weight; k++) {
-                    weightedFruitViews.push(fruitObj);
+                    weightedList.push(fruitMap[fruitId]);
                 }
             }
         }
 
-        // Shuffle (Line 149)
-        for (let i = weightedFruitViews.length - 1; i > 0; i--) {
+        // خلط القائمة (Fisher-Yates)
+        for (let i = weightedList.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
-            [weightedFruitViews[i], weightedFruitViews[j]] = [weightedFruitViews[j], weightedFruitViews[i]];
+            [weightedList[i], weightedList[j]] = [weightedList[j], weightedList[i]];
         }
 
-        return weightedFruitViews;
+        return weightedList;
     },
 
     checkTimers: function() {
         const now = Date.now();
-        const lastFull = parseInt(localStorage.getItem(this.KEY_RESET_FULL) || '0');
-        const lastList = parseInt(localStorage.getItem(this.KEY_RESET_LIST) || '0');
+        const lastFull = parseInt(localStorage.getItem(this.KEYS.RESET_FULL) || '0');
+        const lastList = parseInt(localStorage.getItem(this.KEYS.RESET_LIST) || '0');
 
-        // Check 48h Full Reset
-        if (now - lastFull > this.TIME_48H) {
-            this.aiLearnedFruits = [];
-            localStorage.setItem(this.KEY_LEARNED, JSON.stringify(this.aiLearnedFruits));
-            localStorage.setItem(this.KEY_RESET_FULL, now);
-            console.log("Memory Reset (48h)");
-        }
-        // Check 3h Aging (Halve list)
-        else if (now - lastList > this.TIME_3H) { // Using 0xa4cb80 from Smali
-            if (this.aiLearnedFruits.length > 0) {
-                const half = Math.floor(this.aiLearnedFruits.length / 2);
-                this.aiLearnedFruits.splice(0, half); // Remove first half
-                localStorage.setItem(this.KEY_LEARNED, JSON.stringify(this.aiLearnedFruits));
+        if (now - lastFull > this.TIME.FULL_RESET) {
+            this.history = [];
+            this.saveHistory();
+            localStorage.setItem(this.KEYS.RESET_FULL, now);
+        } else if (now - lastList > this.TIME.LIST_AGE) {
+            if (this.history.length > 0) {
+                this.history.splice(0, Math.floor(this.history.length / 2));
+                this.saveHistory();
             }
-            localStorage.setItem(this.KEY_RESET_LIST, now);
-            console.log("Memory Aging");
+            localStorage.setItem(this.KEYS.RESET_LIST, now);
         }
     },
 
+    saveHistory: function() {
+        localStorage.setItem(this.KEYS.LEARNED, JSON.stringify(this.history));
+    },
+
     predict: function() {
-        const btn = document.getElementById('guess-btn');
-        const icon = document.getElementById('fruit-icon');
-        const text = document.getElementById('fruit-text');
-        const loader = document.getElementById('loader');
-        const resultCont = document.getElementById('result-container');
+        const elements = {
+            btn: document.getElementById('guess-btn'),
+            icon: document.getElementById('fruit-icon'),
+            text: document.getElementById('fruit-text'),
+            loader: document.getElementById('loader'),
+            content: document.getElementById('result-content')
+        };
 
-        // UI Animation
-        btn.disabled = true;
-        resultCont.style.display = 'none';
-        loader.style.display = 'block';
+        // تفعيل وضع التحميل
+        elements.btn.disabled = true;
+        elements.btn.innerHTML = '<i class="fa-solid fa-microchip"></i> جاري المعالجة...';
+        elements.content.style.display = 'none';
+        elements.loader.style.display = 'block';
 
-        // Simulation Delay
+        // محاكاة وقت المعالجة
         setTimeout(() => {
-            // Run Logic
             this.checkTimers();
-            const weightedList = this.updateWeightedList();
+            const list = this.updateWeightedList();
+            const winner = list[Math.floor(Math.random() * list.length)];
+
+            this.history.push(winner.id);
+            this.saveHistory();
+
+            // عرض النتيجة
+            elements.loader.style.display = 'none';
+            elements.content.style.display = 'block';
             
-            // Pick Winner
-            const winnerIndex = Math.floor(Math.random() * weightedList.length);
-            const winner = weightedList[winnerIndex];
+            elements.icon.innerText = winner.icon;
+            elements.text.innerText = winner.name;
+            elements.text.style.color = 'var(--accent)';
 
-            // Update History
-            this.aiLearnedFruits.push(winner.id);
-            localStorage.setItem(this.KEY_LEARNED, JSON.stringify(this.aiLearnedFruits));
+            elements.btn.disabled = false;
+            elements.btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> تخمين التالي';
 
-            // Show Result
-            loader.style.display = 'none';
-            resultCont.style.display = 'block';
-            icon.innerText = winner.icon;
-            text.innerText = winner.name;
-            
-            // Add pop animation
-            icon.style.animation = 'none';
-            icon.offsetHeight; /* trigger reflow */
-            icon.style.animation = 'slideUp 0.3s ease';
-
-            btn.disabled = false;
-        }, 1500); // 1.5s delay for effect
+        }, 1200);
     }
 };
 
-// Start App
+// بدء التطبيق
 window.onload = function() {
     SubscriptionManager.init();
+    
+    // تعريف حركة الاهتزاز في CSS عبر JS (اختياري)
+    const style = document.createElement('style');
+    style.innerHTML = `
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+    `;
+    document.head.appendChild(style);
 };
-
 </script>
 </body>
 </html>
