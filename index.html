@@ -2,30 +2,102 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>شات عام</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>شات مطور - نظام إدارة</title>
 <style>
-body { background:#111; color:white; font-family:sans-serif; padding:20px; }
-#chat { height:400px; overflow:auto; border:1px solid #333; padding:10px; margin-bottom:10px; }
-input { width:100%; padding:10px; margin-top:5px; box-sizing:border-box; border-radius:4px; border:none; }
-.msg { margin:4px 0; }
-.name { color:#4fc3f7; font-weight:bold; }
+    body { background:#111; color:white; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding:20px; }
+    
+    /* تنسيق الهيدر والبحث */
+    .header-controls { display: flex; gap: 10px; margin-bottom: 15px; }
+    #searchId { flex: 1; padding: 10px; border-radius: 4px; border: 1px solid #444; background: #222; color: #fff; }
+    
+    /* منطقة الشات */
+    #chat { height:500px; overflow-y:auto; border:1px solid #333; padding:15px; margin-bottom:10px; background: #0a0a0a; border-radius: 8px; }
+    
+    /* تنسيق الرسائل */
+    .msg { margin: 8px 0; padding: 8px; border-bottom: 1px solid #222; position: relative; }
+    .msg-header { font-size: 0.8em; color: #666; display: flex; justify-content: space-between; }
+    .user-id { font-family: monospace; color: #888; }
+    
+    /* اسم المستخدم */
+    .name { font-weight:bold; cursor: pointer; text-decoration: underline; }
+    .name:hover { color: #fff; }
+    .name.user { color:#4fc3f7; }
+    
+    /* تنسيق الأدمن المميز */
+    .name.admin { color: #ff4444; }
+    .msg.admin-msg .text-content {
+        font-weight: bold;
+        font-size: 1.1em;
+        background: linear-gradient(270deg, #8B0000, #00008B, #8B0000);
+        background-size: 600% 600%;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: gradientAnim 3s ease infinite;
+    }
+
+    @keyframes gradientAnim {
+        0%{background-position:0% 50%}
+        50%{background-position:100% 50%}
+        100%{background-position:0% 50%}
+    }
+
+    /* رسائل النظام (الحظر) */
+    .sys-msg { background: #330000; border: 1px solid red; color: #ff9999; padding: 10px; text-align: center; border-radius: 5px; }
+
+    /* المدخلات */
+    .input-area { display: flex; gap: 10px; }
+    input { padding:10px; box-sizing:border-box; border-radius:4px; border:none; background: #222; color: white; }
+    #name { width: 20%; }
+    #msg { width: 80%; }
+
+    /* نافذة الحظر (Modal) */
+    #banModal {
+        display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        background: #222; border: 2px solid #555; padding: 20px; z-index: 1000;
+        width: 300px; text-align: center; border-radius: 8px; box-shadow: 0 0 20px rgba(0,0,0,0.8);
+    }
+    #banModal h3 { margin-top: 0; color: #ff4444; }
+    #banModal button { padding: 8px 15px; margin: 5px; cursor: pointer; border: none; border-radius: 4px; }
+    .btn-ban { background: #d32f2f; color: white; }
+    .btn-cancel { background: #555; color: white; }
+    #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 999; }
 </style>
 </head>
 <body>
 
-<h2>💬 الشات العام</h2>
+<div class="header-controls">
+    <input id="searchId" placeholder="🔍 بحث عن مستخدم عبر ID...">
+</div>
+
+<h2>💬 الشات العام (نظام آمن)</h2>
 <div id="chat"></div>
 
-<input id="name" placeholder="اسمك">
-<input id="msg" placeholder="اكتب رسالة واضغط Enter">
+<div class="input-area">
+    <input id="name" placeholder="اسمك (texn للأدمن)">
+    <input id="msg" placeholder="اكتب رسالة..." disabled>
+</div>
+<div style="font-size: 12px; color: #777; margin-top: 5px;">* الأدمن: texn | المستخدمين: 10 أرقام ID</div>
+
+<div id="overlay"></div>
+<div id="banModal">
+    <h3>⛔ حظر مستخدم</h3>
+    <p id="banTargetName"></p>
+    <input type="number" id="banDuration" placeholder="المدة (مثلاً 5)">
+    <select id="banUnit" style="padding: 8px; background: #333; color: white; border: none;">
+        <option value="hours">ساعات</option>
+        <option value="seconds">ثواني</option>
+    </select>
+    <br><br>
+    <button class="btn-ban" onclick="confirmBan()">تأكيد الحظر</button>
+    <button class="btn-cancel" onclick="closeModal()">إلغاء</button>
+</div>
 
 <script type="module">
-  // Import Firebase SDK
+  // إعدادات الفايربيس كما هي
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics.js";
+  import { getDatabase, ref, push, set, get, child, onChildAdded } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-  // Firebase config (عبيتها من حسابك)
   const firebaseConfig = {
     apiKey: "AIzaSyDdbUK04WTiBvv3z1K9oYhssfpJTI9fZh4",
     authDomain: "chatdoy.firebaseapp.com",
@@ -37,37 +109,187 @@ input { width:100%; padding:10px; margin-top:5px; box-sizing:border-box; border-
     measurementId: "G-6V7VB06ZPL"
   };
 
-  // Initialize Firebase
   const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
   const db = getDatabase(app);
   const chatRef = ref(db, "messages");
+  const bansRef = ref(db, "bans");
 
+  // عناصر HTML
   const chat = document.getElementById("chat");
-  const msg = document.getElementById("msg");
-  const name = document.getElementById("name");
+  const msgInput = document.getElementById("msg");
+  const nameInput = document.getElementById("name");
+  const searchInput = document.getElementById("searchId");
+  const modal = document.getElementById("banModal");
+  const overlay = document.getElementById("overlay");
+  
+  // متغيرات المستخدم
+  let myId = "";
+  let isAdmin = false;
+  let targetBanUser = null; // لتخزين بيانات المستخدم المراد حظره
 
-  // إرسال الرسائل
-  msg.addEventListener("keydown", e => {
-    if(e.key === "Enter" && msg.value.trim()){
-      push(chatRef, {
-        name: name.value || "زائر",
-        text: msg.value,
+  // 1. توليد وإدارة الـ ID عند تغيير الاسم
+  nameInput.addEventListener("input", () => {
+      const name = nameInput.value.trim();
+      
+      if(name === "texn") {
+          myId = "1111";
+          isAdmin = true;
+          msgInput.placeholder = "أهلاً بك أيها الأدمن texn";
+      } else {
+          // إذا لم يكن أدمن، نولد له ID عشوائي 10 أرقام إذا لم يكن لديه واحد
+          if(!localStorage.getItem("user_random_id")) {
+              localStorage.setItem("user_random_id", Math.floor(1000000000 + Math.random() * 9000000000));
+          }
+          myId = localStorage.getItem("user_random_id");
+          isAdmin = false;
+          msgInput.placeholder = "اكتب رسالة...";
+      }
+      
+      // تفعيل الكتابة فقط إذا كان هناك اسم
+      msgInput.disabled = name.length === 0;
+  });
+
+  // 2. إرسال الرسالة
+  msgInput.addEventListener("keydown", async (e) => {
+    if(e.key === "Enter" && msgInput.value.trim()){
+      
+      // التحقق من الحظر قبل الإرسال
+      const banCheck = await get(child(bansRef, myId));
+      if (banCheck.exists()) {
+          const banData = banCheck.val();
+          if (banData.until > Date.now()) {
+              alert(`⛔ أنت محظور حتى: ${new Date(banData.until).toLocaleTimeString()}`);
+              return;
+          }
+      }
+
+      const msgData = {
+        name: nameInput.value || "زائر",
+        text: msgInput.value,
+        uid: myId,
+        isAdmin: isAdmin,
+        type: "msg", // msg or system
         time: Date.now()
-      });
-      msg.value = "";
+      };
+
+      push(chatRef, msgData);
+      msgInput.value = "";
     }
   });
 
-  // استقبال الرسائل وعرضها
+  // 3. عرض الرسائل
   onChildAdded(chatRef, snap => {
     const d = snap.val();
     const div = document.createElement("div");
-    div.className = "msg";
-    div.innerHTML = `<span class="name">${d.name}:</span> ${d.text}`;
+    
+    // فلترة البحث
+    div.dataset.uid = d.uid; // تخزين الـ ID في العنصر للبحث
+
+    if (d.type === "system") {
+        // رسالة النظام (الحظر)
+        div.className = "msg sys-msg";
+        div.innerHTML = `⚠️ ${d.text}`;
+    } else {
+        // رسالة عادية
+        div.className = `msg ${d.isAdmin ? "admin-msg" : ""}`;
+        
+        // تنسيق الوقت
+        const timeObj = new Date(d.time);
+        const timeStr = timeObj.getHours() + ":" + timeObj.getMinutes();
+
+        // لون الاسم (أدمن أو مستخدم)
+        const nameClass = d.isAdmin ? "name admin" : "name user";
+        
+        div.innerHTML = `
+            <div class="msg-header">
+                <span class="user-id">ID: ${d.uid}</span>
+                <span>${timeStr}</span>
+            </div>
+            <div>
+                <span class="${nameClass}" onclick="openAdminMenu('${d.name}', '${d.uid}', ${d.isAdmin})">${d.name}</span>: 
+                <span class="text-content">${d.text}</span>
+            </div>
+        `;
+    }
+
     chat.appendChild(div);
     chat.scrollTop = chat.scrollHeight;
+    
+    // تشغيل فلتر البحث للتأكد من ظهور الرسالة إذا كانت تطابق البحث
+    filterMessages();
   });
+
+  // 4. وظائف الأدمن (فتح القائمة)
+  window.openAdminMenu = (userName, userId, isTargetAdmin) => {
+      if (!isAdmin) return; // فقط الأدمن يمكنه فتح القائمة
+      if (userId === "1111") return; // لا يمكن حظر الأدمن نفسه
+
+      targetBanUser = { name: userName, id: userId };
+      document.getElementById("banTargetName").innerText = `المستخدم: ${userName} (ID: ${userId})`;
+      modal.style.display = "block";
+      overlay.style.display = "block";
+  };
+
+  window.closeModal = () => {
+      modal.style.display = "none";
+      overlay.style.display = "none";
+  };
+
+  // 5. تنفيذ الحظر
+  window.confirmBan = () => {
+      const duration = document.getElementById("banDuration").value;
+      const unit = document.getElementById("banUnit").value;
+      
+      if (!duration || !targetBanUser) return;
+
+      let multiplier = 1000; // ثواني
+      if (unit === "hours") multiplier = 1000 * 60 * 60;
+      
+      const banTimeMs = duration * multiplier;
+      const liftTime = Date.now() + banTimeMs;
+
+      // 1. إرسال رسالة النظام للشات
+      push(chatRef, {
+          name: "System",
+          text: `تم حظر المستخدم ${targetBanUser.name} (ID:${targetBanUser.id}) لأنه مسيء لمدة ${duration} ${unit === 'hours' ? 'ساعة' : 'ثانية'}.`,
+          uid: "0000",
+          isAdmin: true,
+          type: "system",
+          time: Date.now()
+      });
+
+      // 2. تسجيل الحظر في قاعدة البيانات
+      set(child(bansRef, targetBanUser.id), {
+          until: liftTime,
+          reason: "Abusive behavior"
+      });
+
+      closeModal();
+      alert("تم الحظر بنجاح!");
+  };
+
+  // 6. وظيفة البحث
+  searchInput.addEventListener("input", filterMessages);
+
+  function filterMessages() {
+      const query = searchInput.value.trim();
+      const messages = document.querySelectorAll(".msg");
+      
+      messages.forEach(msgDiv => {
+          if (!query) {
+              msgDiv.style.display = "block";
+          } else {
+              const uid = msgDiv.dataset.uid;
+              if (uid && uid.includes(query)) {
+                  msgDiv.style.display = "block";
+                  msgDiv.style.background = "#222"; // تمييز النتيجة
+              } else {
+                  msgDiv.style.display = "none";
+              }
+          }
+      });
+  }
+
 </script>
 
 </body>
