@@ -14,6 +14,7 @@
         --premium-color: #ffd700;
         --danger-color: #ff4444;
         --success-color: #00c853;
+        --warning-color: #ff9800;
         --text-main: #ececec;
         --text-secondary: #aaaaaa;
     }
@@ -43,7 +44,6 @@
         text-align: center;
         box-shadow: 0 25px 60px rgba(0,0,0,0.7);
         animation: fadeIn 0.5s ease;
-        display: none;
     }
 
     @keyframes fadeIn {
@@ -166,6 +166,11 @@
         cursor: pointer;
         border: 2px solid var(--accent-color);
         position: relative;
+        transition: 0.3s;
+    }
+
+    .user-avatar:hover {
+        transform: scale(1.05);
     }
 
     .premium-badge {
@@ -181,6 +186,7 @@
         align-items: center;
         justify-content: center;
         font-size: 10px;
+        z-index: 2;
     }
 
     /* منطقة الرسائل */
@@ -190,6 +196,7 @@
         padding: 20px;
         background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), 
                     url('https://www.transparenttextures.com/patterns/dark-geometry.png');
+        scroll-behavior: smooth;
     }
 
     .message {
@@ -205,13 +212,19 @@
     }
 
     .message-avatar {
-        width: 35px;
-        height: 35px;
+        width: 40px;
+        height: 40px;
         border-radius: 50%;
         object-fit: cover;
         margin: 0 10px;
         border: 2px solid transparent;
         cursor: pointer;
+        transition: 0.3s;
+        position: relative;
+    }
+
+    .message-avatar:hover {
+        transform: scale(1.1);
     }
 
     .message-content {
@@ -268,6 +281,26 @@
 
     .sender-admin {
         color: var(--danger-color);
+        position: relative;
+    }
+
+    .super-admin-badge {
+        background: linear-gradient(45deg, #ff0000, #ff4444);
+        color: white;
+        padding: 2px 6px;
+        border-radius: 10px;
+        font-size: 9px;
+        margin-right: 5px;
+    }
+
+    .premium-id-badge {
+        background: linear-gradient(45deg, #ffd700, #ff9800);
+        color: #000;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 9px;
+        font-family: monospace;
+        margin-right: 5px;
     }
 
     .message-time {
@@ -326,6 +359,7 @@
         align-items: center;
         justify-content: center;
         animation: fadeIn 0.3s ease;
+        padding: 20px;
     }
 
     .modal-content {
@@ -356,13 +390,6 @@
         padding: 20px;
     }
 
-    .modal-footer {
-        padding: 20px;
-        border-top: 1px solid rgba(255,255,255,0.1);
-        display: flex;
-        gap: 10px;
-    }
-
     .close-btn {
         background: none;
         border: none;
@@ -375,10 +402,111 @@
         align-items: center;
         justify-content: center;
         border-radius: 50%;
+        transition: 0.3s;
     }
 
     .close-btn:hover {
         background: rgba(255,255,255,0.1);
+    }
+
+    /* بروفايل المستخدم */
+    .profile-container {
+        text-align: center;
+    }
+
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid var(--accent-color);
+        margin: 0 auto 15px;
+        display: block;
+    }
+
+    .profile-name {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+    .profile-id {
+        background: rgba(255,255,255,0.1);
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-family: monospace;
+        font-size: 14px;
+        margin: 10px 0;
+        display: inline-block;
+    }
+
+    .profile-bio {
+        color: rgba(255,255,255,0.7);
+        font-size: 14px;
+        line-height: 1.5;
+        margin: 15px 0;
+        padding: 15px;
+        background: rgba(0,0,0,0.3);
+        border-radius: 10px;
+    }
+
+    .profile-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin: 20px 0;
+    }
+
+    .stat-item {
+        background: rgba(255,255,255,0.05);
+        padding: 15px;
+        border-radius: 10px;
+        text-align: center;
+    }
+
+    .stat-value {
+        font-size: 20px;
+        font-weight: bold;
+        color: var(--accent-color);
+    }
+
+    .stat-label {
+        font-size: 12px;
+        color: rgba(255,255,255,0.5);
+        margin-top: 5px;
+    }
+
+    .badges-container {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin: 20px 0;
+        flex-wrap: wrap;
+    }
+
+    .badge {
+        padding: 5px 10px;
+        border-radius: 15px;
+        font-size: 12px;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .badge-premium {
+        background: linear-gradient(45deg, #ffd700, #ff9800);
+        color: #000;
+    }
+
+    .badge-admin {
+        background: linear-gradient(45deg, #ff0000, #ff4444);
+        color: white;
+    }
+
+    .badge-super-admin {
+        background: linear-gradient(45deg, #9C27B0, #7B1FA2);
+        color: white;
     }
 
     /* مودال الاشتراك المميز */
@@ -526,6 +654,11 @@
         align-items: center;
         gap: 5px;
         animation: glow 2s infinite;
+        transition: 0.3s;
+    }
+
+    #premium-btn:hover {
+        transform: scale(1.05);
     }
 
     /* الإشعارات */
@@ -584,55 +717,53 @@
         transform: scale(1.1);
     }
 
-    /* المستخدمين النشطين */
-    .active-users {
-        position: fixed;
-        top: 80px;
-        left: 20px;
-        background: rgba(30,30,30,0.8);
-        border-radius: 15px;
-        padding: 15px;
-        border: 1px solid rgba(255,255,255,0.1);
-        backdrop-filter: blur(10px);
-        display: none;
-        z-index: 100;
-    }
-
-    .user-status {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin: 10px 0;
-    }
-
-    .status-indicator {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: var(--success-color);
-    }
-
-    .status-indicator.away { background: #ff9800; }
-    .status-indicator.offline { background: #9e9e9e; }
-
     /* تصميم متجاوب */
     @media (max-width: 768px) {
         .gradient-options {
             grid-template-columns: 1fr;
         }
         
-        .toolbar, .active-users {
+        .toolbar {
             left: 10px;
-            right: 10px;
             bottom: 70px;
-            flex-direction: row;
-            justify-content: center;
         }
         
-        .tool-btn {
-            width: 40px;
-            height: 40px;
+        .profile-stats {
+            grid-template-columns: 1fr;
         }
+        
+        .message-content {
+            max-width: 85%;
+        }
+    }
+
+    /* تصميم ID المميز */
+    .premium-id-container {
+        background: linear-gradient(45deg, rgba(255,215,0,0.1), rgba(255,152,0,0.1));
+        border: 1px solid rgba(255,215,0,0.3);
+        border-radius: 10px;
+        padding: 15px;
+        margin: 15px 0;
+        text-align: center;
+    }
+
+    .current-id-display {
+        font-family: monospace;
+        font-size: 20px;
+        font-weight: bold;
+        color: #ffd700;
+        letter-spacing: 2px;
+        margin: 10px 0;
+        direction: ltr;
+    }
+
+    /* إطار الصورة المميز */
+    .premium-frame {
+        border: 3px solid transparent;
+        background: linear-gradient(45deg, #ffd700, #ff9800, #ffd700) border-box;
+        background-origin: border-box;
+        background-clip: content-box, border-box;
+        animation: glow 2s infinite;
     }
 </style>
 </head>
@@ -671,7 +802,7 @@
     <!-- الهيدر -->
     <div class="chat-header">
         <div class="header-left">
-            <img src="" alt="" class="user-avatar" onclick="showProfileModal()">
+            <img src="" alt="" class="user-avatar" onclick="showMyProfile()">
             <div>
                 <div id="user-name" style="font-weight: bold;"></div>
                 <div id="user-status" style="font-size: 11px; color: var(--success-color);">● متصل</div>
@@ -713,14 +844,24 @@
     </button>
 </div>
 
-<!-- المستخدمين النشطين -->
-<div class="active-users" id="active-users">
-    <h3 style="margin-bottom: 15px;">👥 المستخدمين النشطين</h3>
-    <div id="users-list"></div>
-</div>
-
 <!-- إشعارات -->
 <div class="notification" id="notification"></div>
+
+<!-- مودال بروفايل المستخدم -->
+<div class="modal" id="profile-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2><i class="fas fa-user"></i> بروفايل المستخدم</h2>
+            <button class="close-btn" onclick="closeModal()">×</button>
+        </div>
+        
+        <div class="modal-body">
+            <div class="profile-container" id="profile-container">
+                <!-- سيتم ملؤه ديناميكياً -->
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- مودال الاشتراك المميز -->
 <div class="modal" id="premium-modal">
@@ -743,6 +884,14 @@
                 <li><i class="fas fa-check-circle"></i> أولوية في عرض الرسائل</li>
                 <li><i class="fas fa-check-circle"></i> إمكانية تغيير اللون كل 24 ساعة</li>
             </ul>
+            
+            <div class="premium-id-container">
+                <h3 style="color: #ffd700; margin-bottom: 10px;">ID المميز الحالي</h3>
+                <div class="current-id-display" id="current-id-display"></div>
+                <p style="color: rgba(255,255,255,0.7); font-size: 12px;">
+                    يمكنك تغيير هذا الـ ID إلى أي رقم تريده بعد الاشتراك
+                </p>
+            </div>
             
             <div style="background: rgba(255,215,0,0.1); padding: 15px; border-radius: 10px; margin: 20px 0;">
                 <p style="color: #ffd700; margin-bottom: 10px;">
@@ -937,7 +1086,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { 
     getDatabase, ref, set, get, child, push, update, remove, 
-    onChildAdded, onValue, query, orderByChild, equalTo 
+    onChildAdded, onValue, query, orderByChild, equalTo, onDisconnect,
+    serverTimestamp, limitToLast 
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 // تكوين Firebase
@@ -962,6 +1112,7 @@ const premiumRef = ref(db, "premium");
 const codesRef = ref(db, "codes");
 const bansRef = ref(db, "bans");
 const adminRef = ref(db, "admin");
+const onlineRef = ref(db, "online");
 
 // أكواد الاشتراك الثابتة
 const validCodes = [
@@ -998,20 +1149,23 @@ let currentUser = {
     username: null,
     displayName: null,
     isAdmin: false,
+    isSuperAdmin: false,
     isPremium: false,
     premiumUntil: 0,
     premiumId: null,
     gradient: 1,
-    photo: "https://cdn-icons-png.flaticon.com/512/149/149071.png"
+    photo: "https://cdn-icons-png.flaticon.com/512/149/149071.png",
+    bio: "",
+    joinedAt: null
 };
 
 let selectedGradient = 1;
+let selectedUserProfile = null;
 
 // عند تحميل الصفحة
 document.addEventListener('DOMContentLoaded', () => {
     checkSavedLogin();
     setupEventListeners();
-    document.getElementById('login-screen').style.display = 'block';
 });
 
 function setupEventListeners() {
@@ -1037,7 +1191,7 @@ async function checkSavedLogin() {
 
 // تسجيل الدخول
 async function login() {
-    const username = document.getElementById('username').value.trim();
+    const username = document.getElementById('username').value.trim().toLowerCase();
     const password = document.getElementById('password').value.trim();
     const displayName = document.getElementById('display-name').value.trim() || username;
     
@@ -1053,11 +1207,14 @@ async function login() {
             username: "texn",
             displayName: "𝐑𝐄𝐌𝐀𝐒 ༗",
             isAdmin: true,
+            isSuperAdmin: true,
             isPremium: true,
             premiumUntil: Date.now() + (365 * 24 * 60 * 60 * 1000),
             premiumId: "ADMIN",
             gradient: 1,
-            photo: "https://i.pinimg.com/736x/8b/16/7a/8b167af653c2399dd93b952a48740620.jpg"
+            photo: "https://i.pinimg.com/736x/8b/16/7a/8b167af653c2399dd93b952a48740620.jpg",
+            bio: "Super Admin - مدير النظام الرئيسي",
+            joinedAt: Date.now()
         };
         
         // حفظ في Firebase
@@ -1067,11 +1224,14 @@ async function login() {
             displayName: currentUser.displayName,
             password: password,
             isAdmin: true,
+            isSuperAdmin: true,
             isPremium: true,
             premiumUntil: currentUser.premiumUntil,
             premiumId: "ADMIN",
             gradient: 1,
             photo: currentUser.photo,
+            bio: currentUser.bio,
+            joinedAt: currentUser.joinedAt,
             lastLogin: Date.now()
         });
         
@@ -1092,18 +1252,36 @@ async function login() {
                     username: username,
                     displayName: displayName || userData.displayName,
                     isAdmin: userData.isAdmin || false,
+                    isSuperAdmin: userData.isSuperAdmin || false,
                     isPremium: userData.isPremium || false,
                     premiumUntil: userData.premiumUntil || 0,
                     premiumId: userData.premiumId || userData.id,
                     gradient: userData.gradient || 1,
-                    photo: userData.photo || "https://cdn-icons-png.flaticon.com/512/149/149071.png"
+                    photo: userData.photo || "https://cdn-icons-png.flaticon.com/512/149/149071.png",
+                    bio: userData.bio || "مرحباً! أنا جديد في شات بلس",
+                    joinedAt: userData.joinedAt || Date.now()
                 };
                 
                 // تحديث آخر دخول
                 await update(child(usersRef, username), {
                     lastLogin: Date.now(),
-                    displayName: currentUser.displayName
+                    displayName: currentUser.displayName,
+                    isOnline: true
                 });
+                
+                // تحديث حالة الاتصال
+                const userOnlineRef = child(onlineRef, currentUser.id);
+                await set(userOnlineRef, {
+                    userId: currentUser.id,
+                    username: currentUser.username,
+                    displayName: currentUser.displayName,
+                    isPremium: currentUser.isPremium,
+                    isAdmin: currentUser.isAdmin,
+                    lastSeen: Date.now()
+                });
+                
+                // عند الانفصال
+                onDisconnect(userOnlineRef).remove();
                 
                 startChat();
             } else {
@@ -1118,11 +1296,14 @@ async function login() {
                 username: username,
                 displayName: displayName,
                 isAdmin: false,
+                isSuperAdmin: false,
                 isPremium: false,
                 premiumUntil: 0,
                 premiumId: newId,
                 gradient: 1,
-                photo: "https://cdn-icons-png.flaticon.com/512/149/149071.png"
+                photo: "https://cdn-icons-png.flaticon.com/512/149/149071.png",
+                bio: "مرحباً! أنا جديد في شات بلس",
+                joinedAt: Date.now()
             };
             
             await set(child(usersRef, username), {
@@ -1131,14 +1312,32 @@ async function login() {
                 displayName: displayName,
                 password: password,
                 isAdmin: false,
+                isSuperAdmin: false,
                 isPremium: false,
                 premiumUntil: 0,
                 premiumId: newId,
                 gradient: 1,
                 photo: currentUser.photo,
+                bio: currentUser.bio,
+                joinedAt: currentUser.joinedAt,
                 createdAt: Date.now(),
-                lastLogin: Date.now()
+                lastLogin: Date.now(),
+                isOnline: true
             });
+            
+            // تحديث حالة الاتصال
+            const userOnlineRef = child(onlineRef, currentUser.id);
+            await set(userOnlineRef, {
+                userId: currentUser.id,
+                username: currentUser.username,
+                displayName: currentUser.displayName,
+                isPremium: false,
+                isAdmin: false,
+                lastSeen: Date.now()
+            });
+            
+            // عند الانفصال
+            onDisconnect(userOnlineRef).remove();
             
             startChat();
             showNotification('مرحباً بك! تم إنشاء حسابك بنجاح', 'success');
@@ -1160,16 +1359,17 @@ function startChat() {
     document.getElementById('chat-screen').style.display = 'flex';
     
     document.getElementById('user-name').textContent = currentUser.displayName;
-    document.querySelector('.user-avatar').src = currentUser.photo;
+    const userAvatar = document.querySelector('.user-avatar');
+    userAvatar.src = currentUser.photo;
+    
+    // تحديث حالة الاشتراك
+    updatePremiumStatus();
     
     // عرض زر الاشتراك المميز
     document.getElementById('premium-btn').style.display = 'flex';
     
     // تحميل الرسائل القديمة
     loadMessages();
-    
-    // تحديث حالة الاشتراك
-    updatePremiumStatus();
     
     // الاستماع للرسائل الجديدة
     onChildAdded(messagesRef, (snapshot) => {
@@ -1178,10 +1378,58 @@ function startChat() {
     });
     
     // تحديث قائمة المستخدمين النشطين
-    updateActiveUsers();
-    setInterval(updateActiveUsers, 30000);
+    monitorOnlineUsers();
     
     showNotification(`مرحباً ${currentUser.displayName}!`, 'success');
+}
+
+// تحديث حالة الاشتراك في الواجهة
+function updatePremiumStatus() {
+    const isPremiumActive = currentUser.isPremium && currentUser.premiumUntil > Date.now();
+    
+    // تحديث بادج المميز
+    const avatar = document.querySelector('.user-avatar');
+    const badge = avatar.querySelector('.premium-badge') || document.createElement('div');
+    
+    if (isPremiumActive) {
+        badge.className = 'premium-badge';
+        badge.innerHTML = '<i class="fas fa-crown"></i>';
+        if (!avatar.contains(badge)) {
+            avatar.appendChild(badge);
+        }
+        
+        // إضافة إطار مميز
+        avatar.classList.add('premium-frame');
+        
+        // تحديث عرض الـ ID الحالي
+        document.getElementById('current-id-display').textContent = currentUser.premiumId;
+    } else {
+        if (avatar.contains(badge)) {
+            badge.remove();
+        }
+        avatar.classList.remove('premium-frame');
+        avatar.style.border = '2px solid var(--accent-color)';
+        
+        document.getElementById('current-id-display').textContent = currentUser.id;
+    }
+    
+    // تحديث زر الاشتراك
+    const premiumBtn = document.getElementById('premium-btn');
+    if (isPremiumActive) {
+        const daysLeft = Math.ceil((currentUser.premiumUntil - Date.now()) / (1000 * 60 * 60 * 24));
+        premiumBtn.innerHTML = `<i class="fas fa-crown"></i> مميز (${daysLeft} يوم)`;
+        premiumBtn.onclick = () => showPremiumSettingsModal();
+    } else {
+        premiumBtn.innerHTML = '<i class="fas fa-crown"></i> اشتراك مميز';
+        premiumBtn.onclick = () => showPremiumModal();
+    }
+}
+
+// مراقبة المستخدمين المتصلين
+function monitorOnlineUsers() {
+    onValue(onlineRef, (snapshot) => {
+        // يمكن استخدام هذه البيانات لعرض المستخدمين النشطين
+    });
 }
 
 // إرسال رسالة
@@ -1212,13 +1460,19 @@ async function sendMessage() {
         isPremium: currentUser.isPremium && currentUser.premiumUntil > Date.now(),
         premiumId: currentUser.premiumId,
         gradient: currentUser.gradient,
-        isAdmin: currentUser.isAdmin
+        isAdmin: currentUser.isAdmin,
+        isSuperAdmin: currentUser.isSuperAdmin
     };
     
     try {
         await push(messagesRef, messageData);
         input.value = '';
         input.focus();
+        
+        // تحديث آخر نشاط
+        await update(child(usersRef, currentUser.username), {
+            lastActivity: Date.now()
+        });
     } catch (error) {
         showNotification('حدث خطأ في إرسال الرسالة', 'error');
     }
@@ -1227,7 +1481,7 @@ async function sendMessage() {
 // تحميل الرسائل القديمة
 async function loadMessages() {
     try {
-        const messagesSnap = await get(query(messagesRef, orderByChild('timestamp'), limitToLast(50)));
+        const messagesSnap = await get(query(messagesRef, orderByChild('timestamp'), limitToLast(100)));
         const messages = [];
         
         if (messagesSnap.exists()) {
@@ -1254,6 +1508,7 @@ function displayMessage(message, messageId = null) {
     
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${isMe ? 'me' : 'other'} ${message.isPremium ? 'premium' : ''}`;
+    messageDiv.dataset.messageId = messageId || message.id;
     
     // إعداد التدرج اللوني للرسائل المميزة
     let gradientStyle = '';
@@ -1270,18 +1525,27 @@ function displayMessage(message, messageId = null) {
     }
     
     let senderClass = '';
-    if (message.isAdmin) senderClass = 'sender-admin';
-    else if (message.isPremium) senderClass = 'sender-premium';
+    let senderBadge = '';
+    
+    if (message.isSuperAdmin) {
+        senderClass = 'sender-admin';
+        senderBadge = '<span class="super-admin-badge">Super Admin</span>';
+    } else if (message.isAdmin) {
+        senderClass = 'sender-admin';
+        senderBadge = '<span style="color: #ff4444; font-size: 10px;">👑</span>';
+    } else if (message.isPremium) {
+        senderClass = 'sender-premium';
+        senderBadge = '<span style="color: #ffd700; font-size: 10px;">👑</span>';
+    }
     
     messageDiv.innerHTML = `
         <img src="${message.senderPhoto}" class="message-avatar" 
              onclick="showUserProfile('${message.senderId}')">
         <div class="message-content" style="${gradientStyle}">
             <div class="message-sender ${senderClass}">
-                ${message.isPremium ? '<i class="fas fa-crown"></i>' : ''}
-                ${message.isAdmin ? '<i class="fas fa-shield-alt"></i>' : ''}
+                ${senderBadge}
                 ${message.senderName}
-                ${message.isPremium ? `<small>(${message.premiumId})</small>` : ''}
+                ${message.isPremium ? `<span class="premium-id-badge">${message.premiumId}</span>` : ''}
             </div>
             <div>${message.text}</div>
             <div class="message-time">${formatTime(message.timestamp)}</div>
@@ -1328,7 +1592,7 @@ async function activatePremium() {
         await set(child(premiumRef, currentUser.id), {
             isPremium: true,
             premiumUntil: premiumUntil,
-            premiumId: currentUser.premiumId,
+            premiumId: currentUser.premiumId || currentUser.id,
             gradient: currentUser.gradient,
             activatedAt: Date.now(),
             activatedBy: currentUser.username,
@@ -1339,13 +1603,14 @@ async function activatePremium() {
         await update(child(usersRef, currentUser.username), {
             isPremium: true,
             premiumUntil: premiumUntil,
-            premiumId: currentUser.premiumId,
+            premiumId: currentUser.premiumId || currentUser.id,
             gradient: currentUser.gradient
         });
         
         // تحديث البيانات المحلية
         currentUser.isPremium = true;
         currentUser.premiumUntil = premiumUntil;
+        currentUser.premiumId = currentUser.premiumId || currentUser.id;
         
         // حفظ الكود كمستخدم
         await set(child(codesRef, code), {
@@ -1371,52 +1636,14 @@ async function activatePremium() {
         // عرض إشعار النجاح
         showNotification('تم تفعيل الاشتراك المميز بنجاح لمدة 30 يوم!', 'success');
         
-        // إظهار إعدادات المميز
+        // إظهار إعدادات المميز بعد ثانيتين
         setTimeout(() => {
             showPremiumSettingsModal();
-        }, 1500);
+        }, 2000);
         
     } catch (error) {
         showNotification('حدث خطأ في تفعيل الاشتراك', 'error');
         console.error(error);
-    }
-}
-
-// تحديث حالة الاشتراك في الواجهة
-function updatePremiumStatus() {
-    const isPremiumActive = currentUser.isPremium && currentUser.premiumUntil > Date.now();
-    
-    // تحديث بادج المميز
-    const avatar = document.querySelector('.user-avatar');
-    const badge = avatar.querySelector('.premium-badge') || document.createElement('div');
-    
-    if (isPremiumActive) {
-        badge.className = 'premium-badge';
-        badge.innerHTML = '<i class="fas fa-crown"></i>';
-        if (!avatar.contains(badge)) {
-            avatar.appendChild(badge);
-        }
-        
-        // إضافة إطار مميز
-        avatar.style.border = '2px solid transparent';
-        avatar.style.background = 'linear-gradient(45deg, #ffd700, #ff9800) border-box';
-        avatar.style.backgroundClip = 'padding-box, border-box';
-        avatar.style.backgroundOrigin = 'border-box';
-    } else {
-        if (avatar.contains(badge)) {
-            badge.remove();
-        }
-        avatar.style.border = '2px solid var(--accent-color)';
-        avatar.style.background = 'none';
-    }
-    
-    // تحديث زر الاشتراك
-    const premiumBtn = document.getElementById('premium-btn');
-    if (isPremiumActive) {
-        const daysLeft = Math.ceil((currentUser.premiumUntil - Date.now()) / (1000 * 60 * 60 * 24));
-        premiumBtn.innerHTML = `<i class="fas fa-crown"></i> مميز (${daysLeft} يوم)`;
-    } else {
-        premiumBtn.innerHTML = '<i class="fas fa-crown"></i> اشتراك مميز';
     }
 }
 
@@ -1470,9 +1697,49 @@ async function setCustomId() {
         // تحديث البيانات المحلية
         currentUser.premiumId = customId;
         
+        // تحديث الواجهة
+        updatePremiumStatus();
+        
+        // تحديث جميع الرسائل القديمة لهذا المستخدم (بشكل اختياري)
+        updateUserMessagesPremiumId(customId);
+        
         showNotification(`تم تعيين ID المميز إلى: ${customId}`, 'success');
+        
+        // إرسال رسالة إعلامية
+        await push(messagesRef, {
+            id: Date.now().toString(),
+            senderId: "system",
+            senderName: "النظام",
+            text: `🆔 ${currentUser.displayName} قام بتغيير ID المميز إلى: ${customId}`,
+            timestamp: Date.now(),
+            type: "system"
+        });
+        
     } catch (error) {
         showNotification('حدث خطأ في تعيين ID', 'error');
+    }
+}
+
+// تحديث ID المميز في الرسائل القديمة (وظيفة اختيارية)
+async function updateUserMessagesPremiumId(newId) {
+    try {
+        const messagesSnap = await get(query(messagesRef, orderByChild('senderId'), equalTo(currentUser.id)));
+        const updates = {};
+        
+        if (messagesSnap.exists()) {
+            messagesSnap.forEach((child) => {
+                const message = child.val();
+                if (message.isPremium) {
+                    updates[`${child.key}/premiumId`] = newId;
+                }
+            });
+            
+            if (Object.keys(updates).length > 0) {
+                await update(messagesRef, updates);
+            }
+        }
+    } catch (error) {
+        console.error('Error updating messages premiumId:', error);
     }
 }
 
@@ -1519,6 +1786,9 @@ async function saveGradientSettings() {
         // تحديث البيانات المحلية
         currentUser.gradient = selectedGradient;
         
+        // تحديث الرسائل القديمة
+        await updateUserMessagesGradient(selectedGradient);
+        
         showNotification('تم حفظ إعدادات التدرج اللوني', 'success');
         setTimeout(() => {
             closeModal();
@@ -1528,52 +1798,345 @@ async function saveGradientSettings() {
     }
 }
 
-// تحديث قائمة المستخدمين النشطين
-async function updateActiveUsers() {
+// تحديث التدرج في الرسائل القديمة
+async function updateUserMessagesGradient(newGradient) {
     try {
+        const messagesSnap = await get(query(messagesRef, orderByChild('senderId'), equalTo(currentUser.id)));
+        const updates = {};
+        
+        if (messagesSnap.exists()) {
+            messagesSnap.forEach((child) => {
+                const message = child.val();
+                if (message.isPremium) {
+                    updates[`${child.key}/gradient`] = newGradient;
+                }
+            });
+            
+            if (Object.keys(updates).length > 0) {
+                await update(messagesRef, updates);
+            }
+        }
+    } catch (error) {
+        console.error('Error updating messages gradient:', error);
+    }
+}
+
+// عرض بروفايل المستخدم
+async function showUserProfile(userId) {
+    try {
+        // البحث عن المستخدم بالـ ID
         const usersSnap = await get(usersRef);
-        const activeUsers = [];
-        const now = Date.now();
-        const fifteenMinutesAgo = now - (15 * 60 * 1000);
+        let userData = null;
+        let username = null;
         
         if (usersSnap.exists()) {
             usersSnap.forEach((child) => {
-                const user = child.val();
-                if (user.lastLogin && user.lastLogin > fifteenMinutesAgo) {
-                    activeUsers.push({
-                        id: user.id,
-                        name: user.displayName,
-                        isPremium: user.isPremium && user.premiumUntil > now,
-                        isAdmin: user.isAdmin,
-                        lastLogin: user.lastLogin
-                    });
+                const data = child.val();
+                if (data.id === userId) {
+                    userData = data;
+                    username = child.key;
                 }
             });
         }
         
-        // تحديث العرض إذا كان مفتوحاً
-        const usersList = document.getElementById('users-list');
-        if (usersList) {
-            usersList.innerHTML = '';
-            
-            activeUsers.forEach(user => {
-                const userDiv = document.createElement('div');
-                userDiv.className = 'user-status';
-                userDiv.innerHTML = `
-                    <div class="status-indicator ${user.lastLogin > now - (5 * 60 * 1000) ? '' : 'away'}"></div>
-                    <span>${user.name}</span>
-                    ${user.isPremium ? '<i class="fas fa-crown" style="color: #ffd700;"></i>' : ''}
-                    ${user.isAdmin ? '<i class="fas fa-shield-alt" style="color: #ff4444;"></i>' : ''}
-                `;
-                usersList.appendChild(userDiv);
-            });
+        if (!userData) {
+            showNotification('لم يتم العثور على المستخدم', 'error');
+            return;
         }
+        
+        // التحقق من حالة الاشتراك المميز
+        const premiumSnap = await get(child(premiumRef, userId));
+        const isPremium = premiumSnap.exists() && premiumSnap.val().isPremium && 
+                         premiumSnap.val().premiumUntil > Date.now();
+        const premiumId = premiumSnap.exists() ? premiumSnap.val().premiumId : userId;
+        
+        // تحضير بيانات البروفايل
+        const profileData = {
+            username: username,
+            displayName: userData.displayName,
+            photo: userData.photo || "https://cdn-icons-png.flaticon.com/512/149/149071.png",
+            id: userId,
+            premiumId: premiumId,
+            bio: userData.bio || "لم يقم بإضافة نبذة عن نفسه",
+            isPremium: isPremium,
+            isAdmin: userData.isAdmin || false,
+            isSuperAdmin: userData.isSuperAdmin || false,
+            joinedAt: userData.joinedAt || userData.createdAt || Date.now(),
+            lastLogin: userData.lastLogin || Date.now()
+        };
+        
+        selectedUserProfile = profileData;
+        displayProfile(profileData);
+        
     } catch (error) {
-        console.error('Error updating active users:', error);
+        console.error('Error loading user profile:', error);
+        showNotification('حدث خطأ في تحميل البروفايل', 'error');
     }
 }
 
-// وظائف الأدمن
+// عرض بروفايل المستخدم الحالي
+function showMyProfile() {
+    const profileData = {
+        username: currentUser.username,
+        displayName: currentUser.displayName,
+        photo: currentUser.photo,
+        id: currentUser.id,
+        premiumId: currentUser.premiumId,
+        bio: currentUser.bio,
+        isPremium: currentUser.isPremium && currentUser.premiumUntil > Date.now(),
+        isAdmin: currentUser.isAdmin,
+        isSuperAdmin: currentUser.isSuperAdmin,
+        joinedAt: currentUser.joinedAt,
+        lastLogin: Date.now()
+    };
+    
+    selectedUserProfile = profileData;
+    displayProfile(profileData);
+}
+
+// عرض البروفايل في المودال
+function displayProfile(profileData) {
+    const container = document.getElementById('profile-container');
+    
+    // حساب عدد الأيام منذ الانضمام
+    const daysSinceJoined = Math.floor((Date.now() - profileData.joinedAt) / (1000 * 60 * 60 * 24));
+    
+    // إعداد البادجات
+    let badgesHTML = '';
+    if (profileData.isSuperAdmin) {
+        badgesHTML += '<div class="badge badge-super-admin"><i class="fas fa-shield-alt"></i> Super Admin</div>';
+    } else if (profileData.isAdmin) {
+        badgesHTML += '<div class="badge badge-admin"><i class="fas fa-shield-alt"></i> Admin</div>';
+    }
+    if (profileData.isPremium) {
+        badgesHTML += '<div class="badge badge-premium"><i class="fas fa-crown"></i> مميز</div>';
+    }
+    
+    container.innerHTML = `
+        <img src="${profileData.photo}" class="profile-avatar ${profileData.isPremium ? 'premium-frame' : ''}" 
+             onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
+        
+        <h2 class="profile-name">${profileData.displayName}</h2>
+        
+        <div class="badges-container">
+            ${badgesHTML}
+        </div>
+        
+        <div class="profile-id">
+            ${profileData.isPremium ? '🆔 ' : ''}${profileData.isPremium ? profileData.premiumId : profileData.id}
+        </div>
+        
+        <div class="profile-bio">
+            ${profileData.bio}
+        </div>
+        
+        <div class="profile-stats">
+            <div class="stat-item">
+                <div class="stat-value">${daysSinceJoined}</div>
+                <div class="stat-label">أيام في المنصة</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">@${profileData.username}</div>
+                <div class="stat-label">اسم المستخدم</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">${profileData.isPremium ? 'مميز' : 'عادي'}</div>
+                <div class="stat-label">حساب</div>
+            </div>
+        </div>
+        
+        ${profileData.username === currentUser.username ? `
+            <div style="margin-top: 20px;">
+                <button class="btn" onclick="editMyProfile()" style="background: var(--accent-color);">
+                    <i class="fas fa-edit"></i> تعديل البروفايل
+                </button>
+            </div>
+        ` : ''}
+        
+        ${currentUser.isAdmin && profileData.username !== currentUser.username ? `
+            <div style="margin-top: 20px;">
+                <button class="btn" onclick="adminActions('${profileData.id}')" style="background: var(--danger-color);">
+                    <i class="fas fa-cog"></i> إجراءات الأدمن
+                </button>
+            </div>
+        ` : ''}
+    `;
+    
+    document.getElementById('profile-modal').style.display = 'flex';
+}
+
+// تحرير البروفايل
+async function editMyProfile() {
+    const newBio = prompt('أدخل النبذة الجديدة:', currentUser.bio);
+    if (newBio !== null) {
+        try {
+            await update(child(usersRef, currentUser.username), {
+                bio: newBio
+            });
+            
+            currentUser.bio = newBio;
+            showMyProfile();
+            showNotification('تم تحديث البروفايل بنجاح', 'success');
+        } catch (error) {
+            showNotification('حدث خطأ في تحديث البروفايل', 'error');
+        }
+    }
+}
+
+// إجراءات الأدمن
+async function adminActions(userId) {
+    if (!currentUser.isAdmin) return;
+    
+    const action = prompt(`إجراءات الأدمن للمستخدم ${userId}:
+1. حظر المستخدم
+2. منح صلاحية أدمن
+3. إلغاء صلاحية أدمن
+4. تفعيل اشتراك مميز
+
+أدخل رقم الإجراء:`);
+    
+    if (!action) return;
+    
+    switch (action) {
+        case '1':
+            const reason = prompt('سبب الحظر:');
+            const duration = prompt('مدة الحظر بالأيام:', '7');
+            if (reason && duration) {
+                await banUser(userId, reason, parseInt(duration));
+            }
+            break;
+            
+        case '2':
+            await grantAdmin(userId);
+            break;
+            
+        case '3':
+            await revokeAdmin(userId);
+            break;
+            
+        case '4':
+            const days = prompt('مدة الاشتراك بالأيام:', '30');
+            if (days) {
+                await grantPremium(userId, parseInt(days));
+            }
+            break;
+    }
+}
+
+// حظر مستخدم (للأدمن)
+async function banUser(userId, reason, days) {
+    try {
+        const until = Date.now() + (days * 24 * 60 * 60 * 1000);
+        
+        await set(child(bansRef, userId), {
+            reason: reason,
+            until: until,
+            bannedBy: currentUser.username,
+            bannedAt: Date.now()
+        });
+        
+        showNotification('تم حظر المستخدم بنجاح', 'success');
+    } catch (error) {
+        showNotification('حدث خطأ في حظر المستخدم', 'error');
+    }
+}
+
+// منح صلاحية أدمن
+async function grantAdmin(userId) {
+    try {
+        // البحث عن اسم المستخدم بالـ ID
+        const usersSnap = await get(usersRef);
+        let username = null;
+        
+        if (usersSnap.exists()) {
+            usersSnap.forEach((child) => {
+                const data = child.val();
+                if (data.id === userId) {
+                    username = child.key;
+                }
+            });
+        }
+        
+        if (username) {
+            await update(child(usersRef, username), {
+                isAdmin: true
+            });
+            
+            showNotification('تم منح صلاحية الأدمن بنجاح', 'success');
+        }
+    } catch (error) {
+        showNotification('حدث خطأ في منح الصلاحية', 'error');
+    }
+}
+
+// إلغاء صلاحية أدمن
+async function revokeAdmin(userId) {
+    try {
+        const usersSnap = await get(usersRef);
+        let username = null;
+        
+        if (usersSnap.exists()) {
+            usersSnap.forEach((child) => {
+                const data = child.val();
+                if (data.id === userId) {
+                    username = child.key;
+                }
+            });
+        }
+        
+        if (username) {
+            await update(child(usersRef, username), {
+                isAdmin: false
+            });
+            
+            showNotification('تم إلغاء صلاحية الأدمن بنجاح', 'success');
+        }
+    } catch (error) {
+        showNotification('حدث خطأ في إلغاء الصلاحية', 'error');
+    }
+}
+
+// منح اشتراك مميز
+async function grantPremium(userId, days) {
+    try {
+        const usersSnap = await get(usersRef);
+        let username = null;
+        
+        if (usersSnap.exists()) {
+            usersSnap.forEach((child) => {
+                const data = child.val();
+                if (data.id === userId) {
+                    username = child.key;
+                }
+            });
+        }
+        
+        if (username) {
+            const premiumUntil = Date.now() + (days * 24 * 60 * 60 * 1000);
+            
+            await set(child(premiumRef, userId), {
+                isPremium: true,
+                premiumUntil: premiumUntil,
+                premiumId: userId,
+                gradient: 1,
+                activatedAt: Date.now(),
+                activatedBy: currentUser.username,
+                manualGrant: true
+            });
+            
+            await update(child(usersRef, username), {
+                isPremium: true,
+                premiumUntil: premiumUntil
+            });
+            
+            showNotification(`تم تفعيل اشتراك مميز لمدة ${days} يوم`, 'success');
+        }
+    } catch (error) {
+        showNotification('حدث خطأ في تفعيل الاشتراك', 'error');
+    }
+}
+
+// وظائف الأدمن الأخرى
 async function adminLogin() {
     const username = document.getElementById('username').value.trim();
     const password = document.getElementById('password').value.trim();
@@ -1586,7 +2149,6 @@ async function adminLogin() {
     }
 }
 
-// توليد أكواد اشتراك (للأدمن)
 async function generateCodes() {
     if (!currentUser.isAdmin) {
         showNotification('غير مصرح لك بهذا الإجراء', 'error');
@@ -1684,41 +2246,14 @@ async function searchUser() {
                         @${user.username} • ID: ${user.id}
                     </div>
                 </div>
-                <button class="btn" onclick="banUser('${user.id}')" style="padding: 5px 10px; font-size: 12px;">
-                    <i class="fas fa-ban"></i>
+                <button class="btn" onclick="adminActions('${user.id}')" style="padding: 5px 10px; font-size: 12px;">
+                    <i class="fas fa-cog"></i>
                 </button>
             `;
             resultsDiv.appendChild(userDiv);
         });
     } catch (error) {
         console.error('Error searching users:', error);
-    }
-}
-
-// حظر مستخدم (للأدمن)
-async function banUser(userId) {
-    if (!currentUser.isAdmin) return;
-    
-    const reason = prompt('سبب الحظر:');
-    if (!reason) return;
-    
-    const duration = prompt('مدة الحظر (بالساعات):', '24');
-    if (!duration) return;
-    
-    const hours = parseInt(duration);
-    const until = Date.now() + (hours * 60 * 60 * 1000);
-    
-    try {
-        await set(child(bansRef, userId), {
-            reason: reason,
-            until: until,
-            bannedBy: currentUser.username,
-            bannedAt: Date.now()
-        });
-        
-        showNotification('تم حظر المستخدم بنجاح', 'success');
-    } catch (error) {
-        showNotification('حدث خطأ في حظر المستخدم', 'error');
     }
 }
 
@@ -1750,6 +2285,7 @@ function closeModal() {
 }
 
 function showPremiumModal() {
+    document.getElementById('current-id-display').textContent = currentUser.isPremium ? currentUser.premiumId : currentUser.id;
     document.getElementById('premium-modal').style.display = 'flex';
     document.getElementById('subscription-code').focus();
 }
@@ -1775,25 +2311,19 @@ function showSettingsModal() {
     userInfo.innerHTML = `
         <p><strong>اسم المستخدم:</strong> ${currentUser.username}</p>
         <p><strong>الاسم الظاهر:</strong> ${currentUser.displayName}</p>
-        <p><strong>ID:</strong> ${currentUser.premiumId}</p>
+        <p><strong>ID:</strong> ${currentUser.isPremium ? currentUser.premiumId : currentUser.id}</p>
         <p><strong>حالة الاشتراك:</strong> ${currentUser.isPremium && currentUser.premiumUntil > Date.now() 
             ? `مميز (ينتهي في ${new Date(currentUser.premiumUntil).toLocaleDateString('ar-SA')})` 
             : 'عادي'}</p>
+        <p><strong>الدور:</strong> ${currentUser.isSuperAdmin ? 'Super Admin' : currentUser.isAdmin ? 'أدمن' : 'مستخدم'}</p>
     `;
     document.getElementById('settings-modal').style.display = 'flex';
 }
 
-function showActiveUsers() {
-    const activeUsersDiv = document.getElementById('active-users');
-    activeUsersDiv.style.display = activeUsersDiv.style.display === 'block' ? 'none' : 'block';
-    if (activeUsersDiv.style.display === 'block') {
-        updateActiveUsers();
-    }
-}
-
 function clearChat() {
-    if (confirm('هل أنت متأكد من مسح جميع الرسائل؟')) {
+    if (confirm('هل أنت متأكد من مسح جميع الرسائل من واجهة العرض؟')) {
         document.getElementById('chat-container').innerHTML = '';
+        showNotification('تم مسح الرسائل من العرض', 'info');
     }
 }
 
@@ -1801,7 +2331,20 @@ function contactAdmin() {
     window.open('https://www.instagram.com/6i99n', '_blank');
 }
 
-function logout() {
+async function logout() {
+    try {
+        // تحديث حالة الاتصال
+        await update(child(usersRef, currentUser.username), {
+            isOnline: false,
+            lastSeen: Date.now()
+        });
+        
+        // إزالة من قائمة المتصلين
+        await remove(child(onlineRef, currentUser.id));
+    } catch (error) {
+        console.error('Error updating logout status:', error);
+    }
+    
     localStorage.removeItem('chat_user');
     localStorage.removeItem('chat_pass');
     location.reload();
@@ -1814,7 +2357,6 @@ window.showPremiumModal = showPremiumModal;
 window.showPremiumSettingsModal = showPremiumSettingsModal;
 window.showAdminModal = showAdminModal;
 window.showSettingsModal = showSettingsModal;
-window.showActiveUsers = showActiveUsers;
 window.clearChat = clearChat;
 window.contactAdmin = contactAdmin;
 window.logout = logout;
@@ -1826,7 +2368,8 @@ window.saveGradientSettings = saveGradientSettings;
 window.adminLogin = adminLogin;
 window.generateCodes = generateCodes;
 window.searchUser = searchUser;
-window.banUser = banUser;
+window.showUserProfile = showUserProfile;
+window.showMyProfile = showMyProfile;
 </script>
 </body>
 </html>
