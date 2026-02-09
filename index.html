@@ -56,12 +56,6 @@
         50% { box-shadow: 0 0 25px rgba(255, 215, 0, 0.8); }
     }
 
-    @keyframes gradientFlow {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
-    }
-
     .login-header {
         margin-bottom: 30px;
     }
@@ -130,6 +124,87 @@
         text-decoration: none;
     }
 
+    /* علامات التبويب */
+    .tabs {
+        display: flex;
+        background: rgba(255,255,255,0.05);
+        border-radius: 12px;
+        padding: 5px;
+        margin-bottom: 20px;
+    }
+
+    .tab-button {
+        flex: 1;
+        padding: 12px;
+        background: none;
+        border: none;
+        color: rgba(255,255,255,0.5);
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.3s;
+        border-radius: 8px;
+    }
+
+    .tab-button.active {
+        background: rgba(0, 188, 212, 0.2);
+        color: white;
+    }
+
+    .form-container {
+        display: none;
+    }
+
+    .form-container.active {
+        display: block;
+    }
+
+    .textarea {
+        min-height: 80px;
+        resize: vertical;
+        font-family: 'Tajawal', sans-serif;
+    }
+
+    /* اختيار الصور */
+    .avatar-selection {
+        margin: 15px 0;
+    }
+
+    .avatar-options {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 10px;
+        flex-wrap: wrap;
+    }
+
+    .avatar-option {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        object-fit: cover;
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition: 0.3s;
+    }
+
+    .avatar-option.selected {
+        border-color: var(--accent-color);
+        transform: scale(1.1);
+    }
+
+    .avatar-option:hover {
+        transform: scale(1.05);
+    }
+
+    .admin-credentials {
+        margin-top: 15px;
+        padding: 10px;
+        background: rgba(255, 68, 68, 0.1);
+        border-radius: 10px;
+        font-size: 12px;
+        color: rgba(255,255,255,0.7);
+    }
+
     /* شاشة الشات */
     #chat-screen {
         width: 100%;
@@ -152,10 +227,16 @@
         flex-shrink: 0;
     }
 
-    .header-left, .header-right {
+    .header-left {
         display: flex;
         align-items: center;
         gap: 15px;
+    }
+
+    .header-right {
+        display: flex;
+        align-items: center;
+        gap: 10px;
     }
 
     .user-avatar {
@@ -173,20 +254,23 @@
         transform: scale(1.05);
     }
 
-    .premium-badge {
-        position: absolute;
-        top: -5px;
-        right: -5px;
-        background: var(--premium-color);
-        color: #000;
-        width: 18px;
-        height: 18px;
+    .header-btn {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 18px;
+        cursor: pointer;
+        width: 40px;
+        height: 40px;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 10px;
-        z-index: 2;
+        transition: 0.3s;
+    }
+
+    .header-btn:hover {
+        background: rgba(255,255,255,0.1);
     }
 
     /* منطقة الرسائل */
@@ -220,7 +304,6 @@
         border: 2px solid transparent;
         cursor: pointer;
         transition: 0.3s;
-        position: relative;
     }
 
     .message-avatar:hover {
@@ -801,6 +884,129 @@
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
     }
+
+    /* مودال جميع المستخدمين */
+    .users-list {
+        max-height: 400px;
+        overflow-y: auto;
+        margin: 20px 0;
+    }
+
+    .user-item {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        margin: 5px 0;
+        background: rgba(255,255,255,0.05);
+        border-radius: 10px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .user-item:hover {
+        background: rgba(255,255,255,0.1);
+        transform: translateX(-5px);
+    }
+
+    .user-item-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin-left: 10px;
+        object-fit: cover;
+    }
+
+    .user-item-info {
+        flex: 1;
+    }
+
+    .user-item-name {
+        font-weight: bold;
+        font-size: 14px;
+    }
+
+    .user-item-status {
+        font-size: 11px;
+        color: var(--success-color);
+    }
+
+    .user-item-status.offline {
+        color: rgba(255,255,255,0.3);
+    }
+
+    /* أدوات الأدمن */
+    .admin-tools {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+        margin: 20px 0;
+    }
+
+    .admin-tool {
+        background: rgba(255,255,255,0.05);
+        padding: 15px;
+        border-radius: 10px;
+        text-align: center;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .admin-tool:hover {
+        background: rgba(255,255,255,0.1);
+        transform: translateY(-5px);
+    }
+
+    .admin-tool h3 {
+        color: var(--accent-color);
+        margin-bottom: 5px;
+        font-size: 14px;
+    }
+
+    .admin-tool p {
+        font-size: 11px;
+        color: rgba(255,255,255,0.5);
+    }
+
+    /* إجراءات الأدمن */
+    .admin-actions-modal .modal-content {
+        max-width: 500px;
+    }
+
+    .admin-action-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin: 20px 0;
+    }
+
+    .admin-action-btn {
+        padding: 12px;
+        background: rgba(255,255,255,0.05);
+        border: none;
+        border-radius: 10px;
+        color: white;
+        cursor: pointer;
+        transition: 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .admin-action-btn:hover {
+        background: rgba(255,68,68,0.2);
+    }
+
+    .admin-action-btn.ban {
+        background: rgba(255,68,68,0.1);
+    }
+
+    .admin-action-btn.promote {
+        background: rgba(255,215,0,0.1);
+    }
+
+    .admin-action-btn.premium {
+        background: rgba(0,200,83,0.1);
+    }
 </style>
 </head>
 <body>
@@ -812,13 +1018,45 @@
         <p style="color: rgba(255,255,255,0.7);">التواصل الأكثر أماناً وتميزاً</p>
     </div>
     
-    <input type="text" id="username" class="login-input" placeholder="اسم المستخدم" required>
-    <input type="password" id="password" class="login-input" placeholder="كلمة المرور" required>
-    <input type="text" id="display-name" class="login-input" placeholder="الاسم الظاهر في الشات">
+    <!-- علامات التبويب -->
+    <div class="tabs">
+        <button class="tab-button active" onclick="showLoginTab()">دخول</button>
+        <button class="tab-button" onclick="showRegisterTab()">تسجيل جديد</button>
+    </div>
     
-    <button class="btn btn-login" onclick="login()">
-        <i class="fas fa-sign-in-alt"></i> دخول / تسجيل جديد
-    </button>
+    <!-- نموذج الدخول -->
+    <div id="login-form" class="form-container active">
+        <input type="text" id="login-username" class="login-input" placeholder="اسم المستخدم" required>
+        <input type="password" id="login-password" class="login-input" placeholder="كلمة المرور" required>
+        
+        <button class="btn btn-login" onclick="login()">
+            <i class="fas fa-sign-in-alt"></i> دخول
+        </button>
+    </div>
+    
+    <!-- نموذج التسجيل -->
+    <div id="register-form" class="form-container">
+        <input type="text" id="register-username" class="login-input" placeholder="اسم المستخدم" required>
+        <input type="password" id="register-password" class="login-input" placeholder="كلمة المرور" required>
+        <input type="text" id="register-display-name" class="login-input" placeholder="الاسم الظاهر في الشات">
+        <textarea id="register-bio" class="login-input textarea" placeholder="نبذة عنك (اختياري)"></textarea>
+        
+        <div class="avatar-selection">
+            <p style="color: rgba(255,255,255,0.7); text-align: right; margin-bottom: 10px;">اختر صورتك الشخصية:</p>
+            <div class="avatar-options">
+                <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="avatar-option selected" data-avatar="https://cdn-icons-png.flaticon.com/512/149/149071.png">
+                <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="avatar-option" data-avatar="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
+                <img src="https://cdn-icons-png.flaticon.com/512/4140/4140048.png" class="avatar-option" data-avatar="https://cdn-icons-png.flaticon.com/512/4140/4140048.png">
+                <img src="https://cdn-icons-png.flaticon.com/512/921/921071.png" class="avatar-option" data-avatar="https://cdn-icons-png.flaticon.com/512/921/921071.png">
+                <img src="https://cdn-icons-png.flaticon.com/512/219/219970.png" class="avatar-option" data-avatar="https://cdn-icons-png.flaticon.com/512/219/219970.png">
+            </div>
+            <p style="color: rgba(255,255,255,0.5); font-size: 12px; margin-top: 10px;">يمكنك تغيير الصورة لاحقاً من إعدادات البروفايل</p>
+        </div>
+        
+        <button class="btn btn-login" onclick="register()">
+            <i class="fas fa-user-plus"></i> تسجيل جديد
+        </button>
+    </div>
     
     <button class="btn btn-premium" onclick="showPremiumModal()">
         <i class="fas fa-crown"></i> تفعيل الاشتراك المميز
@@ -831,6 +1069,10 @@
     <a href="https://www.instagram.com/6i99n" target="_blank" class="btn btn-support">
         <i class="fab fa-instagram"></i> تواصل مع الدعم
     </a>
+    
+    <div class="admin-credentials">
+        <p>حساب الأدمن: <strong>texn@gmail.com</strong> | كلمة المرور: <strong>34567</strong></p>
+    </div>
 </div>
 
 <!-- شاشة الشات -->
@@ -838,8 +1080,10 @@
     <!-- الهيدر -->
     <div class="chat-header">
         <div class="header-left">
-            <img src="" alt="" class="user-avatar" onclick="showMyProfile()">
-            <div>
+            <div class="avatar-container">
+                <img src="" alt="" class="user-avatar" onclick="showMyProfile()">
+            </div>
+            <div class="user-info">
                 <div id="user-name" style="font-weight: bold;"></div>
                 <div id="user-status" style="font-size: 11px; color: var(--success-color);">● متصل</div>
             </div>
@@ -849,7 +1093,10 @@
             <div id="premium-btn" onclick="showPremiumModal()" style="display: none;">
                 <i class="fas fa-crown"></i> اشتراك مميز
             </div>
-            <button onclick="showSettingsModal()" style="background: none; border: none; color: white; cursor: pointer;">
+            <button class="header-btn" onclick="showAllUsersModal()" title="جميع المستخدمين">
+                <i class="fas fa-users"></i>
+            </button>
+            <button class="header-btn" onclick="showSettingsModal()" title="الإعدادات">
                 <i class="fas fa-cog"></i>
             </button>
         </div>
@@ -872,7 +1119,7 @@
     <button class="tool-btn" onclick="showPremiumModal()" title="اشتراك مميز">
         <i class="fas fa-crown"></i>
     </button>
-    <button class="tool-btn" onclick="showActiveUsers()" title="المستخدمين النشطين">
+    <button class="tool-btn" onclick="showAllUsersModal()" title="جميع المستخدمين">
         <i class="fas fa-users"></i>
     </button>
     <button class="tool-btn" onclick="clearChat()" title="مسح المحادثة">
@@ -922,6 +1169,11 @@
                 </div>
                 
                 <div>
+                    <label style="display: block; margin-bottom: 5px; color: rgba(255,255,255,0.7);">اسم المستخدم:</label>
+                    <input type="text" id="edit-username" class="login-input" placeholder="اسم المستخدم" disabled>
+                </div>
+                
+                <div>
                     <label style="display: block; margin-bottom: 5px; color: rgba(255,255,255,0.7);">الاسم الظاهر:</label>
                     <input type="text" id="edit-display-name" class="login-input" placeholder="الاسم الظاهر">
                 </div>
@@ -939,7 +1191,111 @@
     </div>
 </div>
 
-<!-- مودال الاشتراك المميز -->
+<!-- مودال جميع المستخدمين -->
+<div class="modal" id="all-users-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2><i class="fas fa-users"></i> جميع المستخدمين</h2>
+            <button class="close-btn" onclick="closeModal()">×</button>
+        </div>
+        
+        <div class="modal-body">
+            <div class="users-list" id="users-list">
+                <!-- سيتم ملؤه ديناميكياً -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- مودال إجراءات الأدمن -->
+<div class="modal admin-actions-modal" id="admin-actions-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2><i class="fas fa-shield-alt"></i> إجراءات الأدمن</h2>
+            <button class="close-btn" onclick="closeModal()">×</button>
+        </div>
+        
+        <div class="modal-body">
+            <div id="admin-action-user-info" style="text-align: center; margin-bottom: 20px;">
+                <img id="admin-action-avatar" src="" class="avatar-preview" style="width: 80px; height: 80px;">
+                <h3 id="admin-action-name" style="margin: 10px 0;"></h3>
+                <p id="admin-action-id" class="profile-id"></p>
+            </div>
+            
+            <div class="admin-action-buttons">
+                <button class="admin-action-btn ban" onclick="adminAction('ban')">
+                    <i class="fas fa-ban"></i> حظر المستخدم
+                </button>
+                <button class="admin-action-btn promote" onclick="adminAction('promote')">
+                    <i class="fas fa-user-shield"></i> ترقية إلى أدمن
+                </button>
+                <button class="admin-action-btn" onclick="adminAction('demote')">
+                    <i class="fas fa-user"></i> إلغاء صلاحية أدمن
+                </button>
+                <button class="admin-action-btn premium" onclick="adminAction('premium')">
+                    <i class="fas fa-crown"></i> تفعيل اشتراك مميز
+                </button>
+                <button class="admin-action-btn" onclick="adminAction('delete')">
+                    <i class="fas fa-trash"></i> حذف المستخدم
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- مودال الأدمن الرئيسي -->
+<div class="modal" id="admin-panel-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2><i class="fas fa-shield-alt"></i> لوحة تحكم الأدمن</h2>
+            <button class="close-btn" onclick="closeModal()">×</button>
+        </div>
+        
+        <div class="modal-body">
+            <div class="admin-tools">
+                <div class="admin-tool" onclick="showAllUsersModal()">
+                    <h3><i class="fas fa-users-cog"></i> إدارة المستخدمين</h3>
+                    <p>عرض جميع المستخدمين والإجراءات</p>
+                </div>
+                
+                <div class="admin-tool" onclick="showPremiumManagement()">
+                    <h3><i class="fas fa-crown"></i> إدارة الاشتراكات</h3>
+                    <p>تفعيل وإلغاء الاشتراكات المميزة</p>
+                </div>
+                
+                <div class="admin-tool" onclick="generatePremiumCode()">
+                    <h3><i class="fas fa-key"></i> توليد أكواد</h3>
+                    <p>إنشاء أكواد اشتراك جديدة</p>
+                </div>
+                
+                <div class="admin-tool" onclick="showSystemStats()">
+                    <h3><i class="fas fa-chart-bar"></i> إحصائيات النظام</h3>
+                    <p>إحصائيات الاستخدام والنشاط</p>
+                </div>
+            </div>
+            
+            <div style="margin-top: 30px;">
+                <h3 style="margin-bottom: 15px;">إحصائيات سريعة</h3>
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="total-users">0</div>
+                        <div class="stat-label">إجمالي المستخدمين</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="online-users">0</div>
+                        <div class="stat-label">المستخدمين النشطين</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="premium-users">0</div>
+                        <div class="stat-label">المستخدمين المميزين</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- باقي المودالات من الكود السابق (نفسها بدون تغيير) -->
 <div class="modal" id="premium-modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -985,18 +1341,10 @@
                     <i class="fas fa-bolt"></i> تفعيل الاشتراك
                 </button>
             </div>
-            
-            <div id="premium-info" style="display: none;">
-                <div style="background: rgba(0,200,83,0.1); padding: 15px; border-radius: 10px; margin-top: 20px;">
-                    <h3 style="color: #00c853;"><i class="fas fa-check-circle"></i> تم تفعيل الاشتراك!</h3>
-                    <p id="premium-details"></p>
-                </div>
-            </div>
         </div>
     </div>
 </div>
 
-<!-- مودال إعدادات المميز -->
 <div class="modal" id="premium-settings-modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -1005,7 +1353,6 @@
         </div>
         
         <div class="modal-body">
-            <!-- إعداد ID المميز -->
             <div style="margin-bottom: 30px;">
                 <h3 style="margin-bottom: 15px;"><i class="fas fa-id-card"></i> ID المميز</h3>
                 <p style="color: rgba(255,255,255,0.7); margin-bottom: 10px;">
@@ -1017,7 +1364,6 @@
                 </button>
             </div>
             
-            <!-- إعداد التدرج اللوني -->
             <div>
                 <h3 style="margin-bottom: 15px;"><i class="fas fa-fill-drip"></i> تدرج ألوان الرسائل</h3>
                 <p style="color: rgba(255,255,255,0.7); margin-bottom: 15px;">
@@ -1061,41 +1407,6 @@
     </div>
 </div>
 
-<!-- مودال الأدمن -->
-<div class="modal" id="admin-modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2><i class="fas fa-shield-alt"></i> لوحة تحكم الأدمن</h2>
-            <button class="close-btn" onclick="closeModal()">×</button>
-        </div>
-        
-        <div class="modal-body">
-            <div class="admin-tools">
-                <div class="admin-tool" onclick="showUserManagement()">
-                    <h3><i class="fas fa-users-cog"></i> إدارة المستخدمين</h3>
-                    <p>عرض، حظر، حذف المستخدمين</p>
-                </div>
-                
-                <div class="admin-tool" onclick="showPremiumManagement()">
-                    <h3><i class="fas fa-crown"></i> إدارة الاشتراكات</h3>
-                    <p>تفعيل، تجديد، إلغاء الاشتراكات</p>
-                </div>
-                
-                <div class="admin-tool" onclick="showCodeGenerator()">
-                    <h3><i class="fas fa-key"></i> توليد أكواد</h3>
-                    <p>إنشاء أكواد اشتراك جديدة</p>
-                </div>
-                
-                <div class="admin-tool" onclick="showStatistics()">
-                    <h3><i class="fas fa-chart-bar"></i> الإحصائيات</h3>
-                    <p>إحصائيات النظام والاستخدام</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- مودال الإعدادات -->
 <div class="modal" id="settings-modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -1154,35 +1465,13 @@ const premiumRef = ref(db, "premium");
 const codesRef = ref(db, "codes");
 const bansRef = ref(db, "bans");
 const adminRef = ref(db, "admin");
-const onlineRef = ref(db, "online");
 
 // أكواد الاشتراك الثابتة
 const validCodes = [
     "FAI-TRIAL-AB3C-C5D7-E9F1", "FAI-TRIAL-F5F9-GA7B-IE11", 
     "FAI-TRIAL-M3N5-O7P9-Q1R3", "FAI-TRIAL-S4T6-V8W7-W2X7",
     "FAI-TRIAL-Y5Z7-A9B1C3D5", "FAI-TRIAL-E6F8-G0H2-I4J6",
-    "FAI-TRIAL-K7L9-M1N3-O5P7", "FAI-TRIAL-Q8R0-S2T4-U6V8",
-    "FAI-TRIAL-W9X1-Y3Z5-A7B9", "FAI-TRIAL-C0D2-E4F6G-G8H3",
-    "FAI-TRIAL-I1J3-K5L7-M9N1", "FAI-TRIAL-O2P4-Q6R8S0T2",
-    "FAI-TRIAL-U3V5-V7X9-Y1Z3", "FAI-TRIAL-A4B6-C8D0-E2F4",
-    "FAI-TRIAL-G5H7-I9J1-K3L5", "FAI-TRIAL-M6N8-O0P2-Q4R2",
-    "FAI-TRIAL-S7T9-U0V3-W5X7", "FAI-TRIAL-Y8Z0-A2B4-C6D8",
-    "FAI-TRIAL-E9F1-G3H7-I7J9", "FAI-TRIAL-K4L2-M4N6-O8E8",
-    "FAI-TRIAL-Q1R3-S5T7-U9F1", "FAI-TRIAL-W2Z6-Z68-T0B2",
-    "FAI-TRIAL-C3D51-7Fgg9G1R3", "FAI-TRIAL-I4J6-K8L0W-M2N6",
-    "FAI-TRIAL-O5P7-Q9R1S3D5", "FAI-TRIAL-U5Z8-W0X2-Y4Z6",
-    "FAI-TRIAL-A7B9-C1D3-E9F7", "FAI-TRIAL-G8H0-I2J4-K6E8",
-    "FAI-TRIAL-M9N1-O3O5S7R0", "FAI-TRIAL-S0V2-U4V6-W8X0",
-    "FAI-TRIAL-Y1Z3-A57-9D1", "FAI-TRIAL-E2F4-G6H8-I0J2",
-    "FAI-TRIAL-K3L5-M7N1-O1P3", "FAI-TRIAL-Q1R6-S8T0W-U2V2",
-    "FAI-TRIAL-W5Z7-Y9Z1-A3B5", "FAI-TRIAL-C6D8-F02-G4J6",
-    "FAI-TRIAL-I7J9-K1L3-M5N7", "FAI-TRIAL-O8P0-Q2R4-S6T8",
-    "FAI-TRIAL-U5S91-W3X5-Y7Z9", "FAI-TRIAL-W0B2-C4D6E-E80",
-    "FAI-TRIAL-G5J3-I5J7-K9C1", "FAI-TRIAL-M2F4-O6N4-Q0V2",
-    "FAI-TRIAL-S3T5-U5U9-W1X3", "FAI-TRIAL-Y4Z6-A8B0C2D4",
-    "FAI-TRIAL-E5F7-G9H1I-J5", "FAI-TRIAL-K6D8-M0N2-O4E6",
-    "FAI-TRIAL-Q7R9-S1T3-U5V7", "FAI-TRIAL-W8Z0-Y2B4-A6D8",
-    "FAI-TRIAL-C9D1-E3F5-G9F9"
+    "FAI-TRIAL-K7L9-M1N3-O5P7", "FAI-TRIAL-Q8R0-S2T4-U6V8"
 ];
 
 // بيانات المستخدم الحالي
@@ -1204,11 +1493,14 @@ let currentUser = {
 let selectedGradient = 1;
 let selectedUserProfile = null;
 let editAvatarBase64 = null;
+let selectedAvatar = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+let adminTargetUser = null;
 
 // عند تحميل الصفحة
 document.addEventListener('DOMContentLoaded', () => {
     checkSavedLogin();
     setupEventListeners();
+    setupAvatarSelection();
 });
 
 function setupEventListeners() {
@@ -1220,14 +1512,43 @@ function setupEventListeners() {
     });
 }
 
+function setupAvatarSelection() {
+    // اختيار الصورة في التسجيل
+    document.querySelectorAll('.avatar-option').forEach(option => {
+        option.addEventListener('click', function() {
+            document.querySelectorAll('.avatar-option').forEach(img => {
+                img.classList.remove('selected');
+            });
+            this.classList.add('selected');
+            selectedAvatar = this.getAttribute('data-avatar');
+        });
+    });
+}
+
+function showLoginTab() {
+    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.form-container').forEach(form => form.classList.remove('active'));
+    
+    document.querySelector('.tab-button').classList.add('active');
+    document.getElementById('login-form').classList.add('active');
+}
+
+function showRegisterTab() {
+    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.form-container').forEach(form => form.classList.remove('active'));
+    
+    document.querySelectorAll('.tab-button')[1].classList.add('active');
+    document.getElementById('register-form').classList.add('active');
+}
+
 // التحقق من تسجيل الدخول السابق
 async function checkSavedLogin() {
     const savedUser = localStorage.getItem('chat_user');
     const savedPass = localStorage.getItem('chat_pass');
     
     if (savedUser && savedPass) {
-        document.getElementById('username').value = savedUser;
-        document.getElementById('password').value = savedPass;
+        document.getElementById('login-username').value = savedUser;
+        document.getElementById('login-password').value = savedPass;
         await login();
     }
 }
@@ -1263,51 +1584,11 @@ function hideLoading() {
 
 // تسجيل الدخول
 async function login() {
-    const username = document.getElementById('username').value.trim().toLowerCase();
-    const password = document.getElementById('password').value.trim();
-    const displayName = document.getElementById('display-name').value.trim() || username;
+    const username = document.getElementById('login-username').value.trim().toLowerCase();
+    const password = document.getElementById('login-password').value.trim();
     
     if (!username || !password) {
         showNotification('الرجاء إدخال اسم المستخدم وكلمة المرور', 'error');
-        return;
-    }
-    
-    // حساب الأدمن الرئيسي
-    if (username === "texn" && password === "hamzagmail34567") {
-        currentUser = {
-            id: "1111",
-            username: "texn",
-            displayName: "𝐑𝐄𝐌𝐀𝐒 ༗",
-            isAdmin: true,
-            isSuperAdmin: true,
-            isPremium: true,
-            premiumUntil: Date.now() + (365 * 24 * 60 * 60 * 1000),
-            premiumId: "ADMIN",
-            gradient: 1,
-            photo: "https://i.pinimg.com/736x/8b/16/7a/8b167af653c2399dd93b952a48740620.jpg",
-            bio: "Super Admin - مدير النظام الرئيسي",
-            joinedAt: Date.now()
-        };
-        
-        // حفظ في Firebase
-        await set(child(usersRef, username), {
-            id: "1111",
-            username: username,
-            displayName: currentUser.displayName,
-            password: password,
-            isAdmin: true,
-            isSuperAdmin: true,
-            isPremium: true,
-            premiumUntil: currentUser.premiumUntil,
-            premiumId: "ADMIN",
-            gradient: 1,
-            photo: currentUser.photo,
-            bio: currentUser.bio,
-            joinedAt: currentUser.joinedAt,
-            lastLogin: Date.now()
-        });
-        
-        startChat();
         return;
     }
     
@@ -1323,7 +1604,7 @@ async function login() {
                 currentUser = {
                     id: userData.id,
                     username: username,
-                    displayName: displayName || userData.displayName,
+                    displayName: userData.displayName || username,
                     isAdmin: userData.isAdmin || false,
                     isSuperAdmin: userData.isSuperAdmin || false,
                     isPremium: userData.isPremium || false,
@@ -1347,45 +1628,7 @@ async function login() {
                 showNotification('كلمة المرور غير صحيحة', 'error');
             }
         } else {
-            // إنشاء حساب جديد
-            const newId = Math.floor(1000000000 + Math.random() * 9000000000).toString();
-            
-            currentUser = {
-                id: newId,
-                username: username,
-                displayName: displayName,
-                isAdmin: false,
-                isSuperAdmin: false,
-                isPremium: false,
-                premiumUntil: 0,
-                premiumId: newId,
-                gradient: 1,
-                photo: "https://cdn-icons-png.flaticon.com/512/149/149071.png",
-                bio: "مرحباً! أنا جديد في شات بلس",
-                joinedAt: Date.now()
-            };
-            
-            await set(child(usersRef, username), {
-                id: newId,
-                username: username,
-                displayName: displayName,
-                password: password,
-                isAdmin: false,
-                isSuperAdmin: false,
-                isPremium: false,
-                premiumUntil: 0,
-                premiumId: newId,
-                gradient: 1,
-                photo: currentUser.photo,
-                bio: currentUser.bio,
-                joinedAt: currentUser.joinedAt,
-                createdAt: Date.now(),
-                lastLogin: Date.now(),
-                isOnline: true
-            });
-            
-            startChat();
-            showNotification('مرحباً بك! تم إنشاء حسابك بنجاح', 'success');
+            showNotification('اسم المستخدم غير موجود', 'error');
         }
     } catch (error) {
         showNotification('حدث خطأ في الاتصال', 'error');
@@ -1395,11 +1638,182 @@ async function login() {
     }
 }
 
+// التسجيل الجديد
+async function register() {
+    const username = document.getElementById('register-username').value.trim().toLowerCase();
+    const password = document.getElementById('register-password').value.trim();
+    const displayName = document.getElementById('register-display-name').value.trim() || username;
+    const bio = document.getElementById('register-bio').value.trim() || "مرحباً! أنا جديد في شات بلس";
+    
+    if (!username || !password) {
+        showNotification('الرجاء إدخال اسم المستخدم وكلمة المرور', 'error');
+        return;
+    }
+    
+    if (username.length < 3) {
+        showNotification('اسم المستخدم يجب أن يكون 3 أحرف على الأقل', 'error');
+        return;
+    }
+    
+    try {
+        showLoading('جاري إنشاء الحساب...');
+        const userSnap = await get(child(usersRef, username));
+        
+        if (userSnap.exists()) {
+            showNotification('اسم المستخدم موجود مسبقاً', 'error');
+            return;
+        }
+        
+        // إنشاء حساب جديد
+        const newId = Math.floor(1000000000 + Math.random() * 9000000000).toString();
+        
+        currentUser = {
+            id: newId,
+            username: username,
+            displayName: displayName,
+            isAdmin: false,
+            isSuperAdmin: false,
+            isPremium: false,
+            premiumUntil: 0,
+            premiumId: newId,
+            gradient: 1,
+            photo: selectedAvatar,
+            bio: bio,
+            joinedAt: Date.now()
+        };
+        
+        await set(child(usersRef, username), {
+            id: newId,
+            username: username,
+            displayName: displayName,
+            password: password,
+            isAdmin: false,
+            isSuperAdmin: false,
+            isPremium: false,
+            premiumUntil: 0,
+            premiumId: newId,
+            gradient: 1,
+            photo: selectedAvatar,
+            bio: bio,
+            joinedAt: Date.now(),
+            createdAt: Date.now(),
+            lastLogin: Date.now(),
+            isOnline: true
+        });
+        
+        startChat();
+        showNotification('مرحباً بك! تم إنشاء حسابك بنجاح', 'success');
+        
+    } catch (error) {
+        showNotification('حدث خطأ في إنشاء الحساب', 'error');
+        console.error(error);
+    } finally {
+        hideLoading();
+    }
+}
+
+// دخول الأدمن
+async function adminLogin() {
+    const username = document.getElementById('login-username').value.trim().toLowerCase();
+    const password = document.getElementById('login-password').value.trim();
+    
+    if (!username || !password) {
+        showNotification('الرجاء إدخال اسم المستخدم وكلمة المرور', 'error');
+        return;
+    }
+    
+    // حساب الأدمن الرئيسي
+    if (username === "texn@gmail.com" && password === "34567") {
+        const adminUserSnap = await get(child(usersRef, "texn"));
+        
+        if (!adminUserSnap.exists()) {
+            // إنشاء حساب الأدمن إذا لم يكن موجوداً
+            await set(child(usersRef, "texn"), {
+                id: "1111",
+                username: "texn",
+                displayName: "𝐑𝐄𝐌𝐀𝐒 ༗",
+                password: "hamzagmail34567",
+                isAdmin: true,
+                isSuperAdmin: true,
+                isPremium: true,
+                premiumUntil: Date.now() + (365 * 24 * 60 * 60 * 1000),
+                premiumId: "ADMIN",
+                gradient: 1,
+                photo: "https://i.pinimg.com/736x/8b/16/7a/8b167af653c2399dd93b952a48740620.jpg",
+                bio: "Super Admin - مدير النظام الرئيسي",
+                joinedAt: Date.now(),
+                lastLogin: Date.now(),
+                isOnline: true
+            });
+        }
+        
+        currentUser = {
+            id: "1111",
+            username: "texn",
+            displayName: "𝐑𝐄𝐌𝐀𝐒 ༗",
+            isAdmin: true,
+            isSuperAdmin: true,
+            isPremium: true,
+            premiumUntil: Date.now() + (365 * 24 * 60 * 60 * 1000),
+            premiumId: "ADMIN",
+            gradient: 1,
+            photo: "https://i.pinimg.com/736x/8b/16/7a/8b167af653c2399dd93b952a48740620.jpg",
+            bio: "Super Admin - مدير النظام الرئيسي",
+            joinedAt: Date.now()
+        };
+        
+        startChat();
+        showNotification('مرحباً يا أدمن!', 'success');
+        return;
+    }
+    
+    // تحقق من بيانات الأدمن الأخرى
+    try {
+        const userSnap = await get(child(usersRef, username));
+        
+        if (userSnap.exists()) {
+            const userData = userSnap.val();
+            
+            if (userData.password === password && userData.isAdmin) {
+                currentUser = {
+                    id: userData.id,
+                    username: username,
+                    displayName: userData.displayName || username,
+                    isAdmin: true,
+                    isSuperAdmin: userData.isSuperAdmin || false,
+                    isPremium: userData.isPremium || false,
+                    premiumUntil: userData.premiumUntil || 0,
+                    premiumId: userData.premiumId || userData.id,
+                    gradient: userData.gradient || 1,
+                    photo: userData.photo || "https://cdn-icons-png.flaticon.com/512/149/149071.png",
+                    bio: userData.bio || "أدمن النظام",
+                    joinedAt: userData.joinedAt || Date.now()
+                };
+                
+                await update(child(usersRef, username), {
+                    lastLogin: Date.now(),
+                    isOnline: true
+                });
+                
+                startChat();
+                showNotification('مرحباً يا أدمن!', 'success');
+            } else {
+                showNotification('بيانات الدخول غير صحيحة أو ليس لديك صلاحيات أدمن', 'error');
+            }
+        } else {
+            showNotification('اسم المستخدم غير موجود', 'error');
+        }
+    } catch (error) {
+        showNotification('حدث خطأ في الاتصال', 'error');
+        console.error(error);
+    }
+}
+
 // بدء الشات
 function startChat() {
     // حفظ بيانات الدخول
     localStorage.setItem('chat_user', currentUser.username);
-    localStorage.setItem('chat_pass', document.getElementById('password').value);
+    localStorage.setItem('chat_pass', currentUser.isAdmin ? "34567" : document.getElementById('login-password')?.value || '');
     
     // تحديث الواجهة
     document.getElementById('login-screen').style.display = 'none';
@@ -1433,24 +1847,13 @@ function updatePremiumStatus() {
     
     // تحديث بادج المميز
     const avatar = document.querySelector('.user-avatar');
-    const badge = avatar.querySelector('.premium-badge') || document.createElement('div');
     
     if (isPremiumActive) {
-        badge.className = 'premium-badge';
-        badge.innerHTML = '<i class="fas fa-crown"></i>';
-        if (!avatar.contains(badge)) {
-            avatar.appendChild(badge);
-        }
-        
-        // إضافة إطار مميز
         avatar.classList.add('premium-frame');
         
         // تحديث عرض الـ ID الحالي
         document.getElementById('current-id-display').textContent = currentUser.premiumId;
     } else {
-        if (avatar.contains(badge)) {
-            badge.remove();
-        }
         avatar.classList.remove('premium-frame');
         avatar.style.border = '2px solid var(--accent-color)';
         
@@ -1475,16 +1878,6 @@ async function sendMessage() {
     const text = input.value.trim();
     
     if (!text) return;
-    
-    // التحقق من الحظر
-    const banSnap = await get(child(bansRef, currentUser.id));
-    if (banSnap.exists()) {
-        const banData = banSnap.val();
-        if (banData.until > Date.now()) {
-            showNotification(`أنت محظور حتى ${new Date(banData.until).toLocaleString()}`, 'error');
-            return;
-        }
-    }
     
     // إعداد بيانات الرسالة
     const messageData = {
@@ -1602,280 +1995,69 @@ function scrollToBottom() {
     container.scrollTop = container.scrollHeight;
 }
 
-// تفعيل الاشتراك المميز
-async function activatePremium() {
-    const code = document.getElementById('subscription-code').value.trim();
-    
-    if (!code) {
-        showNotification('الرجاء إدخال كود الاشتراك', 'warning');
-        return;
-    }
-    
-    // التحقق من صحة الكود
-    if (!validCodes.includes(code)) {
-        showNotification('كود الاشتراك غير صالح', 'error');
-        return;
-    }
-    
-    // التحقق إذا كان الكود مستخدم مسبقاً
-    const codeSnap = await get(child(codesRef, code));
-    if (codeSnap.exists()) {
-        showNotification('هذا الكود مستخدم مسبقاً', 'error');
-        return;
-    }
-    
-    // تفعيل الاشتراك (30 يوم)
-    const premiumUntil = Date.now() + (30 * 24 * 60 * 60 * 1000);
-    
+// عرض جميع المستخدمين
+async function showAllUsersModal() {
     try {
-        showLoading('جاري تفعيل الاشتراك...');
+        showLoading('جاري تحميل المستخدمين...');
+        const usersSnap = await get(usersRef);
+        const usersList = document.getElementById('users-list');
+        usersList.innerHTML = '';
         
-        // إذا كان premiumId غير موجود، استخدم الـ ID الحالي
-        if (!currentUser.premiumId) {
-            currentUser.premiumId = currentUser.id;
-        }
-        
-        // حفظ بيانات الاشتراك
-        await set(child(premiumRef, currentUser.id), {
-            isPremium: true,
-            premiumUntil: premiumUntil,
-            premiumId: currentUser.premiumId,
-            gradient: currentUser.gradient,
-            activatedAt: Date.now(),
-            activatedBy: currentUser.username,
-            codeUsed: code
-        });
-        
-        // تحديث بيانات المستخدم
-        await update(child(usersRef, currentUser.username), {
-            isPremium: true,
-            premiumUntil: premiumUntil,
-            premiumId: currentUser.premiumId,
-            gradient: currentUser.gradient
-        });
-        
-        // تحديث البيانات المحلية
-        currentUser.isPremium = true;
-        currentUser.premiumUntil = premiumUntil;
-        
-        // حفظ الكود كمستخدم
-        await set(child(codesRef, code), {
-            usedBy: currentUser.username,
-            usedAt: Date.now(),
-            validUntil: premiumUntil
-        });
-        
-        // إرسال رسالة ترحيب
-        await push(messagesRef, {
-            id: Date.now().toString(),
-            senderId: "system",
-            senderName: "النظام",
-            text: `🎉 ${currentUser.displayName} أصبح الآن عضو مميز!`,
-            timestamp: Date.now(),
-            type: "system"
-        });
-        
-        // تحديث الواجهة
-        updatePremiumStatus();
-        closeModal();
-        
-        // عرض إشعار النجاح
-        showNotification('تم تفعيل الاشتراك المميز بنجاح لمدة 30 يوم!', 'success');
-        
-        // إظهار إعدادات المميز بعد ثانيتين
-        setTimeout(() => {
-            showPremiumSettingsModal();
-        }, 2000);
-        
-    } catch (error) {
-        showNotification('حدث خطأ في تفعيل الاشتراك', 'error');
-        console.error(error);
-    } finally {
-        hideLoading();
-    }
-}
-
-// تعيين ID مخصص
-async function setCustomId() {
-    if (!currentUser.isPremium || currentUser.premiumUntil < Date.now()) {
-        showNotification('هذه الميزة متاحة للأعضاء المميزين فقط', 'error');
-        return;
-    }
-    
-    const customId = document.getElementById('custom-id-input').value.trim();
-    
-    if (!customId || customId.length < 4 || customId.length > 10) {
-        showNotification('الرجاء إدخال ID من 4 إلى 10 أرقام', 'warning');
-        return;
-    }
-    
-    if (!/^\d+$/.test(customId)) {
-        showNotification('ID يجب أن يحتوي على أرقام فقط', 'warning');
-        return;
-    }
-    
-    // التحقق من عدم تكرار الـ ID
-    const premiumSnap = await get(premiumRef);
-    let idExists = false;
-    
-    if (premiumSnap.exists()) {
-        premiumSnap.forEach((child) => {
-            const data = child.val();
-            if (data.premiumId === customId && child.key !== currentUser.id) {
-                idExists = true;
-            }
-        });
-    }
-    
-    if (idExists) {
-        showNotification('هذا ID مستخدم بالفعل', 'error');
-        return;
-    }
-    
-    try {
-        showLoading('جاري تحديث ID...');
-        
-        // تحديث الـ ID في قاعدة البيانات
-        await update(child(premiumRef, currentUser.id), {
-            premiumId: customId
-        });
-        
-        await update(child(usersRef, currentUser.username), {
-            premiumId: customId
-        });
-        
-        // تحديث البيانات المحلية
-        currentUser.premiumId = customId;
-        
-        // تحديث الواجهة
-        updatePremiumStatus();
-        
-        // تحديث جميع الرسائل القديمة لهذا المستخدم
-        await updateUserMessagesPremiumId(customId);
-        
-        showNotification(`تم تعيين ID المميز إلى: ${customId}`, 'success');
-        
-        // إرسال رسالة إعلامية
-        await push(messagesRef, {
-            id: Date.now().toString(),
-            senderId: "system",
-            senderName: "النظام",
-            text: `🆔 ${currentUser.displayName} قام بتغيير ID المميز إلى: ${customId}`,
-            timestamp: Date.now(),
-            type: "system"
-        });
-        
-    } catch (error) {
-        showNotification('حدث خطأ في تعيين ID', 'error');
-        console.error(error);
-    } finally {
-        hideLoading();
-    }
-}
-
-// تحديث ID المميز في الرسائل القديمة
-async function updateUserMessagesPremiumId(newId) {
-    try {
-        const messagesSnap = await get(query(messagesRef, orderByChild('senderId'), equalTo(currentUser.id)));
-        const updates = {};
-        
-        if (messagesSnap.exists()) {
-            messagesSnap.forEach((child) => {
-                const message = child.val();
-                if (message.senderId === currentUser.id) {
-                    updates[`${child.key}/premiumId`] = newId;
-                }
+        if (usersSnap.exists()) {
+            const users = [];
+            
+            usersSnap.forEach((child) => {
+                users.push({
+                    username: child.key,
+                    ...child.val()
+                });
             });
             
-            if (Object.keys(updates).length > 0) {
-                await update(messagesRef, updates);
-            }
+            // ترتيب المستخدمين حسب آخر دخول
+            users.sort((a, b) => (b.lastLogin || 0) - (a.lastLogin || 0));
+            
+            users.forEach(user => {
+                const userItem = document.createElement('div');
+                userItem.className = 'user-item';
+                userItem.onclick = () => showUserProfile(user.id);
+                
+                // إعداد بادجات المستخدم
+                let badges = '';
+                if (user.isSuperAdmin) {
+                    badges = '<span style="color: #9C27B0; font-size: 10px; margin-right: 5px;">👑</span>';
+                } else if (user.isAdmin) {
+                    badges = '<span style="color: #ff4444; font-size: 10px; margin-right: 5px;">🛡️</span>';
+                } else if (user.isPremium) {
+                    badges = '<span style="color: #ffd700; font-size: 10px; margin-right: 5px;">🌟</span>';
+                }
+                
+                userItem.innerHTML = `
+                    <img src="${user.photo || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="user-item-avatar">
+                    <div class="user-item-info">
+                        <div class="user-item-name">${badges}${user.displayName || user.username}</div>
+                        <div class="user-item-status ${user.isOnline ? '' : 'offline'}">
+                            ${user.isOnline ? '● متصل' : '○ غير متصل'}
+                        </div>
+                    </div>
+                    ${currentUser.isAdmin && user.username !== currentUser.username ? 
+                        `<button onclick="event.stopPropagation(); showAdminActions('${user.id}')" 
+                                style="background: rgba(255,68,68,0.1); color: white; border: none; padding: 5px 10px; border-radius: 5px; font-size: 12px;">
+                            <i class="fas fa-cog"></i>
+                        </button>` : ''}
+                `;
+                
+                usersList.appendChild(userItem);
+            });
+        } else {
+            usersList.innerHTML = '<p style="text-align: center; color: rgba(255,255,255,0.5);">لا يوجد مستخدمين</p>';
         }
+        
+        document.getElementById('all-users-modal').style.display = 'flex';
     } catch (error) {
-        console.error('Error updating messages premiumId:', error);
-    }
-}
-
-// اختيار التدرج اللوني
-function selectGradient(gradientNumber) {
-    selectedGradient = gradientNumber;
-    
-    // تحديث التحديد
-    document.querySelectorAll('.gradient-option').forEach(option => {
-        option.classList.remove('selected');
-    });
-    document.querySelector(`.gradient-option[data-gradient="${gradientNumber}"]`).classList.add('selected');
-    
-    // تحديث المعاينة
-    const gradients = {
-        1: 'linear-gradient(45deg, #00bcd4, #0097a7)',
-        2: 'linear-gradient(45deg, #ff4081, #f50057)',
-        3: 'linear-gradient(45deg, #651fff, #7c4dff)',
-        4: 'linear-gradient(45deg, #00e676, #00c853)',
-        5: 'linear-gradient(45deg, #ff9100, #ff3d00)',
-        6: 'linear-gradient(45deg, #00b0ff, #2979ff)'
-    };
-    
-    document.getElementById('gradient-preview').style.background = gradients[gradientNumber];
-}
-
-// حفظ إعدادات التدرج
-async function saveGradientSettings() {
-    if (!currentUser.isPremium || currentUser.premiumUntil < Date.now()) {
-        showNotification('هذه الميزة متاحة للأعضاء المميزين فقط', 'error');
-        return;
-    }
-    
-    try {
-        showLoading('جاري حفظ الإعدادات...');
-        
-        // تحديث التدرج في قاعدة البيانات
-        await update(child(premiumRef, currentUser.id), {
-            gradient: selectedGradient
-        });
-        
-        await update(child(usersRef, currentUser.username), {
-            gradient: selectedGradient
-        });
-        
-        // تحديث البيانات المحلية
-        currentUser.gradient = selectedGradient;
-        
-        // تحديث الرسائل القديمة
-        await updateUserMessagesGradient(selectedGradient);
-        
-        showNotification('تم حفظ إعدادات التدرج اللوني', 'success');
-        setTimeout(() => {
-            closeModal();
-        }, 1000);
-    } catch (error) {
-        showNotification('حدث خطأ في حفظ الإعدادات', 'error');
-        console.error(error);
+        console.error('Error loading users:', error);
+        showNotification('حدث خطأ في تحميل المستخدمين', 'error');
     } finally {
         hideLoading();
-    }
-}
-
-// تحديث التدرج في الرسائل القديمة
-async function updateUserMessagesGradient(newGradient) {
-    try {
-        const messagesSnap = await get(query(messagesRef, orderByChild('senderId'), equalTo(currentUser.id)));
-        const updates = {};
-        
-        if (messagesSnap.exists()) {
-            messagesSnap.forEach((child) => {
-                const message = child.val();
-                if (message.senderId === currentUser.id && message.isPremium) {
-                    updates[`${child.key}/gradient`] = newGradient;
-                }
-            });
-            
-            if (Object.keys(updates).length > 0) {
-                await update(messagesRef, updates);
-            }
-        }
-    } catch (error) {
-        console.error('Error updating messages gradient:', error);
     }
 }
 
@@ -1904,23 +2086,14 @@ async function showUserProfile(userId) {
             return;
         }
         
-        // التحقق من حالة الاشتراك المميز
-        const premiumSnap = await get(child(premiumRef, userId));
-        const isPremium = premiumSnap.exists() && premiumSnap.val().isPremium && 
-                         premiumSnap.val().premiumUntil > Date.now();
-        const premiumId = premiumSnap.exists() ? premiumSnap.val().premiumId : userId;
-        const gradient = premiumSnap.exists() ? premiumSnap.val().gradient : 1;
-        
         // تحضير بيانات البروفايل
         const profileData = {
             username: username,
-            displayName: userData.displayName,
+            displayName: userData.displayName || username,
             photo: userData.photo || "https://cdn-icons-png.flaticon.com/512/149/149071.png",
             id: userId,
-            premiumId: premiumId,
-            gradient: gradient,
             bio: userData.bio || "لم يقم بإضافة نبذة عن نفسه",
-            isPremium: isPremium,
+            isPremium: userData.isPremium || false,
             isAdmin: userData.isAdmin || false,
             isSuperAdmin: userData.isSuperAdmin || false,
             joinedAt: userData.joinedAt || userData.createdAt || Date.now(),
@@ -1945,8 +2118,6 @@ function showMyProfile() {
         displayName: currentUser.displayName,
         photo: currentUser.photo,
         id: currentUser.id,
-        premiumId: currentUser.premiumId,
-        gradient: currentUser.gradient,
         bio: currentUser.bio,
         isPremium: currentUser.isPremium && currentUser.premiumUntil > Date.now(),
         isAdmin: currentUser.isAdmin,
@@ -1988,7 +2159,7 @@ function displayProfile(profileData) {
         </div>
         
         <div class="profile-id">
-            ${profileData.isPremium ? '🆔 ' : ''}${profileData.isPremium ? profileData.premiumId : profileData.id}
+            ${profileData.isPremium ? '🆔 ' : ''}${profileData.id}
         </div>
         
         <div class="profile-bio" onclick="${profileData.username === currentUser.username ? 'showEditProfileModal()' : ''}">
@@ -2021,7 +2192,7 @@ function displayProfile(profileData) {
         
         ${currentUser.isAdmin && profileData.username !== currentUser.username ? `
             <div style="margin-top: 20px;">
-                <button class="btn" onclick="adminActions('${profileData.id}')" style="background: var(--danger-color);">
+                <button class="btn" onclick="showAdminActions('${profileData.id}')" style="background: var(--danger-color);">
                     <i class="fas fa-cog"></i> إجراءات الأدمن
                 </button>
             </div>
@@ -2031,15 +2202,163 @@ function displayProfile(profileData) {
     document.getElementById('profile-modal').style.display = 'flex';
 }
 
+// عرض إجراءات الأدمن
+async function showAdminActions(userId) {
+    try {
+        // البحث عن المستخدم بالـ ID
+        const usersSnap = await get(usersRef);
+        let userData = null;
+        let username = null;
+        
+        if (usersSnap.exists()) {
+            usersSnap.forEach((child) => {
+                const data = child.val();
+                if (data.id === userId) {
+                    userData = data;
+                    username = child.key;
+                }
+            });
+        }
+        
+        if (!userData) {
+            showNotification('لم يتم العثور على المستخدم', 'error');
+            return;
+        }
+        
+        adminTargetUser = {
+            id: userId,
+            username: username,
+            displayName: userData.displayName || username,
+            photo: userData.photo || "https://cdn-icons-png.flaticon.com/512/149/149071.png",
+            isAdmin: userData.isAdmin || false,
+            isPremium: userData.isPremium || false
+        };
+        
+        // تحديث واجهة إجراءات الأدمن
+        document.getElementById('admin-action-avatar').src = adminTargetUser.photo;
+        document.getElementById('admin-action-name').textContent = adminTargetUser.displayName;
+        document.getElementById('admin-action-id').textContent = `ID: ${adminTargetUser.id}`;
+        
+        document.getElementById('admin-actions-modal').style.display = 'flex';
+        
+    } catch (error) {
+        console.error('Error loading user for admin actions:', error);
+        showNotification('حدث خطأ في تحميل بيانات المستخدم', 'error');
+    }
+}
+
+// تنفيذ إجراءات الأدمن
+async function adminAction(action) {
+    if (!adminTargetUser) return;
+    
+    try {
+        showLoading('جاري تنفيذ الإجراء...');
+        
+        switch (action) {
+            case 'ban':
+                const reason = prompt('سبب الحظر:');
+                const days = prompt('مدة الحظر بالأيام:', '7');
+                if (reason && days) {
+                    await set(child(bansRef, adminTargetUser.id), {
+                        reason: reason,
+                        until: Date.now() + (parseInt(days) * 24 * 60 * 60 * 1000),
+                        bannedBy: currentUser.username,
+                        bannedAt: Date.now()
+                    });
+                    showNotification(`تم حظر ${adminTargetUser.displayName} لمدة ${days} أيام`, 'success');
+                }
+                break;
+                
+            case 'promote':
+                await update(child(usersRef, adminTargetUser.username), {
+                    isAdmin: true
+                });
+                showNotification(`تم ترقية ${adminTargetUser.displayName} إلى أدمن`, 'success');
+                break;
+                
+            case 'demote':
+                await update(child(usersRef, adminTargetUser.username), {
+                    isAdmin: false,
+                    isSuperAdmin: false
+                });
+                showNotification(`تم إلغاء صلاحية الأدمن عن ${adminTargetUser.displayName}`, 'success');
+                break;
+                
+            case 'premium':
+                const premiumDays = prompt('مدة الاشتراك بالأيام:', '30');
+                if (premiumDays) {
+                    const premiumUntil = Date.now() + (parseInt(premiumDays) * 24 * 60 * 60 * 1000);
+                    await update(child(usersRef, adminTargetUser.username), {
+                        isPremium: true,
+                        premiumUntil: premiumUntil
+                    });
+                    showNotification(`تم تفعيل اشتراك مميز لـ ${adminTargetUser.displayName} لمدة ${premiumDays} يوم`, 'success');
+                }
+                break;
+                
+            case 'delete':
+                if (confirm(`هل أنت متأكد من حذف ${adminTargetUser.displayName}؟`)) {
+                    await remove(child(usersRef, adminTargetUser.username));
+                    showNotification(`تم حذف ${adminTargetUser.displayName}`, 'success');
+                    closeModal();
+                }
+                break;
+        }
+    } catch (error) {
+        console.error('Error performing admin action:', error);
+        showNotification('حدث خطأ في تنفيذ الإجراء', 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+// عرض لوحة الأدمن الرئيسية
+async function showAdminPanel() {
+    if (!currentUser.isAdmin) {
+        showNotification('ليس لديك صلاحية الوصول إلى لوحة الأدمن', 'error');
+        return;
+    }
+    
+    try {
+        showLoading('جاري تحميل إحصائيات النظام...');
+        
+        const usersSnap = await get(usersRef);
+        let totalUsers = 0;
+        let onlineUsers = 0;
+        let premiumUsers = 0;
+        
+        if (usersSnap.exists()) {
+            usersSnap.forEach((child) => {
+                totalUsers++;
+                const userData = child.val();
+                if (userData.isOnline) onlineUsers++;
+                if (userData.isPremium) premiumUsers++;
+            });
+        }
+        
+        document.getElementById('total-users').textContent = totalUsers;
+        document.getElementById('online-users').textContent = onlineUsers;
+        document.getElementById('premium-users').textContent = premiumUsers;
+        
+        document.getElementById('admin-panel-modal').style.display = 'flex';
+    } catch (error) {
+        console.error('Error loading admin stats:', error);
+        showNotification('حدث خطأ في تحميل إحصائيات النظام', 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
 // عرض مودال تعديل البروفايل
 function showEditProfileModal() {
+    document.getElementById('edit-username').value = currentUser.username;
     document.getElementById('edit-display-name').value = currentUser.displayName;
     document.getElementById('edit-bio').value = currentUser.bio;
     document.getElementById('edit-avatar-preview').src = currentUser.photo;
     editAvatarBase64 = null;
     
-    document.getElementById('edit-profile-modal').style.display = 'flex';
     closeModal(); // إغلاق مودال البروفايل الحالي
+    document.getElementById('edit-profile-modal').style.display = 'flex';
 }
 
 // معاينة الصورة المحددة
@@ -2125,258 +2444,10 @@ async function updateUserMessagesProfile(newDisplayName, newPhoto) {
             
             if (Object.keys(updates).length > 0) {
                 await update(messagesRef, updates);
-                
-                // تحديث عرض الرسائل في الواجهة
-                updateMessagesDisplay();
             }
         }
     } catch (error) {
         console.error('Error updating messages profile:', error);
-    }
-}
-
-// تحديث عرض الرسائل في الواجهة
-function updateMessagesDisplay() {
-    // يمكن إعادة تحميل الرسائل أو تحديثها ديناميكياً
-    // لهذه البساطة، سنقوم بإعادة تحميل الرسائل
-    document.getElementById('chat-container').innerHTML = '';
-    loadMessages();
-}
-
-// إجراءات الأدمن
-async function adminActions(userId) {
-    if (!currentUser.isAdmin) return;
-    
-    const action = prompt(`إجراءات الأدمن للمستخدم ${userId}:
-1. حظر المستخدم
-2. منح صلاحية أدمن
-3. إلغاء صلاحية أدمن
-4. تفعيل اشتراك مميز
-5. تغيير ID مميز
-
-أدخل رقم الإجراء:`);
-    
-    if (!action) return;
-    
-    switch (action) {
-        case '1':
-            const reason = prompt('سبب الحظر:');
-            const duration = prompt('مدة الحظر بالأيام:', '7');
-            if (reason && duration) {
-                await banUser(userId, reason, parseInt(duration));
-            }
-            break;
-            
-        case '2':
-            await grantAdmin(userId);
-            break;
-            
-        case '3':
-            await revokeAdmin(userId);
-            break;
-            
-        case '4':
-            const days = prompt('مدة الاشتراك بالأيام:', '30');
-            if (days) {
-                await grantPremium(userId, parseInt(days));
-            }
-            break;
-            
-        case '5':
-            const newId = prompt('ID المميز الجديد:');
-            if (newId) {
-                await changeUserPremiumId(userId, newId);
-            }
-            break;
-    }
-}
-
-// حظر مستخدم (للأدمن)
-async function banUser(userId, reason, days) {
-    try {
-        const until = Date.now() + (days * 24 * 60 * 60 * 1000);
-        
-        await set(child(bansRef, userId), {
-            reason: reason,
-            until: until,
-            bannedBy: currentUser.username,
-            bannedAt: Date.now()
-        });
-        
-        showNotification('تم حظر المستخدم بنجاح', 'success');
-    } catch (error) {
-        showNotification('حدث خطأ في حظر المستخدم', 'error');
-    }
-}
-
-// تغيير ID مميز لمستخدم (للأدمن)
-async function changeUserPremiumId(userId, newId) {
-    try {
-        // تحديث الـ ID في قاعدة البيانات
-        await update(child(premiumRef, userId), {
-            premiumId: newId
-        });
-        
-        // البحث عن اسم المستخدم بالـ ID
-        const usersSnap = await get(usersRef);
-        let username = null;
-        
-        if (usersSnap.exists()) {
-            usersSnap.forEach((child) => {
-                const data = child.val();
-                if (data.id === userId) {
-                    username = child.key;
-                }
-            });
-        }
-        
-        if (username) {
-            await update(child(usersRef, username), {
-                premiumId: newId
-            });
-            
-            // تحديث الرسائل القديمة
-            await updateUserMessagesPremiumIdForUser(userId, newId);
-            
-            showNotification(`تم تغيير ID المميز إلى: ${newId}`, 'success');
-        }
-    } catch (error) {
-        showNotification('حدث خطأ في تغيير ID', 'error');
-    }
-}
-
-// تحديث ID في رسائل مستخدم معين
-async function updateUserMessagesPremiumIdForUser(userId, newId) {
-    try {
-        const messagesSnap = await get(query(messagesRef, orderByChild('senderId'), equalTo(userId)));
-        const updates = {};
-        
-        if (messagesSnap.exists()) {
-            messagesSnap.forEach((child) => {
-                const message = child.val();
-                if (message.senderId === userId) {
-                    updates[`${child.key}/premiumId`] = newId;
-                }
-            });
-            
-            if (Object.keys(updates).length > 0) {
-                await update(messagesRef, updates);
-            }
-        }
-    } catch (error) {
-        console.error('Error updating user messages premiumId:', error);
-    }
-}
-
-// منح صلاحية أدمن
-async function grantAdmin(userId) {
-    try {
-        // البحث عن اسم المستخدم بالـ ID
-        const usersSnap = await get(usersRef);
-        let username = null;
-        
-        if (usersSnap.exists()) {
-            usersSnap.forEach((child) => {
-                const data = child.val();
-                if (data.id === userId) {
-                    username = child.key;
-                }
-            });
-        }
-        
-        if (username) {
-            await update(child(usersRef, username), {
-                isAdmin: true
-            });
-            
-            showNotification('تم منح صلاحية الأدمن بنجاح', 'success');
-        }
-    } catch (error) {
-        showNotification('حدث خطأ في منح الصلاحية', 'error');
-    }
-}
-
-// إلغاء صلاحية أدمن
-async function revokeAdmin(userId) {
-    try {
-        const usersSnap = await get(usersRef);
-        let username = null;
-        
-        if (usersSnap.exists()) {
-            usersSnap.forEach((child) => {
-                const data = child.val();
-                if (data.id === userId) {
-                    username = child.key;
-                }
-            });
-        }
-        
-        if (username) {
-            await update(child(usersRef, username), {
-                isAdmin: false,
-                isSuperAdmin: false
-            });
-            
-            showNotification('تم إلغاء صلاحية الأدمن بنجاح', 'success');
-        }
-    } catch (error) {
-        showNotification('حدث خطأ في إلغاء الصلاحية', 'error');
-    }
-}
-
-// منح اشتراك مميز
-async function grantPremium(userId, days) {
-    try {
-        const usersSnap = await get(usersRef);
-        let username = null;
-        let currentPremiumId = userId;
-        
-        if (usersSnap.exists()) {
-            usersSnap.forEach((child) => {
-                const data = child.val();
-                if (data.id === userId) {
-                    username = child.key;
-                    currentPremiumId = data.premiumId || userId;
-                }
-            });
-        }
-        
-        if (username) {
-            const premiumUntil = Date.now() + (days * 24 * 60 * 60 * 1000);
-            
-            await set(child(premiumRef, userId), {
-                isPremium: true,
-                premiumUntil: premiumUntil,
-                premiumId: currentPremiumId,
-                gradient: 1,
-                activatedAt: Date.now(),
-                activatedBy: currentUser.username,
-                manualGrant: true
-            });
-            
-            await update(child(usersRef, username), {
-                isPremium: true,
-                premiumUntil: premiumUntil,
-                premiumId: currentPremiumId
-            });
-            
-            showNotification(`تم تفعيل اشتراك مميز لمدة ${days} يوم`, 'success');
-        }
-    } catch (error) {
-        showNotification('حدث خطأ في تفعيل الاشتراك', 'error');
-    }
-}
-
-// وظائف الأدمن الأخرى
-async function adminLogin() {
-    const username = document.getElementById('username').value.trim();
-    const password = document.getElementById('password').value.trim();
-    
-    if (username === "texn" && password === "hamzagmail34567") {
-        await login();
-        showAdminModal();
-    } else {
-        showNotification('بيانات الدخول غير صحيحة للأدمن', 'error');
     }
 }
 
@@ -2423,12 +2494,6 @@ function showPremiumSettingsModal() {
     }
 }
 
-function showAdminModal() {
-    if (currentUser.isAdmin) {
-        document.getElementById('admin-modal').style.display = 'flex';
-    }
-}
-
 function showSettingsModal() {
     const userInfo = document.getElementById('user-info');
     userInfo.innerHTML = `
@@ -2472,12 +2537,263 @@ async function logout() {
     location.reload();
 }
 
+// وظائف الاشتراك المميز (من الكود السابق)
+async function activatePremium() {
+    const code = document.getElementById('subscription-code').value.trim();
+    
+    if (!code) {
+        showNotification('الرجاء إدخال كود الاشتراك', 'warning');
+        return;
+    }
+    
+    if (!validCodes.includes(code)) {
+        showNotification('كود الاشتراك غير صالح', 'error');
+        return;
+    }
+    
+    const codeSnap = await get(child(codesRef, code));
+    if (codeSnap.exists()) {
+        showNotification('هذا الكود مستخدم مسبقاً', 'error');
+        return;
+    }
+    
+    const premiumUntil = Date.now() + (30 * 24 * 60 * 60 * 1000);
+    
+    try {
+        showLoading('جاري تفعيل الاشتراك...');
+        
+        if (!currentUser.premiumId) {
+            currentUser.premiumId = currentUser.id;
+        }
+        
+        await set(child(premiumRef, currentUser.id), {
+            isPremium: true,
+            premiumUntil: premiumUntil,
+            premiumId: currentUser.premiumId,
+            gradient: currentUser.gradient,
+            activatedAt: Date.now(),
+            activatedBy: currentUser.username,
+            codeUsed: code
+        });
+        
+        await update(child(usersRef, currentUser.username), {
+            isPremium: true,
+            premiumUntil: premiumUntil,
+            premiumId: currentUser.premiumId,
+            gradient: currentUser.gradient
+        });
+        
+        currentUser.isPremium = true;
+        currentUser.premiumUntil = premiumUntil;
+        
+        await set(child(codesRef, code), {
+            usedBy: currentUser.username,
+            usedAt: Date.now(),
+            validUntil: premiumUntil
+        });
+        
+        await push(messagesRef, {
+            id: Date.now().toString(),
+            senderId: "system",
+            senderName: "النظام",
+            text: `🎉 ${currentUser.displayName} أصبح الآن عضو مميز!`,
+            timestamp: Date.now(),
+            type: "system"
+        });
+        
+        updatePremiumStatus();
+        closeModal();
+        
+        showNotification('تم تفعيل الاشتراك المميز بنجاح لمدة 30 يوم!', 'success');
+        
+        setTimeout(() => {
+            showPremiumSettingsModal();
+        }, 2000);
+        
+    } catch (error) {
+        showNotification('حدث خطأ في تفعيل الاشتراك', 'error');
+        console.error(error);
+    } finally {
+        hideLoading();
+    }
+}
+
+async function setCustomId() {
+    if (!currentUser.isPremium || currentUser.premiumUntil < Date.now()) {
+        showNotification('هذه الميزة متاحة للأعضاء المميزين فقط', 'error');
+        return;
+    }
+    
+    const customId = document.getElementById('custom-id-input').value.trim();
+    
+    if (!customId || customId.length < 4 || customId.length > 10) {
+        showNotification('الرجاء إدخال ID من 4 إلى 10 أرقام', 'warning');
+        return;
+    }
+    
+    if (!/^\d+$/.test(customId)) {
+        showNotification('ID يجب أن يحتوي على أرقام فقط', 'warning');
+        return;
+    }
+    
+    const premiumSnap = await get(premiumRef);
+    let idExists = false;
+    
+    if (premiumSnap.exists()) {
+        premiumSnap.forEach((child) => {
+            const data = child.val();
+            if (data.premiumId === customId && child.key !== currentUser.id) {
+                idExists = true;
+            }
+        });
+    }
+    
+    if (idExists) {
+        showNotification('هذا ID مستخدم بالفعل', 'error');
+        return;
+    }
+    
+    try {
+        showLoading('جاري تحديث ID...');
+        
+        await update(child(premiumRef, currentUser.id), {
+            premiumId: customId
+        });
+        
+        await update(child(usersRef, currentUser.username), {
+            premiumId: customId
+        });
+        
+        currentUser.premiumId = customId;
+        
+        updatePremiumStatus();
+        
+        await updateUserMessagesPremiumId(customId);
+        
+        showNotification(`تم تعيين ID المميز إلى: ${customId}`, 'success');
+        
+        await push(messagesRef, {
+            id: Date.now().toString(),
+            senderId: "system",
+            senderName: "النظام",
+            text: `🆔 ${currentUser.displayName} قام بتغيير ID المميز إلى: ${customId}`,
+            timestamp: Date.now(),
+            type: "system"
+        });
+        
+    } catch (error) {
+        showNotification('حدث خطأ في تعيين ID', 'error');
+        console.error(error);
+    } finally {
+        hideLoading();
+    }
+}
+
+async function updateUserMessagesPremiumId(newId) {
+    try {
+        const messagesSnap = await get(query(messagesRef, orderByChild('senderId'), equalTo(currentUser.id)));
+        const updates = {};
+        
+        if (messagesSnap.exists()) {
+            messagesSnap.forEach((child) => {
+                const message = child.val();
+                if (message.senderId === currentUser.id) {
+                    updates[`${child.key}/premiumId`] = newId;
+                }
+            });
+            
+            if (Object.keys(updates).length > 0) {
+                await update(messagesRef, updates);
+            }
+        }
+    } catch (error) {
+        console.error('Error updating messages premiumId:', error);
+    }
+}
+
+function selectGradient(gradientNumber) {
+    selectedGradient = gradientNumber;
+    
+    document.querySelectorAll('.gradient-option').forEach(option => {
+        option.classList.remove('selected');
+    });
+    document.querySelector(`.gradient-option[data-gradient="${gradientNumber}"]`).classList.add('selected');
+    
+    const gradients = {
+        1: 'linear-gradient(45deg, #00bcd4, #0097a7)',
+        2: 'linear-gradient(45deg, #ff4081, #f50057)',
+        3: 'linear-gradient(45deg, #651fff, #7c4dff)',
+        4: 'linear-gradient(45deg, #00e676, #00c853)',
+        5: 'linear-gradient(45deg, #ff9100, #ff3d00)',
+        6: 'linear-gradient(45deg, #00b0ff, #2979ff)'
+    };
+    
+    document.getElementById('gradient-preview').style.background = gradients[gradientNumber];
+}
+
+async function saveGradientSettings() {
+    if (!currentUser.isPremium || currentUser.premiumUntil < Date.now()) {
+        showNotification('هذه الميزة متاحة للأعضاء المميزين فقط', 'error');
+        return;
+    }
+    
+    try {
+        showLoading('جاري حفظ الإعدادات...');
+        
+        await update(child(premiumRef, currentUser.id), {
+            gradient: selectedGradient
+        });
+        
+        await update(child(usersRef, currentUser.username), {
+            gradient: selectedGradient
+        });
+        
+        currentUser.gradient = selectedGradient;
+        
+        await updateUserMessagesGradient(selectedGradient);
+        
+        showNotification('تم حفظ إعدادات التدرج اللوني', 'success');
+        setTimeout(() => {
+            closeModal();
+        }, 1000);
+    } catch (error) {
+        showNotification('حدث خطأ في حفظ الإعدادات', 'error');
+        console.error(error);
+    } finally {
+        hideLoading();
+    }
+}
+
+async function updateUserMessagesGradient(newGradient) {
+    try {
+        const messagesSnap = await get(query(messagesRef, orderByChild('senderId'), equalTo(currentUser.id)));
+        const updates = {};
+        
+        if (messagesSnap.exists()) {
+            messagesSnap.forEach((child) => {
+                const message = child.val();
+                if (message.senderId === currentUser.id && message.isPremium) {
+                    updates[`${child.key}/gradient`] = newGradient;
+                }
+            });
+            
+            if (Object.keys(updates).length > 0) {
+                await update(messagesRef, updates);
+            }
+        }
+    } catch (error) {
+        console.error('Error updating messages gradient:', error);
+    }
+}
+
 // جعل الوظائف متاحة عالمياً
 window.login = login;
+window.register = register;
+window.adminLogin = adminLogin;
 window.sendMessage = sendMessage;
 window.showPremiumModal = showPremiumModal;
 window.showPremiumSettingsModal = showPremiumSettingsModal;
-window.showAdminModal = showAdminModal;
+window.showAdminPanel = showAdminPanel;
 window.showSettingsModal = showSettingsModal;
 window.clearChat = clearChat;
 window.contactAdmin = contactAdmin;
@@ -2487,12 +2803,16 @@ window.activatePremium = activatePremium;
 window.setCustomId = setCustomId;
 window.selectGradient = selectGradient;
 window.saveGradientSettings = saveGradientSettings;
-window.adminLogin = adminLogin;
 window.showUserProfile = showUserProfile;
 window.showMyProfile = showMyProfile;
 window.showEditProfileModal = showEditProfileModal;
 window.previewEditAvatar = previewEditAvatar;
 window.saveProfileChanges = saveProfileChanges;
+window.showAllUsersModal = showAllUsersModal;
+window.showAdminActions = showAdminActions;
+window.adminAction = adminAction;
+window.showLoginTab = showLoginTab;
+window.showRegisterTab = showRegisterTab;
 </script>
 </body>
 </html>
