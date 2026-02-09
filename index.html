@@ -1,444 +1,74 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام المحلل الذكي | AI Vision</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        /* --- التصميم الأساسي (Theme) --- */
-        :root {
-            --primary: #00ff9d; /* لون أخضر تقني */
-            --accent: #bc13fe;  /* لون بنفسجي للذكاء */
-            --bg-dark: #050505;
-            --panel-bg: rgba(20, 20, 25, 0.95);
-            --border: rgba(255, 255, 255, 0.1);
-        }
-
-        body {
-            margin: 0;
-            background-color: #000;
-            /* خلفية تقنية خارج الهاتف */
-            background-image: 
-                linear-gradient(rgba(0, 255, 157, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 255, 157, 0.03) 1px, transparent 1px);
-            background-size: 30px 30px;
-            color: white;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            overflow: hidden;
-        }
-
-        /* حاوية التطبيق */
-        .app-shell {
-            width: 100%;
-            max-width: 420px; /* عرض الجوال */
-            height: 90vh;
-            background: var(--bg-dark);
-            border-radius: 25px;
-            border: 2px solid #333;
-            box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            overflow: hidden;
-        }
-
-        /* الشريط العلوي */
-        .status-bar {
-            padding: 15px;
-            background: rgba(20, 20, 20, 0.8);
-            backdrop-filter: blur(10px);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 12px;
-            color: #aaa;
-            border-bottom: 1px solid var(--border);
-            z-index: 10;
-        }
-
-        .file-badge {
-            background: rgba(0, 255, 157, 0.1);
-            color: var(--primary);
-            padding: 4px 10px;
-            border-radius: 4px;
-            font-family: monospace;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            border: 1px solid rgba(0, 255, 157, 0.2);
-        }
-
-        /* منطقة العرض (الكاميرا/الصورة) */
-        .viewport {
-            flex: 1;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            background: #111;
-        }
-
-        /* الصورة المستدعاة (board.jpg) */
-        .target-image {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover; /* تغطية كامل الشاشة */
-            opacity: 0.4; /* تخفيف سطوع الصورة لتظهر القوائم */
-            z-index: 0;
-            transition: 0.5s;
-        }
-
-        /* خط المسح الضوئي (Scanner) */
-        .scanner-beam {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: var(--primary);
-            box-shadow: 0 0 15px var(--primary), 0 0 30px var(--primary);
-            z-index: 2;
-            display: none;
-            animation: scanMove 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-        }
-
-        @keyframes scanMove {
-            0% { top: 0%; opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { top: 100%; opacity: 0; }
-        }
-
-        /* شبكة الخيارات */
-        .overlay-grid {
-            position: relative;
-            z-index: 5;
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            width: 90%;
-            padding: 20px;
-        }
-
-        .option-card {
-            background: rgba(30, 30, 35, 0.7);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 15px;
-            text-align: center;
-            backdrop-filter: blur(8px);
-            transition: 0.3s;
-            position: relative;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
-
-        .option-card img {
-            width: 55px;
-            height: 55px;
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
-            transition: transform 0.2s;
-        }
-
-        .option-name {
-            display: block;
-            margin-top: 10px;
-            font-size: 15px;
-            font-weight: bold;
-        }
-
-        .option-count {
-            font-size: 11px;
-            color: #888;
-            margin-top: 4px;
-            display: block;
-        }
-
-        /* مربع التركيز (Bounding Box) */
-        .bounding-box {
-            position: absolute;
-            border: 2px solid var(--primary);
-            background: rgba(0, 255, 157, 0.1);
-            z-index: 20;
-            pointer-events: none;
-            display: none;
-            border-radius: 12px;
-            box-shadow: 0 0 20px rgba(0, 255, 157, 0.4), inset 0 0 20px rgba(0, 255, 157, 0.1);
-            transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
-        }
-
-        /* زوايا المربع وتفاصيله */
-        .box-label {
-            position: absolute;
-            top: -20px;
-            left: 0;
-            background: var(--primary);
-            color: black;
-            font-size: 10px;
-            font-weight: 800;
-            padding: 2px 6px;
-            font-family: monospace;
-            border-radius: 2px;
-        }
-
-        .box-corner {
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            border: 2px solid white;
-            transition: 0.3s;
-        }
-        .tl { top: -2px; left: -2px; border-bottom: 0; border-right: 0; }
-        .tr { top: -2px; right: -2px; border-bottom: 0; border-left: 0; }
-        .bl { bottom: -2px; left: -2px; border-top: 0; border-right: 0; }
-        .br { bottom: -2px; right: -2px; border-top: 0; border-left: 0; }
-
-        /* منطقة التحكم السفلية */
-        .control-panel {
-            padding: 20px;
-            background: #111;
-            border-top: 1px solid #333;
-            z-index: 20;
-            text-align: center;
-        }
-
-        .main-btn {
-            width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, var(--primary), #008f58);
-            color: #000;
-            font-weight: 900;
-            font-size: 16px;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            box-shadow: 0 4px 15px rgba(0, 255, 157, 0.2);
-            transition: 0.2s;
-            text-transform: uppercase;
-        }
-
-        .main-btn:active { transform: scale(0.98); }
-        .main-btn:disabled { background: #333; color: #666; box-shadow: none; cursor: not-allowed; }
-
-        .log-text {
-            font-family: 'Courier New', monospace;
-            font-size: 11px;
-            color: var(--primary);
-            text-align: left;
-            margin-bottom: 15px;
-            min-height: 14px;
-            opacity: 0.8;
-            border-left: 2px solid var(--primary);
-            padding-left: 8px;
-        }
-
-    </style>
+<meta charset="UTF-8">
+<title>شات عام</title>
+<style>
+body { background:#111; color:white; font-family:sans-serif; padding:20px; }
+#chat { height:400px; overflow:auto; border:1px solid #333; padding:10px; margin-bottom:10px; }
+input { width:100%; padding:10px; margin-top:5px; box-sizing:border-box; border-radius:4px; border:none; }
+.msg { margin:4px 0; }
+.name { color:#4fc3f7; font-weight:bold; }
+</style>
 </head>
 <body>
 
-    <div class="app-shell">
-        <div class="status-bar">
-            <div class="file-badge">
-                <i class="fa-regular fa-folder-open"></i>
-                <span>board.jpg</span>
-            </div>
-            <div>
-                <i class="fa-solid fa-satellite-dish" style="font-size:10px; color:#00ff9d; margin-left:5px"></i>
-                <span>ONLINE</span>
-            </div>
-        </div>
+<h2>💬 الشات العام</h2>
+<div id="chat"></div>
 
-        <div class="viewport" id="viewport">
-            <img src="board.jpg" class="target-image" id="bgImage" onerror="this.style.display='none'; document.getElementById('log').innerText='> Error: board.jpg not found!';">
-            
-            <div class="scanner-beam" id="scanner"></div>
+<input id="name" placeholder="اسمك">
+<input id="msg" placeholder="اكتب رسالة واضغط Enter">
 
-            <div class="bounding-box" id="aiBox">
-                <div class="box-corner tl"></div><div class="box-corner tr"></div>
-                <div class="box-corner bl"></div><div class="box-corner br"></div>
-                <div class="box-label">CONFIDENCE 99.8%</div>
-            </div>
+<script type="module">
+  // Import Firebase SDK
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics.js";
 
-            <div class="overlay-grid" id="fruitsGrid">
-                </div>
-        </div>
+  // Firebase config (عبيتها من حسابك)
+  const firebaseConfig = {
+    apiKey: "AIzaSyDdbUK04WTiBvv3z1K9oYhssfpJTI9fZh4",
+    authDomain: "chatdoy.firebaseapp.com",
+    databaseURL: "https://chatdoy-default-rtdb.firebaseio.com",
+    projectId: "chatdoy",
+    storageBucket: "chatdoy.firebasestorage.app",
+    messagingSenderId: "922018470576",
+    appId: "1:922018470576:web:bbe06151c06e345c4cb975",
+    measurementId: "G-6V7VB06ZPL"
+  };
 
-        <div class="control-panel">
-            <div class="log-text" id="log">> System Ready. Waiting for input...</div>
-            <button class="main-btn" onclick="runPrediction()" id="actionBtn">
-                <i class="fa-solid fa-crosshairs"></i> START ANALYSIS
-            </button>
-            <div style="margin-top:15px; font-size:11px; color:#555; cursor:pointer; text-decoration:underline;" onclick="clearMemory()">
-                Reset Learning Data
-            </div>
-        </div>
-    </div>
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+  const db = getDatabase(app);
+  const chatRef = ref(db, "messages");
 
-    <script>
-        // ---------------------------------------------------------
-        // 1. البيانات والإعدادات
-        // ---------------------------------------------------------
-        
-        // القائمة المسموح بها (تم حذف الفراولة والمانجو)
-        const fruits = [
-            { id: 'apple', name: 'تفاح', icon: 'https://cdn-icons-png.flaticon.com/128/415/415733.png' },
-            { id: 'orange', name: 'برتقال', icon: 'https://cdn-icons-png.flaticon.com/128/415/415736.png' },
-            { id: 'watermelon', name: 'بطيخ', icon: 'https://cdn-icons-png.flaticon.com/128/415/415709.png' },
-            { id: 'grapes', name: 'عنب', icon: 'https://cdn-icons-png.flaticon.com/128/415/415755.png' }
-        ];
+  const chat = document.getElementById("chat");
+  const msg = document.getElementById("msg");
+  const name = document.getElementById("name");
 
-        // استدعاء الذاكرة من المتصفح
-        let memory = JSON.parse(localStorage.getItem('Fawakih_AI_Data')) || {};
+  // إرسال الرسائل
+  msg.addEventListener("keydown", e => {
+    if(e.key === "Enter" && msg.value.trim()){
+      push(chatRef, {
+        name: name.value || "زائر",
+        text: msg.value,
+        time: Date.now()
+      });
+      msg.value = "";
+    }
+  });
 
-        // دالة التهيئة والرسم
-        function init() {
-            const grid = document.getElementById('fruitsGrid');
-            grid.innerHTML = '';
-            
-            fruits.forEach((fruit, index) => {
-                // إنشاء سجل إذا لم يوجد
-                if(!memory[fruit.id]) memory[fruit.id] = 0;
+  // استقبال الرسائل وعرضها
+  onChildAdded(chatRef, snap => {
+    const d = snap.val();
+    const div = document.createElement("div");
+    div.className = "msg";
+    div.innerHTML = `<span class="name">${d.name}:</span> ${d.text}`;
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
+  });
+</script>
 
-                const card = document.createElement('div');
-                card.className = 'option-card';
-                card.id = `fruit-card-${index}`; // ID مهم لتحديد الموقع
-                
-                card.innerHTML = `
-                    <img src="${fruit.icon}" alt="${fruit.name}">
-                    <span class="option-name">${fruit.name}</span>
-                    <span class="option-count" id="count-${fruit.id}">Total: ${memory[fruit.id]}</span>
-                `;
-                grid.appendChild(card);
-            });
-        }
-
-        // ---------------------------------------------------------
-        // 2. المحرك المنطقي (Core Engine)
-        // ---------------------------------------------------------
-
-        function runPrediction() {
-            const btn = document.getElementById('actionBtn');
-            const scanner = document.getElementById('scanner');
-            const box = document.getElementById('aiBox');
-            const log = document.getElementById('log');
-            const bgImage = document.getElementById('bgImage');
-
-            if(btn.disabled) return;
-
-            // تفعيل وضع التحليل
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> PROCESSING...';
-            scanner.style.display = 'block';
-            box.style.display = 'none'; // إخفاء المربع القديم
-            
-            // سطوع الصورة يتغير قليلاً للمحاكاة
-            bgImage.style.filter = "grayscale(0%) contrast(1.1)";
-
-            // محاكاة قراءة ملف board.jpg
-            const logs = [
-                "> Loading source: board.jpg...",
-                "> Scanning pixels [1920x1080]...",
-                "> Identifying patterns...",
-                "> Object match found."
-            ];
-
-            let logIndex = 0;
-            const logInterval = setInterval(() => {
-                if(logIndex < logs.length) {
-                    log.innerText = logs[logIndex];
-                    logIndex++;
-                }
-            }, 500);
-
-            // الانتظار ثم إظهار النتيجة
-            setTimeout(() => {
-                clearInterval(logInterval);
-                scanner.style.display = 'none';
-                bgImage.style.filter = ""; // استعادة الفلتر الأصلي
-                makeDecision();
-            }, 2500);
-        }
-
-        // ---------------------------------------------------------
-        // 3. اتخاذ القرار ورسم المربع
-        // ---------------------------------------------------------
-
-        function makeDecision() {
-            const btn = document.getElementById('actionBtn');
-            const box = document.getElementById('aiBox');
-            const log = document.getElementById('log');
-
-            // الخوارزمية (اختيار عشوائي حالياً)
-            const winnerIndex = Math.floor(Math.random() * fruits.length);
-            const winnerData = fruits[winnerIndex];
-            const targetElement = document.getElementById(`fruit-card-${winnerIndex}`);
-
-            // 1. تحديث الذاكرة
-            memory[winnerData.id]++;
-            localStorage.setItem('Fawakih_AI_Data', JSON.stringify(memory));
-            document.getElementById(`count-${winnerData.id}`).innerText = `Total: ${memory[winnerData.id]}`;
-
-            // 2. حساب الرياضيات لرسم المربع فوق العنصر بالضبط
-            const parentRect = document.getElementById('viewport').getBoundingClientRect();
-            const targetRect = targetElement.getBoundingClientRect();
-
-            // حساب الموقع النسبي
-            const top = targetRect.top - parentRect.top;
-            const left = targetRect.left - parentRect.left;
-            
-            // تطبيق الأبعاد
-            box.style.width = (targetRect.width - 6) + 'px';
-            box.style.height = (targetRect.height - 6) + 'px';
-            box.style.top = top + 'px';
-            box.style.left = left + 'px';
-            
-            // إظهار المربع
-            box.style.display = 'block';
-
-            // إنهاء العملية
-            log.innerText = `> Result: ${winnerData.name.toUpperCase()} DETECTED`;
-            log.style.color = '#00ff9d';
-            
-            btn.innerHTML = '<i class="fa-solid fa-check"></i> COMPLETE';
-            btn.style.background = '#fff';
-            btn.style.color = '#000';
-            
-            // إعادة الزر للوضع الطبيعي
-            setTimeout(() => {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-crosshairs"></i> START ANALYSIS';
-                btn.style.background = ''; 
-                btn.style.color = '#000';
-                log.style.color = 'var(--primary)';
-            }, 2000);
-        }
-
-        // مسح الذاكرة
-        function clearMemory() {
-            if(confirm('هل أنت متأكد من مسح جميع البيانات المحفوظة؟')) {
-                localStorage.removeItem('Fawakih_AI_Data');
-                memory = {};
-                init();
-                document.getElementById('log').innerText = "> Memory formatted successfully.";
-            }
-        }
-
-        // تشغيل عند البدء
-        init();
-
-    </script>
 </body>
 </html>
