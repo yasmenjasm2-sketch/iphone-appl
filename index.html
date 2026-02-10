@@ -1215,66 +1215,63 @@
             <button class="close-btn" onclick="closeModal()">×</button>
         </div>
         
-        <div class="modal-body">
-    <div id="admin-action-user-info" style="text-align: center; margin-bottom: 20px;">
-        <img id="admin-action-avatar" src="" class="avatar-preview" style="width: 80px; height: 80px;">
-        <h3 id="admin-action-name" style="margin: 10px 0;"></h3>
-        <p id="admin-action-id" class="profile-id"></p>
-        
-        <!-- 🔒 أضف هذا السطر هنا ↓ -->
-        <div id="admin-protection-warning" style="display: none; background: rgba(255, 68, 68, 0.1); padding: 10px; border-radius: 8px; margin-top: 10px; border-left: 4px solid #ff4444;">
-            <p style="color: #ff4444; margin: 0; font-size: 13px; font-family: 'Tajawal', sans-serif;">
-                ⚠️ <strong>مسؤول النظام:</strong> لا يمكن تنفيذ أي إجراء على هذا الحساب
-            </p>
-        </div>
-        <!-- 🔒 نهاية الإضافة -->
-    </div>
-            
-            <div class="admin-action-buttons">
-                <button class="admin-action-btn ban" onclick="adminAction('ban')">
-                    <i class="fas fa-ban"></i> حظر المستخدم
-                </button>
-                <button class="admin-action-btn promote" onclick="adminAction('promote')">
-                    <i class="fas fa-user-shield"></i> ترقية إلى أدمن
-                </button>
-                <button class="admin-action-btn" onclick="adminAction('demote')">
-                    <i class="fas fa-user"></i> إلغاء صلاحية أدمن
-                </button>
-                <button class="admin-action-btn premium" onclick="adminAction('premium')">
-                    <i class="fas fa-crown"></i> تفعيل اشتراك مميز
-                </button>
-                <button class="admin-action-btn" onclick="adminAction('delete')">
-                    <i class="fas fa-trash"></i> حذف المستخدم
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- مودال الأدمن الرئيسي -->
-<div class="modal" id="admin-panel-modal">
+        <!-- مودال إجراءات الأدمن المحسن -->
+<div class="modal admin-actions-modal" id="admin-actions-modal">
     <div class="modal-content">
         <div class="modal-header">
-            <h2><i class="fas fa-shield-alt"></i> لوحة تحكم الأدمن</h2>
+            <h2><i class="fas fa-shield-alt"></i> إجراءات الأدمن</h2>
             <button class="close-btn" onclick="closeModal()">×</button>
         </div>
         
         <div class="modal-body">
-            <div class="admin-tools">
-                <div class="admin-tool" onclick="showAllUsersModal()">
-                    <h3><i class="fas fa-users-cog"></i> إدارة المستخدمين</h3>
-                    <p>عرض جميع المستخدمين والإجراءات</p>
+            <div id="admin-action-user-info" style="text-align: center; margin-bottom: 20px;">
+                <img id="admin-action-avatar" src="" class="avatar-preview" style="width: 80px; height: 80px;">
+                <h3 id="admin-action-name" style="margin: 10px 0;"></h3>
+                <p id="admin-action-id" class="profile-id"></p>
+                
+                <!-- 🔒 تحذير الحماية للمسؤول -->
+                <div id="admin-protection-warning" style="display: none; background: rgba(255, 68, 68, 0.1); padding: 10px; border-radius: 8px; margin-top: 10px; border-left: 4px solid #ff4444;">
+                    <p style="color: #ff4444; margin: 0; font-size: 13px; font-family: 'Tajawal', sans-serif;">
+                        ⚠️ <strong>مسؤول النظام:</strong> لا يمكن تنفيذ أي إجراء على هذا الحساب
+                    </p>
                 </div>
                 
-                <div class="admin-tool" onclick="showPremiumManagement()">
-                    <h3><i class="fas fa-crown"></i> إدارة الاشتراكات</h3>
-                    <p>تفعيل وإلغاء الاشتراكات المميزة</p>
+                <!-- 🛡️ معلومات مستوى الأدمن -->
+                <div id="admin-level-info" style="display: none; background: rgba(0, 188, 212, 0.1); padding: 8px; border-radius: 8px; margin-top: 5px;">
+                    <p style="color: #00bcd4; margin: 0; font-size: 12px; font-family: 'Tajawal', sans-serif;">
+                        👑 <strong>أدمن نظام:</strong> صلاحيات محدودة
+                    </p>
                 </div>
-                
-                <div class="admin-tool" onclick="generatePremiumCode()">
-                    <h3><i class="fas fa-key"></i> توليد أكواد</h3>
-                    <p>إنشاء أكواد اشتراك جديدة</p>
-                </div>
+            </div>
+            
+            <div class="admin-action-buttons" id="admin-action-buttons">
+                <button class="admin-action-btn ban" onclick="executeAdminAction('ban')" data-action="ban">
+                    <i class="fas fa-ban"></i> حظر المستخدم
+                </button>
+                <button class="admin-action-btn promote" onclick="executeAdminAction('promote')" data-action="promote">
+                    <i class="fas fa-user-shield"></i> ترقية إلى أدمن
+                </button>
+                <button class="admin-action-btn" onclick="executeAdminAction('demote')" data-action="demote">
+                    <i class="fas fa-user"></i> إلغاء صلاحية أدمن
+                </button>
+                <button class="admin-action-btn premium" onclick="executeAdminAction('premium')" data-action="premium">
+                    <i class="fas fa-crown"></i> تفعيل اشتراك مميز
+                </button>
+                <button class="admin-action-btn" onclick="executeAdminAction('delete')" data-action="delete">
+                    <i class="fas fa-trash"></i> حذف المستخدم
+                </button>
+            </div>
+            
+            <!-- 📊 معلومات الصلاحيات -->
+            <div id="admin-permissions-info" style="margin-top: 20px; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px; display: none;">
+                <p style="color: rgba(255,255,255,0.7); font-size: 11px; margin: 5px 0; text-align: center;">
+                    <i class="fas fa-info-circle"></i> صلاحياتك الحالية: 
+                    <span id="current-admin-permissions" style="color: #00bcd4;">جارٍ التحميل...</span>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
                 
                 <div class="admin-tool" onclick="showSystemStats()">
                     <h3><i class="fas fa-chart-bar"></i> إحصائيات النظام</h3>
@@ -2821,6 +2818,624 @@ window.showAdminActions = showAdminActions;
 window.adminAction = adminAction;
 window.showLoginTab = showLoginTab;
 window.showRegisterTab = showRegisterTab;
+
+   // ============================================
+// 🛡️ نظام الأدمن المحسن - داخل index.html
+// ============================================
+
+// بيانات النظام المحمية
+const PROTECTED_USERS = {
+    "1111": {
+        username: "texn",
+        displayName: "𝐑𝐄𝐌𝐀𝐒 ༗",
+        level: "SYSTEM_OWNER",
+        cannotBe: ["banned", "deleted", "demoted", "modified"]
+    },
+    "texn": {
+        id: "1111",
+        level: "SYSTEM_OWNER",
+        permissions: ["all"]
+    }
+};
+
+let adminTargetUser = null;
+
+// عرض إجراءات الأدمن مع التحقق من الصلاحيات
+async function showAdminActions(userId) {
+    try {
+        showLoading('جاري تحميل بيانات المستخدم...');
+        
+        // البحث عن المستخدم بالـ ID
+        const usersSnap = await get(usersRef);
+        let userData = null;
+        let username = null;
+        
+        if (usersSnap.exists()) {
+            usersSnap.forEach((child) => {
+                const data = child.val();
+                if (data.id === userId) {
+                    userData = data;
+                    username = child.key;
+                }
+            });
+        }
+        
+        if (!userData) {
+            showNotification('لم يتم العثور على المستخدم', 'error');
+            hideLoading();
+            return;
+        }
+        
+        // حفظ بيانات الهدف
+        adminTargetUser = {
+            id: userId,
+            username: username,
+            displayName: userData.displayName || username,
+            photo: userData.photo || "https://cdn-icons-png.flaticon.com/512/149/149071.png",
+            isAdmin: userData.isAdmin || false,
+            isSuperAdmin: userData.isSuperAdmin || false,
+            isPremium: userData.isPremium || false
+        };
+        
+        // تحديث واجهة إجراءات الأدمن
+        document.getElementById('admin-action-avatar').src = adminTargetUser.photo;
+        document.getElementById('admin-action-name').textContent = adminTargetUser.displayName;
+        document.getElementById('admin-action-id').textContent = `ID: ${adminTargetUser.id}`;
+        
+        // التحقق إذا كان المستخدم محمياً (مسؤول النظام)
+        const isProtected = isProtectedUser(adminTargetUser.id);
+        const warningDiv = document.getElementById('admin-protection-warning');
+        const levelInfoDiv = document.getElementById('admin-level-info');
+        const permissionsInfo = document.getElementById('admin-permissions-info');
+        const actionButtons = document.getElementById('admin-action-buttons');
+        
+        if (isProtected) {
+            // إظهار تحذير الحماية
+            warningDiv.style.display = 'block';
+            levelInfoDiv.style.display = 'none';
+            
+            // تعطيل جميع الأزرار
+            disableAllAdminButtons(true);
+            
+            // تحديث رسالة التحذير
+            warningDiv.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
+                    <div style="background: #ff4444; color: white; width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">⚠️</div>
+                    <strong style="color: #ff4444;">مسؤول النظام الرئيسي</strong>
+                </div>
+                <p style="color: rgba(255,255,255,0.8); font-size: 12px; margin: 5px 0 0 0; line-height: 1.4;">
+                    هذا الحساب محمي بالنظام. لا يمكن تنفيذ أي إجراء عليه.
+                    <br><small style="color: rgba(255,255,255,0.5);">الحماية: ${PROTECTED_USERS[adminTargetUser.id]?.level || 'SYSTEM_OWNER'}</small>
+                </p>
+            `;
+        } else {
+            // إخفاء تحذير الحماية
+            warningDiv.style.display = 'none';
+            
+            // إذا كان المستخدم أدمن، إظهار معلومات المستوى
+            if (adminTargetUser.isAdmin) {
+                levelInfoDiv.style.display = 'block';
+                const level = adminTargetUser.isSuperAdmin ? 'سوبر أدمن' : 'أدمن عادي';
+                levelInfoDiv.innerHTML = `
+                    <p style="color: #00bcd4; margin: 0; font-size: 12px; font-family: 'Tajawal', sans-serif;">
+                        🛡️ <strong>أدمن نظام:</strong> ${level}
+                    </p>
+                `;
+            } else {
+                levelInfoDiv.style.display = 'none';
+            }
+            
+            // التحقق من صلاحيات الأدمن الحالي
+            const hasFullPermissions = await checkAdminPermissions(currentUser);
+            
+            // تحديث معلومات الصلاحيات
+            permissionsInfo.style.display = 'block';
+            document.getElementById('current-admin-permissions').textContent = 
+                hasFullPermissions ? 'صلاحيات كاملة' : 'صلاحيات محدودة';
+            
+            // تفعيل/تعطيل الأزرار حسب الصلاحيات
+            updateAdminButtons(hasFullPermissions, adminTargetUser);
+        }
+        
+        // إظهار المودال
+        document.getElementById('admin-actions-modal').style.display = 'flex';
+        
+    } catch (error) {
+        console.error('Error loading admin actions:', error);
+        showNotification('حدث خطأ في تحميل بيانات المستخدم', 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+// التحقق إذا كان المستخدم محمياً
+function isProtectedUser(userId) {
+    // المسؤول الرئيسي
+    if (userId === "1111" || userId === "texn") {
+        return true;
+    }
+    
+    // أي أدمن سوبر
+    if (adminTargetUser?.isSuperAdmin) {
+        return true;
+    }
+    
+    // المستخدمين في قائمة الحماية
+    return userId in PROTECTED_USERS;
+}
+
+// التحقق من صلاحيات الأدمن الحالي
+async function checkAdminPermissions(adminUser) {
+    // إذا كان المسؤول الرئيسي
+    if (adminUser.id === "1111" || adminUser.username === "texn") {
+        return {
+            canBan: true,
+            canDelete: true,
+            canPromote: true,
+            canDemote: true,
+            canGrantPremium: true,
+            canModifyAdmins: true,
+            level: "SYSTEM_OWNER"
+        };
+    }
+    
+    // إذا كان سوبر أدمن
+    if (adminUser.isSuperAdmin) {
+        return {
+            canBan: true,
+            canDelete: true,
+            canPromote: false, // لا يقدر يرفع أدمن
+            canDemote: false, // لا يقدر يخفض أدمن
+            canGrantPremium: false, // لا يقدر يعطي مميز
+            canModifyAdmins: false, // لا يلمس الأدمن الآخرين
+            level: "SUPER_ADMIN"
+        };
+    }
+    
+    // إذا كان أدمن عادي
+    if (adminUser.isAdmin) {
+        return {
+            canBan: true,
+            canDelete: false, // لا يقدر يحذف
+            canPromote: false,
+            canDemote: false,
+            canGrantPremium: false,
+            canModifyAdmins: false,
+            level: "NORMAL_ADMIN"
+        };
+    }
+    
+    // ليس أدمن
+    return {
+        canBan: false,
+        canDelete: false,
+        canPromote: false,
+        canDemote: false,
+        canGrantPremium: false,
+        canModifyAdmins: false,
+        level: "NONE"
+    };
+}
+
+// تحديث أزرار الإجراءات حسب الصلاحيات
+function updateAdminButtons(permissions, targetUser) {
+    const buttons = {
+        ban: document.querySelector('[data-action="ban"]'),
+        promote: document.querySelector('[data-action="promote"]'),
+        demote: document.querySelector('[data-action="demote"]'),
+        premium: document.querySelector('[data-action="premium"]'),
+        delete: document.querySelector('[data-action="delete"]')
+    };
+    
+    // حظر
+    if (permissions.canBan) {
+        enableButton(buttons.ban, 'حظر المستخدم');
+    } else {
+        disableButton(buttons.ban, '❌ غير مصرح لك بالحظر');
+    }
+    
+    // ترقية لأدمن (فقط للمسؤول الرئيسي)
+    if (permissions.canPromote && !targetUser.isAdmin) {
+        enableButton(buttons.promote, 'ترقية إلى أدمن');
+    } else {
+        const reason = targetUser.isAdmin ? 'المستخدم بالفعل أدمن' : '❌ غير مصرح لك';
+        disableButton(buttons.promote, reason);
+    }
+    
+    // إلغاء صلاحية أدمن
+    if (permissions.canDemote && targetUser.isAdmin && 
+        !(targetUser.id === "1111" || targetUser.username === "texn")) {
+        enableButton(buttons.demote, 'إلغاء صلاحية أدمن');
+    } else {
+        disableButton(buttons.demote, '❌ غير مصرح لك');
+    }
+    
+    // تفعيل مميز (فقط للمسؤول الرئيسي)
+    if (permissions.canGrantPremium) {
+        enableButton(buttons.premium, 'تفعيل اشتراك مميز');
+    } else {
+        disableButton(buttons.premium, '❌ غير مصرح لك');
+    }
+    
+    // حذف (فقط للمسؤول الرئيسي)
+    if (permissions.canDelete && !targetUser.isAdmin) {
+        enableButton(buttons.delete, 'حذف المستخدم');
+    } else {
+        const reason = targetUser.isAdmin ? 'لا يمكن حذف أدمن' : '❌ غير مصرح لك';
+        disableButton(buttons.delete, reason);
+    }
+}
+
+// تفعيل زر
+function enableButton(button, text) {
+    if (!button) return;
+    
+    const icon = button.querySelector('i').outerHTML;
+    button.innerHTML = `${icon} ${text}`;
+    button.disabled = false;
+    button.style.opacity = '1';
+    button.style.cursor = 'pointer';
+    button.style.pointerEvents = 'auto';
+}
+
+// تعطيل زر
+function disableButton(button, reason) {
+    if (!button) return;
+    
+    button.innerHTML = `<i class="fas fa-ban"></i> ${reason}`;
+    button.disabled = true;
+    button.style.opacity = '0.5';
+    button.style.cursor = 'not-allowed';
+    button.style.pointerEvents = 'none';
+}
+
+// تعطيل جميع الأزرار
+function disableAllAdminButtons(showMessage = false) {
+    const buttons = document.querySelectorAll('.admin-action-btn');
+    
+    buttons.forEach(button => {
+        if (showMessage) {
+            button.innerHTML = '<i class="fas fa-shield-alt"></i> محمي بالنظام';
+        }
+        button.disabled = true;
+        button.style.opacity = '0.3';
+        button.style.cursor = 'not-allowed';
+        button.style.pointerEvents = 'none';
+    });
+}
+
+// تنفيذ إجراء الأدمن مع التحقق
+async function executeAdminAction(action) {
+    if (!adminTargetUser) {
+        showNotification('لم يتم تحديد مستخدم', 'error');
+        return;
+    }
+    
+    // التحقق إذا كان المستخدم محمياً
+    if (isProtectedUser(adminTargetUser.id)) {
+        showNotification('❌ هذا المستخدم محمي بالنظام ولا يمكن تعديله', 'error');
+        return;
+    }
+    
+    // التحقق من صلاحيات الأدمن الحالي
+    const permissions = await checkAdminPermissions(currentUser);
+    
+    // التحقق من كل إجراء
+    switch (action) {
+        case 'ban':
+            if (!permissions.canBan) {
+                showNotification('❌ ليس لديك صلاحية حظر المستخدمين', 'error');
+                return;
+            }
+            await banUser(adminTargetUser.id);
+            break;
+            
+        case 'promote':
+            if (!permissions.canPromote) {
+                showNotification('❌ فقط مسؤول النظام يمكنه ترقية المستخدمين لأدمن', 'error');
+                return;
+            }
+            await promoteToAdmin(adminTargetUser.username);
+            break;
+            
+        case 'demote':
+            if (!permissions.canDemote) {
+                showNotification('❌ غير مصرح لك بإلغاء صلاحية الأدمن', 'error');
+                return;
+            }
+            await demoteAdmin(adminTargetUser.username);
+            break;
+            
+        case 'premium':
+            if (!permissions.canGrantPremium) {
+                showNotification('❌ فقط مسؤول النظام يمكنه تفعيل الاشتراك المميز', 'error');
+                return;
+            }
+            await grantPremium(adminTargetUser.id);
+            break;
+            
+        case 'delete':
+            if (!permissions.canDelete) {
+                showNotification('❌ ليس لديك صلاحية حذف المستخدمين', 'error');
+                return;
+            }
+            await deleteUser(adminTargetUser.username);
+            break;
+    }
+    
+    // إغلاق المودال بعد التنفيذ
+    closeModal();
+}
+
+// ============================================
+// 🔧 دوال الإجراءات المحسنة
+// ============================================
+
+// حظر مستخدم
+async function banUser(userId) {
+    const reason = prompt('سبب الحظر:');
+    if (!reason) return;
+    
+    const days = prompt('مدة الحظر بالأيام (1-30):', '7');
+    if (!days || isNaN(days) || days < 1 || days > 30) {
+        showNotification('مدة الحظر غير صالحة', 'error');
+        return;
+    }
+    
+    try {
+        const until = Date.now() + (parseInt(days) * 24 * 60 * 60 * 1000);
+        
+        await set(child(bansRef, userId), {
+            reason: reason,
+            until: until,
+            bannedBy: currentUser.username,
+            bannedAt: Date.now()
+        });
+        
+        showNotification(`✅ تم حظر المستخدم لمدة ${days} أيام`, 'success');
+    } catch (error) {
+        showNotification('حدث خطأ في حظر المستخدم', 'error');
+    }
+}
+
+// ترقية مستخدم لأدمن (فقط للمسؤول الرئيسي)
+async function promoteToAdmin(username) {
+    if (currentUser.id !== "1111" && currentUser.username !== "texn") {
+        showNotification('❌ فقط مسؤول النظام يمكنه ترقية المستخدمين', 'error');
+        return;
+    }
+    
+    try {
+        await update(child(usersRef, username), {
+            isAdmin: true,
+            adminLevel: 50,
+            promotedBy: currentUser.username,
+            promotedAt: Date.now()
+        });
+        
+        showNotification('✅ تم ترقية المستخدم إلى أدمن', 'success');
+    } catch (error) {
+        showNotification('حدث خطأ في ترقية المستخدم', 'error');
+    }
+}
+
+// إلغاء صلاحية أدمن
+async function demoteAdmin(username) {
+    // التحقق إذا كان يحاول إلغاء صلاحية نفسه
+    if (username === currentUser.username) {
+        showNotification('❌ لا يمكنك إلغاء صلاحيات نفسك', 'error');
+        return;
+    }
+    
+    // التحقق إذا كان يحاول إلغاء صلاحية المسؤول الرئيسي
+    if (username === "texn" || username === currentUser.username) {
+        showNotification('❌ لا يمكن إلغاء صلاحية مسؤول النظام', 'error');
+        return;
+    }
+    
+    try {
+        await update(child(usersRef, username), {
+            isAdmin: false,
+            isSuperAdmin: false,
+            demotedBy: currentUser.username,
+            demotedAt: Date.now()
+        });
+        
+        showNotification('✅ تم إلغاء صلاحية الأدمن', 'success');
+    } catch (error) {
+        showNotification('حدث خطأ في إلغاء الصلاحية', 'error');
+    }
+}
+
+// تفعيل اشتراك مميز (فقط للمسؤول الرئيسي)
+async function grantPremium(userId) {
+    if (currentUser.id !== "1111" && currentUser.username !== "texn") {
+        showNotification('❌ فقط مسؤول النظام يمكنه تفعيل الاشتراك المميز', 'error');
+        return;
+    }
+    
+    const days = prompt('مدة الاشتراك بالأيام (1-365):', '30');
+    if (!days || isNaN(days) || days < 1 || days > 365) {
+        showNotification('المدة غير صالحة', 'error');
+        return;
+    }
+    
+    try {
+        const premiumUntil = Date.now() + (parseInt(days) * 24 * 60 * 60 * 1000);
+        
+        await set(child(premiumRef, userId), {
+            isPremium: true,
+            premiumUntil: premiumUntil,
+            premiumId: userId,
+            gradient: 1,
+            activatedAt: Date.now(),
+            activatedBy: currentUser.username,
+            manualGrant: true
+        });
+        
+        await update(child(usersRef, await getUsernameById(userId)), {
+            isPremium: true,
+            premiumUntil: premiumUntil
+        });
+        
+        showNotification(`✅ تم تفعيل اشتراك مميز لمدة ${days} يوم`, 'success');
+    } catch (error) {
+        showNotification('حدث خطأ في تفعيل الاشتراك', 'error');
+    }
+}
+
+// حذف مستخدم
+async function deleteUser(username) {
+    if (currentUser.id !== "1111" && currentUser.username !== "texn") {
+        showNotification('❌ فقط مسؤول النظام يمكنه حذف المستخدمين', 'error');
+        return;
+    }
+    
+    // التحقق إذا كان يحاول حذف نفسه
+    if (username === currentUser.username) {
+        showNotification('❌ لا يمكنك حذف نفسك', 'error');
+        return;
+    }
+    
+    // التحقق إذا كان يحاول حذف المسؤول الرئيسي
+    if (username === "texn") {
+        showNotification('❌ لا يمكن حذف مسؤول النظام', 'error');
+        return;
+    }
+    
+    if (!confirm(`⚠️ هل أنت متأكد من حذف ${username}؟ هذا الإجراء لا يمكن التراجع عنه.`)) {
+        return;
+    }
+    
+    try {
+        await remove(child(usersRef, username));
+        showNotification('✅ تم حذف المستخدم', 'success');
+    } catch (error) {
+        showNotification('حدث خطأ في حذف المستخدم', 'error');
+    }
+}
+
+// الحصول على اسم المستخدم من الـ ID
+async function getUsernameById(userId) {
+    const usersSnap = await get(usersRef);
+    let username = null;
+    
+    if (usersSnap.exists()) {
+        usersSnap.forEach((child) => {
+            const data = child.val();
+            if (data.id === userId) {
+                username = child.key;
+            }
+        });
+    }
+    
+    return username;
+}
+
+// ============================================
+// 🔧 دوال مساعدة للنظام
+// ============================================
+
+// عرض لوحة الأدمن الرئيسية مع التحقق
+async function showAdminPanel() {
+    // التحقق إذا كان المستخدم أدمن
+    if (!currentUser.isAdmin && !currentUser.isSuperAdmin) {
+        showNotification('ليس لديك صلاحية الوصول إلى لوحة الأدمن', 'error');
+        return;
+    }
+    
+    // التحقق من صلاحيات المسؤول الرئيسي
+    const isSystemOwner = currentUser.id === "1111" || currentUser.username === "texn";
+    
+    try {
+        showLoading('جاري تحميل إحصائيات النظام...');
+        
+        const usersSnap = await get(usersRef);
+        let totalUsers = 0;
+        let onlineUsers = 0;
+        let premiumUsers = 0;
+        let adminUsers = 0;
+        
+        if (usersSnap.exists()) {
+            usersSnap.forEach((child) => {
+                totalUsers++;
+                const userData = child.val();
+                if (userData.isOnline) onlineUsers++;
+                if (userData.isPremium) premiumUsers++;
+                if (userData.isAdmin) adminUsers++;
+            });
+        }
+        
+        // تحديث الإحصائيات
+        document.getElementById('total-users').textContent = totalUsers;
+        document.getElementById('online-users').textContent = onlineUsers;
+        document.getElementById('premium-users').textContent = premiumUsers;
+        
+        // إظهار/إخفاء أدوات المسؤول الرئيسي
+        const adminTools = document.querySelectorAll('.admin-tool');
+        
+        if (!isSystemOwner) {
+            // إخفاء أدوات المسؤول الرئيسي
+            adminTools.forEach((tool, index) => {
+                if (index > 0) { // تبقي فقط أداة إدارة المستخدمين
+                    tool.style.display = 'none';
+                }
+            });
+            
+            // تحديث الرسالة
+            const panelHeader = document.querySelector('#admin-panel-modal .modal-header h2');
+            if (panelHeader) {
+                panelHeader.innerHTML = '<i class="fas fa-user-shield"></i> لوحة الأدمن المحدودة';
+            }
+        }
+        
+        // إظهار المودال
+        document.getElementById('admin-panel-modal').style.display = 'flex';
+        
+    } catch (error) {
+        console.error('Error loading admin stats:', error);
+        showNotification('حدث خطأ في تحميل إحصائيات النظام', 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+// عرض إدارة الاشتراكات (فقط للمسؤول الرئيسي)
+async function showPremiumManagement() {
+    if (currentUser.id !== "1111" && currentUser.username !== "texn") {
+        showNotification('❌ هذه الخاصية متاحة فقط لمسؤول النظام', 'error');
+        return;
+    }
+    
+    // كود إدارة الاشتراكات
+    showNotification('خاصية إدارة الاشتراكات - قيد التطوير', 'info');
+}
+
+// توليد أكواد مميزة (فقط للمسؤول الرئيسي)
+async function generatePremiumCode() {
+    if (currentUser.id !== "1111" && currentUser.username !== "texn") {
+        showNotification('❌ هذه الخاصية متاحة فقط لمسؤول النظام', 'error');
+        return;
+    }
+    
+    // كود توليد الأكواد
+    showNotification('خاصية توليد الأكواد - قيد التطوير', 'info');
+}
+
+// ============================================
+// 🔧 تحديث الوظائف الموجودة
+// ============================================
+
+// استبدال دالة adminAction القديمة
+window.adminAction = executeAdminAction;
+
+// جعل الدوال متاحة عالمياً
+window.showAdminActions = showAdminActions;
+window.showAdminPanel = showAdminPanel;
+window.showPremiumManagement = showPremiumManagement;
+window.generatePremiumCode = generatePremiumCode;
+window.executeAdminAction = executeAdminAction; 
+    
 </script>
 </body>
 </html>
