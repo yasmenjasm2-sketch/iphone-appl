@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>شات بلس - اRemas</title>
+<title>شات بلس - Remas</title>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;500;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
@@ -1014,7 +1014,7 @@
 <!-- شاشة تسجيل الدخول -->
 <div id="login-screen">
     <div class="login-header">
-        <h1>شات بلس المميزRemas</h1>
+        <h1>شات بلس المميز</h1>
         <p style="color: rgba(255,255,255,0.7);">التواصل الأكثر أماناً وتميزاً</p>
     </div>
     
@@ -1071,7 +1071,7 @@
     </a>
     
     <div class="admin-credentials">
-        <p>/: <strong>texn2999</strong> |مثال كلمة المرور: <strong>*******</strong></p>
+        <p>مثال: <strong>text999</strong> | كلمة المرور: <strong>******</strong></p>
     </div>
 </div>
 
@@ -1215,21 +1215,85 @@
             <button class="close-btn" onclick="closeModal()">×</button>
         </div>
         
+        <div class="modal-body">
+            <div id="admin-action-user-info" style="text-align: center; margin-bottom: 20px;">
+                <img id="admin-action-avatar" src="" class="avatar-preview" style="width: 80px; height: 80px;">
+                <h3 id="admin-action-name" style="margin: 10px 0;"></h3>
+                <p id="admin-action-id" class="profile-id"></p>
+            </div>
+            
+            <div class="admin-action-buttons">
+                <button class="admin-action-btn ban" onclick="adminAction('ban')">
+                    <i class="fas fa-ban"></i> حظر المستخدم
+                </button>
+                <button class="admin-action-btn promote" onclick="adminAction('promote')">
+                    <i class="fas fa-user-shield"></i> ترقية إلى أدمن
+                </button>
+                <button class="admin-action-btn" onclick="adminAction('demote')">
+                    <i class="fas fa-user"></i> إلغاء صلاحية أدمن
+                </button>
+                <button class="admin-action-btn premium" onclick="adminAction('premium')">
+                    <i class="fas fa-crown"></i> تفعيل اشتراك مميز
+                </button>
+                <button class="admin-action-btn" onclick="adminAction('delete')">
+                    <i class="fas fa-trash"></i> حذف المستخدم
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- مودال الأدمن الرئيسي -->
+<div class="modal" id="admin-panel-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2><i class="fas fa-shield-alt"></i> لوحة تحكم الأدمن</h2>
+            <button class="close-btn" onclick="closeModal()">×</button>
+        </div>
         
         <div class="modal-body">
-    <div id="admin-action-user-info" style="text-align: center; margin-bottom: 20px;">
-        <img id="admin-action-avatar" src="" class="avatar-preview" style="width: 80px; height: 80px;">
-        <h3 id="admin-action-name" style="margin: 10px 0;"></h3>
-        <p id="admin-action-id" class="profile-id"></p>
-        
-        <!-- 🔒 أضف هذا السطر هنا ↓ -->
-        <div id="admin-protection-warning" style="display: none; background: rgba(255, 68, 68, 0.1); padding: 10px; border-radius: 8px; margin-top: 10px; border-left: 4px solid #ff4444;">
-            <p style="color: #ff4444; margin: 0; font-size: 13px; font-family: 'Tajawal', sans-serif;">
-                ⚠️ <strong>مسؤول النظام:</strong> لا يمكن تنفيذ أي إجراء على هذا الحساب
-            </p>
+            <div class="admin-tools">
+                <div class="admin-tool" onclick="showAllUsersModal()">
+                    <h3><i class="fas fa-users-cog"></i> إدارة المستخدمين</h3>
+                    <p>عرض جميع المستخدمين والإجراءات</p>
+                </div>
+                
+                <div class="admin-tool" onclick="showPremiumManagement()">
+                    <h3><i class="fas fa-crown"></i> إدارة الاشتراكات</h3>
+                    <p>تفعيل وإلغاء الاشتراكات المميزة</p>
+                </div>
+                
+                <div class="admin-tool" onclick="generatePremiumCode()">
+                    <h3><i class="fas fa-key"></i> توليد أكواد</h3>
+                    <p>إنشاء أكواد اشتراك جديدة</p>
+                </div>
+                
+                <div class="admin-tool" onclick="showSystemStats()">
+                    <h3><i class="fas fa-chart-bar"></i> إحصائيات النظام</h3>
+                    <p>إحصائيات الاستخدام والنشاط</p>
+                </div>
+            </div>
+            
+            <div style="margin-top: 30px;">
+                <h3 style="margin-bottom: 15px;">إحصائيات سريعة</h3>
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="total-users">0</div>
+                        <div class="stat-label">إجمالي المستخدمين</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="online-users">0</div>
+                        <div class="stat-label">المستخدمين النشطين</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="premium-users">0</div>
+                        <div class="stat-label">المستخدمين المميزين</div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <!-- 🔒 نهاية الإضافة -->
     </div>
+</div>
 
 <!-- باقي المودالات من الكود السابق (نفسها بدون تغيير) -->
 <div class="modal" id="premium-modal">
@@ -1659,14 +1723,14 @@ async function adminLogin() {
     }
     
     // حساب الأدمن الرئيسي
-    if (username === "texn@gmail.com" && password === "34567") {
+    if (username === "texn" && password === "hamzagmail34567") {
         const adminUserSnap = await get(child(usersRef, "texn"));
         
         if (!adminUserSnap.exists()) {
             // إنشاء حساب الأدمن إذا لم يكن موجوداً
-            await set(child(usersRef, "texn،"), {
+            await set(child(usersRef, "texn"), {
                 id: "1111",
-                username: "texn34567",
+                username: "texn",
                 displayName: "𝐑𝐄𝐌𝐀𝐒 ༗",
                 password: "hamzagmail34567",
                 isAdmin: true,
@@ -1676,7 +1740,7 @@ async function adminLogin() {
                 premiumId: "ADMIN",
                 gradient: 1,
                 photo: "https://i.pinimg.com/736x/8b/16/7a/8b167af653c2399dd93b952a48740620.jpg",
-                bio: "Super Admin - لتقديم لشكاوي عبر انستقرام",
+                bio: "Super Admin - مدير النظام الرئيسي",
                 joinedAt: Date.now(),
                 lastLogin: Date.now(),
                 isOnline: true
@@ -2750,7 +2814,5 @@ window.adminAction = adminAction;
 window.showLoginTab = showLoginTab;
 window.showRegisterTab = showRegisterTab;
 </script>
-<!-- أضف هذا السطر هنا ↓ -->
-<script src="admin-protection-system.js"></script>
 </body>
 </html>
