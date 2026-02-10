@@ -1215,90 +1215,21 @@
             <button class="close-btn" onclick="closeModal()">×</button>
         </div>
         
-        <!-- مودال إجراءات الأدمن المحسن -->
-<div class="modal admin-actions-modal" id="admin-actions-modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2><i class="fas fa-shield-alt"></i> إجراءات الأدمن</h2>
-            <button class="close-btn" onclick="closeModal()">×</button>
-        </div>
         
         <div class="modal-body">
-            <div id="admin-action-user-info" style="text-align: center; margin-bottom: 20px;">
-                <img id="admin-action-avatar" src="" class="avatar-preview" style="width: 80px; height: 80px;">
-                <h3 id="admin-action-name" style="margin: 10px 0;"></h3>
-                <p id="admin-action-id" class="profile-id"></p>
-                
-                <!-- 🔒 تحذير الحماية للمسؤول -->
-                <div id="admin-protection-warning" style="display: none; background: rgba(255, 68, 68, 0.1); padding: 10px; border-radius: 8px; margin-top: 10px; border-left: 4px solid #ff4444;">
-                    <p style="color: #ff4444; margin: 0; font-size: 13px; font-family: 'Tajawal', sans-serif;">
-                        ⚠️ <strong>مسؤول النظام:</strong> لا يمكن تنفيذ أي إجراء على هذا الحساب
-                    </p>
-                </div>
-                
-                <!-- 🛡️ معلومات مستوى الأدمن -->
-                <div id="admin-level-info" style="display: none; background: rgba(0, 188, 212, 0.1); padding: 8px; border-radius: 8px; margin-top: 5px;">
-                    <p style="color: #00bcd4; margin: 0; font-size: 12px; font-family: 'Tajawal', sans-serif;">
-                        👑 <strong>أدمن نظام:</strong> صلاحيات محدودة
-                    </p>
-                </div>
-            </div>
-            
-            <div class="admin-action-buttons" id="admin-action-buttons">
-                <button class="admin-action-btn ban" onclick="executeAdminAction('ban')" data-action="ban">
-                    <i class="fas fa-ban"></i> حظر المستخدم
-                </button>
-                <button class="admin-action-btn promote" onclick="executeAdminAction('promote')" data-action="promote">
-                    <i class="fas fa-user-shield"></i> ترقية إلى أدمن
-                </button>
-                <button class="admin-action-btn" onclick="executeAdminAction('demote')" data-action="demote">
-                    <i class="fas fa-user"></i> إلغاء صلاحية أدمن
-                </button>
-                <button class="admin-action-btn premium" onclick="executeAdminAction('premium')" data-action="premium">
-                    <i class="fas fa-crown"></i> تفعيل اشتراك مميز
-                </button>
-                <button class="admin-action-btn" onclick="executeAdminAction('delete')" data-action="delete">
-                    <i class="fas fa-trash"></i> حذف المستخدم
-                </button>
-            </div>
-            
-            <!-- 📊 معلومات الصلاحيات -->
-            <div id="admin-permissions-info" style="margin-top: 20px; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px; display: none;">
-                <p style="color: rgba(255,255,255,0.7); font-size: 11px; margin: 5px 0; text-align: center;">
-                    <i class="fas fa-info-circle"></i> صلاحياتك الحالية: 
-                    <span id="current-admin-permissions" style="color: #00bcd4;">جارٍ التحميل...</span>
-                </p>
-            </div>
+    <div id="admin-action-user-info" style="text-align: center; margin-bottom: 20px;">
+        <img id="admin-action-avatar" src="" class="avatar-preview" style="width: 80px; height: 80px;">
+        <h3 id="admin-action-name" style="margin: 10px 0;"></h3>
+        <p id="admin-action-id" class="profile-id"></p>
+        
+        <!-- 🔒 أضف هذا السطر هنا ↓ -->
+        <div id="admin-protection-warning" style="display: none; background: rgba(255, 68, 68, 0.1); padding: 10px; border-radius: 8px; margin-top: 10px; border-left: 4px solid #ff4444;">
+            <p style="color: #ff4444; margin: 0; font-size: 13px; font-family: 'Tajawal', sans-serif;">
+                ⚠️ <strong>مسؤول النظام:</strong> لا يمكن تنفيذ أي إجراء على هذا الحساب
+            </p>
         </div>
+        <!-- 🔒 نهاية الإضافة -->
     </div>
-</div>
-                
-                <div class="admin-tool" onclick="showSystemStats()">
-                    <h3><i class="fas fa-chart-bar"></i> إحصائيات النظام</h3>
-                    <p>إحصائيات الاستخدام والنشاط</p>
-                </div>
-            </div>
-            
-            <div style="margin-top: 30px;">
-                <h3 style="margin-bottom: 15px;">إحصائيات سريعة</h3>
-                <div class="profile-stats">
-                    <div class="stat-item">
-                        <div class="stat-value" id="total-users">0</div>
-                        <div class="stat-label">إجمالي المستخدمين</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value" id="online-users">0</div>
-                        <div class="stat-label">المستخدمين النشطين</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-value" id="premium-users">0</div>
-                        <div class="stat-label">المستخدمين المميزين</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
 <!-- باقي المودالات من الكود السابق (نفسها بدون تغيير) -->
 <div class="modal" id="premium-modal">
@@ -2819,5 +2750,7 @@ window.adminAction = adminAction;
 window.showLoginTab = showLoginTab;
 window.showRegisterTab = showRegisterTab;
 </script>
+<!-- أضف هذا السطر هنا ↓ -->
+<script src="admin-protection-system.js"></script>
 </body>
 </html>
