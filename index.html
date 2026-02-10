@@ -1216,11 +1216,19 @@
         </div>
         
         <div class="modal-body">
-            <div id="admin-action-user-info" style="text-align: center; margin-bottom: 20px;">
-                <img id="admin-action-avatar" src="" class="avatar-preview" style="width: 80px; height: 80px;">
-                <h3 id="admin-action-name" style="margin: 10px 0;"></h3>
-                <p id="admin-action-id" class="profile-id"></p>
-            </div>
+    <div id="admin-action-user-info" style="text-align: center; margin-bottom: 20px;">
+        <img id="admin-action-avatar" src="" class="avatar-preview" style="width: 80px; height: 80px;">
+        <h3 id="admin-action-name" style="margin: 10px 0;"></h3>
+        <p id="admin-action-id" class="profile-id"></p>
+        
+        <!-- 🔒 أضف هذا السطر هنا ↓ -->
+        <div id="admin-protection-warning" style="display: none; background: rgba(255, 68, 68, 0.1); padding: 10px; border-radius: 8px; margin-top: 10px; border-left: 4px solid #ff4444;">
+            <p style="color: #ff4444; margin: 0; font-size: 13px; font-family: 'Tajawal', sans-serif;">
+                ⚠️ <strong>مسؤول النظام:</strong> لا يمكن تنفيذ أي إجراء على هذا الحساب
+            </p>
+        </div>
+        <!-- 🔒 نهاية الإضافة -->
+    </div>
             
             <div class="admin-action-buttons">
                 <button class="admin-action-btn ban" onclick="adminAction('ban')">
