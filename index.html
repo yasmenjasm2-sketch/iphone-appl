@@ -3,215 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Remas Group Chat - شات تليجرام الجماعي</title>
+    <title>Remas Chat - المطور</title>
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #0f172a;
-            color: #f8fafc;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        #chat-container {
-            width: 95%;
-            max-width: 500px;
-            height: 85vh;
-            background: #1e293b;
-            border-radius: 15px;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            overflow: hidden;
-        }
-        #messages {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        .message {
-            background: #334155;
-            padding: 10px 15px;
-            border-radius: 12px;
-            max-width: 85%;
-            word-wrap: break-word;
-            font-size: 14px;
-            animation: fadeIn 0.3s ease;
-        }
-        .message .user-name {
-            display: block;
-            font-weight: bold;
-            color: #3b82f6;
-            font-size: 11px;
-            margin-bottom: 3px;
-            text-transform: uppercase;
-        }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; } }
-        
-        .input-area {
-            background: #0f172a;
-            padding: 15px;
-            display: flex;
-            gap: 10px;
-            border-top: 1px solid #334155;
-        }
-        input {
-            flex: 1;
-            background: #334155;
-            border: 1px solid #475569;
-            padding: 12px;
-            border-radius: 8px;
-            color: white;
-            outline: none;
-        }
-        button {
-            background: #3b82f6;
-            color: white;
-            border: none;
-            padding: 0 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: 0.2s;
-        }
-        button:hover { background: #2563eb; }
-
-        /* واجهة اختيار الاسم */
-        #name-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.98);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-        }
-        .name-box {
-            background: #1e293b;
-            padding: 30px;
-            border-radius: 15px;
-            text-align: center;
-            width: 80%;
-            max-width: 350px;
-        }
+        body { font-family: sans-serif; background-color: #0f172a; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        #chat-container { width: 400px; height: 80vh; background: #1e293b; border-radius: 15px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
+        #messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .message { background: #334155; padding: 10px; border-radius: 10px; font-size: 14px; max-width: 80%; }
+        .user-name { font-weight: bold; color: #3b82f6; display: block; font-size: 12px; }
+        .input-area { padding: 15px; background: #0f172a; display: flex; gap: 10px; }
+        input { flex: 1; padding: 10px; border-radius: 5px; border: none; outline: none; background: #334155; color: white; }
+        button { background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+        #status { font-size: 12px; padding: 5px; text-align: center; background: #ef4444; display: none; }
     </style>
 </head>
 <body>
 
-    <div id="name-overlay">
-        <div class="name-box">
-            <h2 style="color: #3b82f6;">ChatDoy</h2>
-            <p>أدخل اسمك المستعار للبدء</p>
-            <input type="text" id="userNameInput" placeholder="مثلاً: ريماس..." style="width: 90%; margin-bottom: 20px;">
-            <button id="startChatBtn" style="width: 100%; height: 45px;">دخول الدردشة</button>
-        </div>
-    </div>
-
     <div id="chat-container">
+        <div id="status">خطأ في الاتصال بتليجرام!</div>
         <div id="messages"></div>
         <div class="input-area">
-            <input type="text" id="messageInput" placeholder="اكتب رسالتك هنا..." autocomplete="off">
+            <input type="text" id="messageInput" placeholder="اكتب هنا...">
             <button id="sendBtn">إرسال</button>
         </div>
     </div>
 
     <script>
         const BOT_TOKEN = "7894436976:AAFdg77dpzCgpeLnkwAQqP9POkwZMwWoikg";
-        const CHAT_ID = "-3783270855"; // تم إضافة علامة السالب ليعمل مع المجموعات
+        // جرب إضافة -100 قبل الآيدي إذا كان قروب كبير (Supergroup)
+        const CHAT_ID = "-1003783270855"; 
 
         const messagesDiv = document.getElementById('messages');
         const messageInput = document.getElementById('messageInput');
-        const sendBtn = document.getElementById('sendBtn');
-        const nameOverlay = document.getElementById('name-overlay');
-        const userNameInput = document.getElementById('userNameInput');
-        const startChatBtn = document.getElementById('startChatBtn');
-
-        let myName = "";
+        const statusDiv = document.getElementById('status');
         let lastUpdateId = 0;
-        let processedMessages = new Set(); 
-
-        startChatBtn.onclick = () => {
-            const name = userNameInput.value.trim();
-            if (name) {
-                myName = name;
-                nameOverlay.style.display = "none";
-                // جلب الرسائل السابقة فور الدخول
-                fetchMessages();
-                setInterval(fetchMessages, 2500); // تحديث كل ثانيتين ونصف
-            }
-        };
-
-        function appendMessage(user, text) {
-            const msgUniqueId = user + text; 
-            if (processedMessages.has(msgUniqueId)) return;
-            processedMessages.add(msgUniqueId);
-
-            const msgDiv = document.createElement('div');
-            msgDiv.classList.add('message');
-            msgDiv.innerHTML = `<span class="user-name">${user}</span> ${text}`;
-            messagesDiv.appendChild(msgDiv);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        }
+        let myName = "زائر_" + Math.floor(Math.random() * 1000);
 
         async function sendMessage() {
             const text = messageInput.value.trim();
             if (!text) return;
 
-            const fullMessage = `[${myName}]: ${text}`;
-
+            const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+            
             try {
-                // إخفاء النص فوراً لتجربة مستخدم سريعة
-                messageInput.value = "";
-                
-                await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         chat_id: CHAT_ID,
-                        text: fullMessage
+                        text: `[${myName}]: ${text}`
                     })
                 });
-            } catch (e) {
-                console.error("خطأ في الإرسال");
+
+                const data = await response.json();
+                if (data.ok) {
+                    messageInput.value = "";
+                    statusDiv.style.display = "none";
+                    // التعديل هنا: عرض الرسالة محلياً فور الإرسال لأن تليجرام لا يعيد رسائل البوت لنفسه
+                    renderMessage(data.result); 
+                } else {
+                    showError("خطأ من تليجرام: " + data.description);
+                }
+            } catch (error) {
+                showError("فشل الإرسال: تأكد من اتصال الإنترنت أو إعدادات CORS");
             }
+        }
+
+        function showError(msg) {
+            statusDiv.innerText = msg;
+            statusDiv.style.display = "block";
+            console.error(msg);
         }
 
         async function fetchMessages() {
             try {
                 const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getUpdates?offset=${lastUpdateId + 1}`);
                 const data = await response.json();
-
                 if (data.ok && data.result.length > 0) {
                     data.result.forEach(update => {
                         lastUpdateId = update.update_id;
-                        if (update.message && update.message.text && update.message.chat.id.toString() === CHAT_ID) {
-                            const rawText = update.message.text;
-                            
-                            if (rawText.includes("]: ")) {
-                                const parts = rawText.split("]: ");
-                                const sender = parts[0].replace("[", "");
-                                const msg = parts[1];
-                                appendMessage(sender, msg);
-                            } else {
-                                // عرض الرسائل التي تُكتب مباشرة في تليجرام من أعضاء المجموعة
-                                const sender = update.message.from.first_name || "عضو";
-                                appendMessage(sender, rawText);
-                            }
+                        if (update.message && update.message.text) {
+                            renderMessage(update.message);
                         }
                     });
                 }
-            } catch (e) {
-                console.error("خطأ في التحديث");
-            }
+            } catch (e) { console.log("جاري الانتظار..."); }
         }
 
-        sendBtn.onclick = sendMessage;
-        messageInput.onkeypress = (e) => { if (e.key === 'Enter') sendMessage(); };
+        function renderMessage(msg) {
+            const div = document.createElement('div');
+            div.className = 'message';
+            const sender = msg.text.includes(']: ') ? msg.text.split(']: ')[0].replace('[', '') : (msg.from.first_name || "عضو");
+            const text = msg.text.includes(']: ') ? msg.text.split(']: ')[1] : msg.text;
+            
+            div.innerHTML = `<span class="user-name">${sender}</span>${text}`;
+            messagesDiv.appendChild(div);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        document.getElementById('sendBtn').onclick = sendMessage;
+        messageInput.onkeypress = (e) => { if(e.key === 'Enter') sendMessage(); };
+        
+        // جلب الرسائل الأولية عند فتح الصفحة
+        fetchMessages();
+        // الاستمرار بجلب الرسائل الجديدة
+        setInterval(fetchMessages, 3000);
     </script>
 </body>
 </html>
