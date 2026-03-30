@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChatDoy - شات جماعي</title>
+    <title>Remas Group Chat - شات تليجرام الجماعي</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -32,7 +32,7 @@
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
         }
         .message {
             background: #334155;
@@ -41,17 +41,17 @@
             max-width: 85%;
             word-wrap: break-word;
             font-size: 14px;
-            position: relative;
             animation: fadeIn 0.3s ease;
         }
         .message .user-name {
             display: block;
             font-weight: bold;
             color: #3b82f6;
-            font-size: 12px;
-            margin-bottom: 4px;
+            font-size: 11px;
+            margin-bottom: 3px;
+            text-transform: uppercase;
         }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; } }
         
         .input-area {
             background: #0f172a;
@@ -77,12 +77,15 @@
             border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
+            transition: 0.2s;
         }
+        button:hover { background: #2563eb; }
+
         /* واجهة اختيار الاسم */
         #name-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.95);
+            background: rgba(15, 23, 42, 0.98);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -93,7 +96,8 @@
             padding: 30px;
             border-radius: 15px;
             text-align: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            width: 80%;
+            max-width: 350px;
         }
     </style>
 </head>
@@ -101,27 +105,24 @@
 
     <div id="name-overlay">
         <div class="name-box">
-            <h3>مرحباً بك في ChatDoy</h3>
-            <input type="text" id="userNameInput" placeholder="أدخل اسمك المستعار..." style="margin-bottom: 15px; width: 80%;">
-            <br>
-            <button id="startChatBtn">دخول الشات</button>
+            <h2 style="color: #3b82f6;">ChatDoy</h2>
+            <p>أدخل اسمك المستعار للبدء</p>
+            <input type="text" id="userNameInput" placeholder="مثلاً: ريماس..." style="width: 90%; margin-bottom: 20px;">
+            <button id="startChatBtn" style="width: 100%; height: 45px;">دخول الدردشة</button>
         </div>
     </div>
 
     <div id="chat-container">
         <div id="messages"></div>
         <div class="input-area">
-            <input type="text" id="messageInput" placeholder="اكتب رسالتك..." autocomplete="off">
+            <input type="text" id="messageInput" placeholder="اكتب رسالتك هنا..." autocomplete="off">
             <button id="sendBtn">إرسال</button>
         </div>
     </div>
 
     <script>
         const BOT_TOKEN = "7894436976:AAFdg77dpzCgpeLnkwAQqP9POkwZMwWoikg";
-        
-        // ⚠️ يجب وضع ID المجموعة هنا (Group ID) 
-        // تأكد من إضافة البوت للمجموعة أولاً
-        const CHAT_ID = "-1004999759094"; // استبدل هذا بالـ ID الحقيقي لمجموعتك
+        const CHAT_ID = "-3783270855"; // تم إضافة علامة السالب ليعمل مع المجموعات
 
         const messagesDiv = document.getElementById('messages');
         const messageInput = document.getElementById('messageInput');
@@ -132,33 +133,31 @@
 
         let myName = "";
         let lastUpdateId = 0;
-        let processedMessages = new Set(); // لمنع تكرار الرسائل
+        let processedMessages = new Set(); 
 
-        // الدخول للشات
         startChatBtn.onclick = () => {
             const name = userNameInput.value.trim();
             if (name) {
                 myName = name;
                 nameOverlay.style.display = "none";
-                fetchMessages(); // بدء جلب الرسائل
-                setInterval(fetchMessages, 3000); // تحديث كل 3 ثواني
+                // جلب الرسائل السابقة فور الدخول
+                fetchMessages();
+                setInterval(fetchMessages, 2500); // تحديث كل ثانيتين ونصف
             }
         };
 
-        // عرض الرسائل في الواجهة
         function appendMessage(user, text) {
-            const msgId = user + text; // معرف بسيط لمنع التكرار
-            if (processedMessages.has(msgId)) return;
-            processedMessages.add(msgId);
+            const msgUniqueId = user + text; 
+            if (processedMessages.has(msgUniqueId)) return;
+            processedMessages.add(msgUniqueId);
 
             const msgDiv = document.createElement('div');
             msgDiv.classList.add('message');
-            msgDiv.innerHTML = `<span class="user-name">${user}</span>${text}`;
+            msgDiv.innerHTML = `<span class="user-name">${user}</span> ${text}`;
             messagesDiv.appendChild(msgDiv);
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
 
-        // إرسال الرسالة
         async function sendMessage() {
             const text = messageInput.value.trim();
             if (!text) return;
@@ -166,6 +165,9 @@
             const fullMessage = `[${myName}]: ${text}`;
 
             try {
+                // إخفاء النص فوراً لتجربة مستخدم سريعة
+                messageInput.value = "";
+                
                 await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -174,13 +176,11 @@
                         text: fullMessage
                     })
                 });
-                messageInput.value = "";
             } catch (e) {
-                console.error("فشل الإرسال");
+                console.error("خطأ في الإرسال");
             }
         }
 
-        // جلب الرسائل من تليجرام (ليراها الجميع)
         async function fetchMessages() {
             try {
                 const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getUpdates?offset=${lastUpdateId + 1}`);
@@ -189,24 +189,24 @@
                 if (data.ok && data.result.length > 0) {
                     data.result.forEach(update => {
                         lastUpdateId = update.update_id;
-                        if (update.message && update.message.text) {
+                        if (update.message && update.message.text && update.message.chat.id.toString() === CHAT_ID) {
                             const rawText = update.message.text;
                             
-                            // تحليل النص لاستخراج الاسم والرسالة
                             if (rawText.includes("]: ")) {
                                 const parts = rawText.split("]: ");
                                 const sender = parts[0].replace("[", "");
                                 const msg = parts[1];
                                 appendMessage(sender, msg);
                             } else {
-                                // رسائل مرسلة مباشرة من تليجرام
-                                appendMessage(update.message.from.first_name, rawText);
+                                // عرض الرسائل التي تُكتب مباشرة في تليجرام من أعضاء المجموعة
+                                const sender = update.message.from.first_name || "عضو";
+                                appendMessage(sender, rawText);
                             }
                         }
                     });
                 }
             } catch (e) {
-                console.error("فشل التحديث");
+                console.error("خطأ في التحديث");
             }
         }
 
