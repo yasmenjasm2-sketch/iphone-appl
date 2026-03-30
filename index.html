@@ -3,130 +3,123 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Remas Chat - المطور</title>
+    <title>Remas Chat - Live</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
     <style>
         body { font-family: sans-serif; background-color: #0f172a; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        #chat-container { width: 400px; height: 80vh; background: #1e293b; border-radius: 15px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
+        #chat-container { width: 400px; height: 85vh; background: #1e293b; border-radius: 15px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
         #messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-        .message { background: #334155; padding: 10px; border-radius: 10px; font-size: 14px; max-width: 80%; }
-        .user-name { font-weight: bold; color: #3b82f6; display: block; font-size: 12px; }
+        .message { background: #334155; padding: 10px; border-radius: 10px; font-size: 14px; max-width: 85%; border-right: 4px solid #3b82f6; position: relative; }
+        .user-name { font-weight: bold; color: #3b82f6; display: block; font-size: 11px; margin-bottom: 4px; text-transform: uppercase; }
         .input-area { padding: 15px; background: #0f172a; display: flex; gap: 10px; }
-        input { flex: 1; padding: 10px; border-radius: 5px; border: none; outline: none; background: #334155; color: white; }
-        button { background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
-        #status { font-size: 12px; padding: 5px; text-align: center; background: #ef4444; display: none; }
+        input { flex: 1; padding: 12px; border-radius: 8px; border: none; outline: none; background: #334155; color: white; }
+        button { background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #2563eb; }
+        #status { font-size: 11px; padding: 5px; text-align: center; background: #10b981; color: white; }
     </style>
 </head>
 <body>
 
     <div id="chat-container">
-        <div id="status">خطأ في الاتصال بتليجرام!</div>
+        <div id="status">متصل الآن - الدردشة جماعية</div>
         <div id="messages"></div>
         <div class="input-area">
-            <input type="text" id="messageInput" placeholder="اكتب هنا...">
+            <input type="text" id="messageInput" placeholder="اكتب رسالة للجميع...">
             <button id="sendBtn">إرسال</button>
         </div>
     </div>
 
     <script>
+        // 1. بيانات تليجرام الخاصة بك
         const BOT_TOKEN = "7894436976:AAFdg77dpzCgpeLnkwAQqP9POkwZMwWoikg";
-        const CHAT_ID = "-1003783270855"; 
+        const CHAT_ID = "-1003783270855";
+
+        // 2. إعدادات Firebase التي أرسلتها (تم دمجها بالكامل)
+        const firebaseConfig = {
+            apiKey: "AIzaSyApqVwnKmq0gJ7k-UM-jLNxaYlBPkRx1Go",
+            authDomain: "chatlive-4387e.firebaseapp.com",
+            databaseURL: "https://chatlive-4387e-default-rtdb.firebaseio.com",
+            projectId: "chatlive-4387e",
+            storageBucket: "chatlive-4387e.firebasestorage.app",
+            messagingSenderId: "722728428486",
+            appId: "1:722728428486:android:847b11a7743dfb7d5ac8c7"
+        };
+
+        // تشغيل Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const messagesRef = db.ref("chat_messages");
 
         const messagesDiv = document.getElementById('messages');
         const messageInput = document.getElementById('messageInput');
-        const statusDiv = document.getElementById('status');
-        let lastUpdateId = 0;
         let myName = "زائر_" + Math.floor(Math.random() * 1000);
 
+        // --- وظيفة استقبال الرسائل (هنا السر ليراها الجميع) ---
+        messagesRef.limitToLast(50).on("child_added", (snapshot) => {
+            const data = snapshot.val();
+            appendMessage(data.user, data.text);
+        });
+
+        // --- وظيفة إرسال الرسالة ---
         async function sendMessage() {
             const text = messageInput.value.trim();
             if (!text) return;
 
-            // --- الخدعة البرمجية (العرض المحلي) ---
-            // إنشاء كائن رسالة وهمي يشبه شكل بيانات تليجرام ونعرضه فوراً
-            const fakeMessage = {
-                text: `[${myName}]: ${text}`,
-                from: { first_name: myName }
-            };
-            renderMessage(fakeMessage); 
-            
-            // تفريغ الحقل فوراً لكي يشعر المستخدم بالسرعة
+            // أ: إرسالها إلى Firebase (ليراها كل زوار الموقع فوراً)
+            messagesRef.push({
+                user: myName,
+                text: text,
+                timestamp: Date.now()
+            });
+
+            // ب: إرسال نسخة لتليجرام (ليصلك إشعار في الجروب)
+            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: CHAT_ID,
+                    text: `👤 ${myName} يرسل:\n${text}`
+                })
+            });
+
             messageInput.value = "";
-            statusDiv.style.display = "none";
-
-            // إرسال الرسالة إلى تليجرام في الخلفية
-            const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
-            
-            try {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        chat_id: CHAT_ID,
-                        text: `[${myName}]: ${text}`
-                    })
-                });
-
-                const data = await response.json();
-                if (!data.ok) {
-                    showError("لم تصل الرسالة لتليجرام: " + data.description);
-                }
-            } catch (error) {
-                showError("فشل الإرسال: تأكد من اتصال الإنترنت");
-            }
         }
 
-        function showError(msg) {
-            statusDiv.innerText = msg;
-            statusDiv.style.display = "block";
-            console.error(msg);
+        // --- عرض الرسالة في القائمة ---
+        function appendMessage(sender, text) {
+            const div = document.createElement('div');
+            div.className = 'message';
+            div.innerHTML = `<span class="user-name">${sender}</span>${text}`;
+            messagesDiv.appendChild(div);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
 
-        async function fetchMessages() {
+        // --- جلب ردودك من تليجرام إلى الموقع ---
+        let lastUpdateId = 0;
+        async function fetchFromTelegram() {
             try {
                 const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getUpdates?offset=${lastUpdateId + 1}`);
                 const data = await response.json();
                 if (data.ok && data.result.length > 0) {
                     data.result.forEach(update => {
                         lastUpdateId = update.update_id;
-                        if (update.message && update.message.text) {
-                            renderMessage(update.message);
+                        // إذا كانت الرسالة ليست "تلقائية" من البوت، اعرضها كـ "رد من المطور"
+                        if (update.message && update.message.text && !update.message.text.includes("يرسل:")) {
+                            appendMessage("المطور (Telegram)", update.message.text);
                         }
                     });
                 }
-            } catch (e) { console.log("جاري الانتظار..."); }
+            } catch (e) { console.log("خطأ في جلب بيانات تليجرام"); }
         }
 
-        function renderMessage(msg) {
-            if (!msg || !msg.text) return; 
-
-            const div = document.createElement('div');
-            div.className = 'message';
-            
-            let sender = "عضو";
-            let messageText = msg.text;
-
-            // فحص آمن: إذا كانت الرسالة من الموقع ستبدأ بقوس [
-            if (msg.text.startsWith('[')) {
-                const closingBracketIndex = msg.text.indexOf(']: ');
-                if (closingBracketIndex !== -1) {
-                    sender = msg.text.substring(1, closingBracketIndex);
-                    messageText = msg.text.substring(closingBracketIndex + 3);
-                }
-            } else if (msg.from && msg.from.first_name) {
-                // إذا كانت مرسلة من شخص داخل تطبيق تليجرام نفسه
-                sender = msg.from.first_name;
-            }
-            
-            div.innerHTML = `<span class="user-name">${sender}</span>${messageText}`;
-            messagesDiv.appendChild(div);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        }
-
+        // إعداد الأزرار والإنتر
         document.getElementById('sendBtn').onclick = sendMessage;
         messageInput.onkeypress = (e) => { if(e.key === 'Enter') sendMessage(); };
         
-        // جلب الرسائل القادمة من تليجرام كل 3 ثواني
-        setInterval(fetchMessages, 3000);
+        // فحص تليجرام كل 3 ثواني للردود
+        setInterval(fetchFromTelegram, 3000);
     </script>
 </body>
 </html>
