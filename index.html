@@ -72,6 +72,12 @@
             transition: 0.2s;
         }
         button:hover { background: #2563eb; }
+        .error-msg {
+            color: #ef4444;
+            font-size: 12px;
+            text-align: center;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
@@ -89,7 +95,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
-        // إعداداتك الخاصة التي أرفقتها
+        // إعدادات Firebase الخاصة بك
         const firebaseConfig = {
             apiKey: "AIzaSyDdbUK04WTiBvv3z1K9oYhssfpJTI9fZh4",
             authDomain: "chatdoy.firebaseapp.com",
@@ -110,15 +116,29 @@
         const sendBtn = document.getElementById('sendBtn');
         const messagesDiv = document.getElementById('messages');
 
-        // إرسال الرسالة عند الضغط على الزر أو Enter
-        function sendMessage() {
+        // إرسال الرسالة مع تتبع الأخطاء
+        async function sendMessage() {
             const text = messageInput.value.trim();
             if (text !== "") {
-                push(messagesRef, {
-                    text: text,
-                    time: new Date().toLocaleTimeString()
-                });
-                messageInput.value = "";
+                // تغيير حالة الزر أثناء الإرسال
+                sendBtn.disabled = true;
+                sendBtn.innerText = "جاري...";
+
+                try {
+                    await push(messagesRef, {
+                        text: text,
+                        time: new Date().toLocaleTimeString()
+                    });
+                    messageInput.value = ""; // مسح الحقل بعد نجاح الإرسال
+                } catch (error) {
+                    console.error("خطأ في Firebase:", error);
+                    alert("لم يتم الإرسال! يرجى التأكد من صلاحيات Firebase Rules.");
+                } finally {
+                    // إعادة الزر لحالته الطبيعية
+                    sendBtn.disabled = false;
+                    sendBtn.innerText = "إرسال";
+                    messageInput.focus();
+                }
             }
         }
 
@@ -128,16 +148,20 @@
         });
 
         // استقبال الرسائل وعرضها فوراً
-        onChildAdded(messagesRef, (snapshot) => {
-            const msg = snapshot.val();
-            const msgDiv = document.createElement('div');
-            msgDiv.classList.add('message');
-            msgDiv.innerHTML = `<strong>زائر:</strong> <br> ${msg.text}`;
-            messagesDiv.appendChild(msgDiv);
-            
-            // النزول التلقائي لآخر رسالة
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        });
+        try {
+            onChildAdded(messagesRef, (snapshot) => {
+                const msg = snapshot.val();
+                const msgDiv = document.createElement('div');
+                msgDiv.classList.add('message');
+                msgDiv.innerHTML = `<strong>زائر:</strong> <br> ${msg.text}`;
+                messagesDiv.appendChild(msgDiv);
+                
+                // النزول التلقائي لآخر رسالة
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            });
+        } catch (error) {
+            console.error("خطأ في استقبال الرسائل:", error);
+        }
     </script>
 </body>
 </html>
