@@ -58,7 +58,7 @@
                 if (data.ok) {
                     messageInput.value = "";
                     statusDiv.style.display = "none";
-                    // التعديل هنا: عرض الرسالة محلياً فور الإرسال لأن تليجرام لا يعيد رسائل البوت لنفسه
+                    // التعديل هنا: عرض الرسالة فوراً في الموقع بعد نجاح إرسالها
                     renderMessage(data.result); 
                 } else {
                     showError("خطأ من تليجرام: " + data.description);
@@ -90,10 +90,13 @@
         }
 
         function renderMessage(msg) {
+            if (!msg || !msg.text) return; // حماية إضافية من الأخطاء
             const div = document.createElement('div');
             div.className = 'message';
-            const sender = msg.text.includes(']: ') ? msg.text.split(']: ')[0].replace('[', '') : (msg.from.first_name || "عضو");
-            const text = msg.text.includes(']: ') ? msg.text.split(']: ')[1] : msg.text;
+            
+            // استخراج اسم المرسل والرسالة بأمان
+            const sender = msg.text.includes(']: ') ? msg.text.split(']: ')[0].replace('[', '') : (msg.from && msg.from.first_name ? msg.from.first_name : "عضو");
+            const text = msg.text.includes(']: ') ? msg.text.substring(msg.text.indexOf(']: ') + 3) : msg.text;
             
             div.innerHTML = `<span class="user-name">${sender}</span>${text}`;
             messagesDiv.appendChild(div);
@@ -102,10 +105,6 @@
 
         document.getElementById('sendBtn').onclick = sendMessage;
         messageInput.onkeypress = (e) => { if(e.key === 'Enter') sendMessage(); };
-        
-        // جلب الرسائل الأولية عند فتح الصفحة
-        fetchMessages();
-        // الاستمرار بجلب الرسائل الجديدة
         setInterval(fetchMessages, 3000);
     </script>
 </body>
