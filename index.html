@@ -29,7 +29,6 @@
 
     <script>
         const BOT_TOKEN = "7894436976:AAFdg77dpzCgpeLnkwAQqP9POkwZMwWoikg";
-        // جرب إضافة -100 قبل الآيدي إذا كان قروب كبير (Supergroup)
         const CHAT_ID = "-1003783270855"; 
 
         const messagesDiv = document.getElementById('messages');
@@ -42,6 +41,19 @@
             const text = messageInput.value.trim();
             if (!text) return;
 
+            // --- الخدعة البرمجية (العرض المحلي) ---
+            // إنشاء كائن رسالة وهمي يشبه شكل بيانات تليجرام ونعرضه فوراً
+            const fakeMessage = {
+                text: `[${myName}]: ${text}`,
+                from: { first_name: myName }
+            };
+            renderMessage(fakeMessage); 
+            
+            // تفريغ الحقل فوراً لكي يشعر المستخدم بالسرعة
+            messageInput.value = "";
+            statusDiv.style.display = "none";
+
+            // إرسال الرسالة إلى تليجرام في الخلفية
             const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
             
             try {
@@ -55,16 +67,11 @@
                 });
 
                 const data = await response.json();
-                if (data.ok) {
-                    messageInput.value = "";
-                    statusDiv.style.display = "none";
-                    // التعديل هنا: عرض الرسالة فوراً في الموقع بعد نجاح إرسالها
-                    renderMessage(data.result); 
-                } else {
-                    showError("خطأ من تليجرام: " + data.description);
+                if (!data.ok) {
+                    showError("لم تصل الرسالة لتليجرام: " + data.description);
                 }
             } catch (error) {
-                showError("فشل الإرسال: تأكد من اتصال الإنترنت أو إعدادات CORS");
+                showError("فشل الإرسال: تأكد من اتصال الإنترنت");
             }
         }
 
@@ -90,21 +97,35 @@
         }
 
         function renderMessage(msg) {
-            if (!msg || !msg.text) return; // حماية إضافية من الأخطاء
+            if (!msg || !msg.text) return; 
+
             const div = document.createElement('div');
             div.className = 'message';
             
-            // استخراج اسم المرسل والرسالة بأمان
-            const sender = msg.text.includes(']: ') ? msg.text.split(']: ')[0].replace('[', '') : (msg.from && msg.from.first_name ? msg.from.first_name : "عضو");
-            const text = msg.text.includes(']: ') ? msg.text.substring(msg.text.indexOf(']: ') + 3) : msg.text;
+            let sender = "عضو";
+            let messageText = msg.text;
+
+            // فحص آمن: إذا كانت الرسالة من الموقع ستبدأ بقوس [
+            if (msg.text.startsWith('[')) {
+                const closingBracketIndex = msg.text.indexOf(']: ');
+                if (closingBracketIndex !== -1) {
+                    sender = msg.text.substring(1, closingBracketIndex);
+                    messageText = msg.text.substring(closingBracketIndex + 3);
+                }
+            } else if (msg.from && msg.from.first_name) {
+                // إذا كانت مرسلة من شخص داخل تطبيق تليجرام نفسه
+                sender = msg.from.first_name;
+            }
             
-            div.innerHTML = `<span class="user-name">${sender}</span>${text}`;
+            div.innerHTML = `<span class="user-name">${sender}</span>${messageText}`;
             messagesDiv.appendChild(div);
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
 
         document.getElementById('sendBtn').onclick = sendMessage;
         messageInput.onkeypress = (e) => { if(e.key === 'Enter') sendMessage(); };
+        
+        // جلب الرسائل القادمة من تليجرام كل 3 ثواني
         setInterval(fetchMessages, 3000);
     </script>
 </body>
