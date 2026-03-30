@@ -2,1299 +2,142 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>شات بلس - النظام المتكامل</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatDoy - غرفة الدردشة</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        /* تصميم عصري وبسيط */
         body {
-            font-family: 'Tajawal', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-            color: white;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        /* شاشة تسجيل الدخول */
-        #login-screen {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            margin: 0;
             display: flex;
-            flex-direction: column;
-            align-items: center;
             justify-content: center;
-            height: 100vh;
-            padding: 20px;
-            overflow-y: auto;
-            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-        }
-
-        .login-header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        .login-header h1 {
-            font-size: 32px;
-            background: linear-gradient(45deg, #00bcd4, #ff4081);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            margin-bottom: 10px;
-        }
-
-        .tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
-            background: rgba(255,255,255,0.1);
-            padding: 5px;
-            border-radius: 50px;
-        }
-
-        .tab-button {
-            flex: 1;
-            padding: 12px 20px;
-            border: none;
-            background: transparent;
-            color: rgba(255,255,255,0.7);
-            font-size: 16px;
-            cursor: pointer;
-            border-radius: 50px;
-            transition: 0.3s;
-            font-family: 'Tajawal', sans-serif;
-        }
-
-        .tab-button.active {
-            background: linear-gradient(135deg, #00bcd4, #0097a7);
-            color: white;
-            box-shadow: 0 4px 15px rgba(0,188,212,0.3);
-        }
-
-        .form-container {
-            width: 100%;
-            max-width: 400px;
-            display: none;
-        }
-
-        .form-container.active {
-            display: block;
-            animation: fadeIn 0.5s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .login-input {
-            width: 100%;
-            padding: 15px 20px;
-            margin: 10px 0;
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 15px;
-            color: white;
-            font-size: 16px;
-            transition: 0.3s;
-            font-family: 'Tajawal', sans-serif;
-        }
-
-        .login-input:focus {
-            outline: none;
-            border-color: #00bcd4;
-            background: rgba(255,255,255,0.15);
-        }
-
-        .login-input.textarea {
-            min-height: 80px;
-            resize: vertical;
-        }
-
-        .btn {
-            width: 100%;
-            padding: 15px;
-            border: none;
-            border-radius: 15px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
-            font-family: 'Tajawal', sans-serif;
-            margin: 10px 0;
-        }
-
-        .btn-login {
-            background: linear-gradient(135deg, #00bcd4, #0097a7);
-            color: white;
-        }
-
-        .btn-login:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(0,188,212,0.4);
-        }
-
-        .btn-premium {
-            background: linear-gradient(45deg, #ffd700, #ff9800);
-            color: #000;
-        }
-
-        .btn-admin {
-            background: linear-gradient(45deg, #ff4444, #cc0000);
-            color: white;
-        }
-
-        .btn-support {
-            background: linear-gradient(45deg, #E4405F, #C13584);
-            color: white;
-            text-decoration: none;
-            display: inline-block;
-            text-align: center;
-        }
-
-        .avatar-selection {
-            margin: 15px 0;
-        }
-
-        .avatar-options {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .avatar-option {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            cursor: pointer;
-            border: 2px solid transparent;
-            transition: 0.3s;
-            object-fit: cover;
-        }
-
-        .avatar-option.selected {
-            border-color: #00bcd4;
-            transform: scale(1.1);
-        }
-
-        .admin-credentials {
-            margin-top: 20px;
-            text-align: center;
-            font-size: 12px;
-            color: rgba(255,255,255,0.5);
-        }
-
-        /* شاشة الشات */
-        #chat-screen {
-            display: none;
-            flex-direction: column;
-            height: 100vh;
-            background: rgba(0,0,0,0.3);
-        }
-
-        .chat-header {
-            background: rgba(20, 20, 30, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 12px 20px;
-            display: flex;
-            justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            flex-shrink: 0;
+            height: 100vh;
         }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .avatar-container {
-            position: relative;
-        }
-
-        .user-avatar {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            object-fit: cover;
-            cursor: pointer;
-            border: 2px solid var(--accent-color);
-            transition: 0.3s;
-        }
-
-        .user-info {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .header-right {
-            display: flex;
-            gap: 10px;
-        }
-
-        .header-btn {
-            background: rgba(255,255,255,0.1);
-            border: none;
-            color: white;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .header-btn:hover {
-            background: rgba(255,255,255,0.2);
-            transform: scale(1.05);
-        }
-
-        /* منطقة الرسائل */
         #chat-container {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
+            width: 95%;
+            max-width: 500px;
+            height: 85vh;
+            background: #1e293b;
+            border-radius: 15px;
             display: flex;
             flex-direction: column;
-            gap: 15px;
-        }
-
-        .message {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            animation: messageSlide 0.3s ease;
-        }
-
-        @keyframes messageSlide {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .message.me {
-            flex-direction: row-reverse;
-        }
-
-        .message-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
-            cursor: pointer;
-            transition: 0.3s;
-            flex-shrink: 0;
-        }
-
-        .message-content {
-            max-width: 70%;
-            padding: 12px 16px;
-            border-radius: 18px;
-            background: rgba(255,255,255,0.1);
-            word-wrap: break-word;
-            position: relative;
-        }
-
-        .message.me .message-content {
-            background: linear-gradient(135deg, #00bcd4, #0097a7);
-            border-bottom-left-radius: 5px;
-            border-bottom-right-radius: 18px;
-        }
-
-        .message.other .message-content {
-            background: rgba(30,30,40,0.9);
-            border-bottom-left-radius: 18px;
-            border-bottom-right-radius: 5px;
-        }
-
-        .message.premium .message-content {
-            background-size: 200% 200% !important;
-            animation: gradientFlow 3s ease infinite !important;
-            border: 1px solid rgba(255, 215, 0, 0.3);
-            position: relative;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
             overflow: hidden;
         }
-
-        @keyframes gradientFlow {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        .message.premium .message-content::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, rgba(255,215,0,0.5), transparent);
-        }
-
-        .message-sender {
-            font-size: 11px;
-            font-weight: bold;
-            margin-bottom: 3px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .sender-premium {
-            color: #ffd700;
-        }
-
-        .sender-admin {
-            color: #ff4444;
-        }
-
-        .super-admin-badge {
-            background: linear-gradient(45deg, #ff0000, #ff4444);
-            color: white;
-            padding: 2px 6px;
-            border-radius: 10px;
-            font-size: 9px;
-        }
-
-        .premium-id-badge {
-            background: linear-gradient(45deg, #ffd700, #ff9800);
-            color: #000;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 9px;
-            font-family: monospace;
-        }
-
-        .message-time {
-            font-size: 10px;
-            opacity: 0.6;
-            margin-top: 5px;
-        }
-
-        .input-container {
-            padding: 15px;
-            background: rgba(20, 20, 20, 0.95);
-            border-top: 1px solid rgba(255,255,255,0.1);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-shrink: 0;
-        }
-
-        #message-input {
+        #messages {
             flex: 1;
-            padding: 12px 18px;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 25px;
-            color: white;
-            font-size: 14px;
-            font-family: 'Tajawal', sans-serif;
-        }
-
-        #send-button {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #00bcd4, #00838f);
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-
-        /* المودالات */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.85);
-            backdrop-filter: blur(10px);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
             padding: 20px;
-        }
-
-        .modal-content {
-            background: rgba(30, 30, 30, 0.95);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 20px;
-            width: 90%;
-            max-width: 450px;
-            max-height: 90vh;
             overflow-y: auto;
-        }
-
-        .modal-header {
-            padding: 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-body {
-            padding: 20px;
-        }
-
-        .close-btn {
-            background: none;
-            border: none;
-            color: rgba(255,255,255,0.7);
-            font-size: 24px;
-            cursor: pointer;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-        }
-
-        .close-btn:hover {
-            background: rgba(255,255,255,0.1);
-        }
-
-        .profile-container {
-            text-align: center;
-        }
-
-        .profile-avatar {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 3px solid #00bcd4;
-            margin: 0 auto 15px;
-            display: block;
-            cursor: pointer;
-        }
-
-        .profile-name {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .profile-id {
-            background: rgba(255,255,255,0.1);
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-family: monospace;
-            font-size: 14px;
-            margin: 10px 0;
-            display: inline-block;
-            direction: ltr;
-        }
-
-        .profile-bio {
-            color: rgba(255,255,255,0.7);
-            font-size: 14px;
-            padding: 15px;
-            background: rgba(0,0,0,0.3);
-            border-radius: 10px;
-            margin: 15px 0;
-            cursor: pointer;
-        }
-
-        .profile-stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin: 20px 0;
-        }
-
-        .stat-item {
-            background: rgba(255,255,255,0.05);
-            padding: 15px;
-            border-radius: 10px;
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 20px;
-            font-weight: bold;
-            color: #00bcd4;
-        }
-
-        .stat-label {
-            font-size: 12px;
-            color: rgba(255,255,255,0.5);
-            margin-top: 5px;
-        }
-
-        .badge {
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 12px;
-            font-weight: bold;
-            display: inline-block;
-            margin: 5px;
-        }
-
-        .badge-premium {
-            background: linear-gradient(45deg, #ffd700, #ff9800);
-            color: #000;
-        }
-
-        .badge-admin {
-            background: linear-gradient(45deg, #ff0000, #ff4444);
-            color: white;
-        }
-
-        .badge-super-admin {
-            background: linear-gradient(45deg, #9C27B0, #7B1FA2);
-            color: white;
-        }
-
-        .premium-features {
-            list-style: none;
-            margin: 20px 0;
-        }
-
-        .premium-features li {
-            padding: 10px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .premium-features li i {
-            color: #ffd700;
-        }
-
-        .gradient-options {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin: 20px 0;
-        }
-
-        .gradient-option {
-            height: 80px;
-            border-radius: 10px;
-            cursor: pointer;
-            border: 2px solid transparent;
-            transition: 0.3s;
-        }
-
-        .gradient-option.selected {
-            border-color: #ffd700;
-        }
-
-        .gradient-preview {
-            width: 100%;
-            height: 60px;
-            border-radius: 10px;
-            margin: 20px 0;
-            background: linear-gradient(45deg, #00bcd4, #0097a7);
-            animation: gradientFlow 5s ease infinite;
-        }
-
-        .users-list {
-            max-height: 400px;
-            overflow-y: auto;
-        }
-
-        .user-item {
-            display: flex;
-            align-items: center;
-            padding: 10px;
-            margin: 5px 0;
-            background: rgba(255,255,255,0.05);
-            border-radius: 10px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .user-item:hover {
-            background: rgba(255,255,255,0.1);
-        }
-
-        .user-item-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            margin-left: 10px;
-            object-fit: cover;
-        }
-
-        .user-item-info {
-            flex: 1;
-        }
-
-        .user-item-name {
-            font-weight: bold;
-            font-size: 14px;
-        }
-
-        .user-item-status {
-            font-size: 11px;
-            color: #00c853;
-        }
-
-        .user-item-status.offline {
-            color: rgba(255,255,255,0.3);
-        }
-
-        .toolbar {
-            position: fixed;
-            bottom: 80px;
-            left: 20px;
             display: flex;
             flex-direction: column;
             gap: 10px;
-            z-index: 100;
         }
-
-        .tool-btn {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            background: rgba(30,30,30,0.8);
-            border: 1px solid rgba(255,255,255,0.1);
+        .message {
+            background: #334155;
+            padding: 10px 15px;
+            border-radius: 12px;
+            max-width: 80%;
+            word-wrap: break-word;
+            font-size: 14px;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .input-area {
+            background: #0f172a;
+            padding: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        input {
+            flex: 1;
+            background: #334155;
+            border: 1px solid #475569;
+            padding: 12px;
+            border-radius: 8px;
             color: white;
+            outline: none;
+        }
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 0 20px;
+            border-radius: 8px;
             cursor: pointer;
-            backdrop-filter: blur(10px);
+            font-weight: bold;
+            transition: 0.2s;
         }
-
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 20px;
-            border-radius: 10px;
-            background: rgba(30,30,30,0.95);
-            border-left: 4px solid #00c853;
-            color: white;
-            z-index: 2000;
-            display: none;
-            max-width: 300px;
-        }
-
-        .notification.error { border-left-color: #ff4444; }
-        .notification.warning { border-left-color: #ffd700; }
-
-        .loading {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            z-index: 3000;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-        }
-
-        .loader {
-            width: 50px;
-            height: 50px;
-            border: 5px solid rgba(255,255,255,0.1);
-            border-top: 5px solid #00bcd4;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        @media (max-width: 768px) {
-            .message-content {
-                max-width: 85%;
-            }
-            .toolbar {
-                left: 10px;
-                bottom: 70px;
-            }
-        }
+        button:hover { background: #2563eb; }
     </style>
 </head>
 <body>
 
-<div id="login-screen">
-    <div class="login-header">
-        <h1>شات بلس</h1>
-        <p style="color: rgba(255,255,255,0.7);">التواصل الأكثر أماناً</p>
-    </div>
-    
-    <div class="tabs">
-        <button class="tab-button active" onclick="showLoginTab()">دخول</button>
-        <button class="tab-button" onclick="showRegisterTab()">تسجيل جديد</button>
-    </div>
-    
-    <div id="login-form" class="form-container active">
-        <input type="text" id="login-username" class="login-input" placeholder="اسم المستخدم">
-        <input type="password" id="login-password" class="login-input" placeholder="كلمة المرور">
-        <button class="btn btn-login" onclick="login()"><i class="fas fa-sign-in-alt"></i> دخول</button>
-    </div>
-    
-    <div id="register-form" class="form-container">
-        <input type="text" id="register-username" class="login-input" placeholder="اسم المستخدم">
-        <input type="password" id="register-password" class="login-input" placeholder="كلمة المرور">
-        <input type="text" id="register-display-name" class="login-input" placeholder="الاسم الظاهر">
-        <textarea id="register-bio" class="login-input textarea" placeholder="نبذة عنك"></textarea>
-        
-        <div class="avatar-selection">
-            <p style="margin-bottom: 10px;">اختر صورتك:</p>
-            <div class="avatar-options">
-                <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="avatar-option selected" data-avatar="https://cdn-icons-png.flaticon.com/512/149/149071.png">
-                <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="avatar-option" data-avatar="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
-                <img src="https://cdn-icons-png.flaticon.com/512/4140/4140048.png" class="avatar-option" data-avatar="https://cdn-icons-png.flaticon.com/512/4140/4140048.png">
-                <img src="https://cdn-icons-png.flaticon.com/512/921/921071.png" class="avatar-option" data-avatar="https://cdn-icons-png.flaticon.com/512/921/921071.png">
+    <div id="chat-container">
+        <div id="messages">
             </div>
-        </div>
-        
-        <button class="btn btn-login" onclick="register()"><i class="fas fa-user-plus"></i> تسجيل</button>
-    </div>
-    
-    <button class="btn btn-premium" onclick="showPremiumModal()"><i class="fas fa-crown"></i> اشتراك مميز</button>
-    <button class="btn btn-admin" onclick="adminLogin()"><i class="fas fa-shield-alt"></i> دخول أدمن</button>
-    <a href="https://www.instagram.com/6i99n" target="_blank" class="btn btn-support"><i class="fab fa-instagram"></i> الدعم</a>
-</div>
-
-<div id="chat-screen">
-    <div class="chat-header">
-        <div class="header-left">
-            <div class="avatar-container">
-                <img src="" alt="" class="user-avatar" onclick="showMyProfile()">
-            </div>
-            <div class="user-info">
-                <div id="user-name" style="font-weight: bold;"></div>
-                <div id="user-status" style="font-size: 11px; color: #00c853;">● متصل</div>
-            </div>
-        </div>
-        <div class="header-right">
-            <button class="header-btn" onclick="showAllUsersModal()"><i class="fas fa-users"></i></button>
-            <button class="header-btn" onclick="showSettingsModal()"><i class="fas fa-cog"></i></button>
+        <div class="input-area">
+            <input type="text" id="messageInput" placeholder="اكتب رسالتك..." autocomplete="off">
+            <button id="sendBtn">إرسال</button>
         </div>
     </div>
-    
-    <div id="chat-container"></div>
-    
-    <div class="input-container">
-        <input type="text" id="message-input" placeholder="اكتب رسالتك..." autocomplete="off">
-        <button id="send-button" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
-    </div>
-</div>
 
-<div class="toolbar">
-    <button class="tool-btn" onclick="showPremiumModal()"><i class="fas fa-crown"></i></button>
-    <button class="tool-btn" onclick="clearChat()"><i class="fas fa-trash"></i></button>
-</div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
-<div class="notification" id="notification"></div>
-<div class="loading" id="loading"><div class="loader"></div><div id="loading-text">جاري التحميل...</div></div>
+        // إعداداتك الخاصة التي أرفقتها
+        const firebaseConfig = {
+            apiKey: "AIzaSyDdbUK04WTiBvv3z1K9oYhssfpJTI9fZh4",
+            authDomain: "chatdoy.firebaseapp.com",
+            databaseURL: "https://chatdoy-default-rtdb.firebaseio.com",
+            projectId: "chatdoy",
+            storageBucket: "chatdoy.firebasestorage.app",
+            messagingSenderId: "922018470576",
+            appId: "1:922018470576:web:6f8c2c6fe1ca97a44cb975",
+            measurementId: "G-MKSSEJ7QJ4"
+        };
 
-<!-- المودالات -->
-<div class="modal" id="profile-modal"><div class="modal-content"><div class="modal-header"><h2>البروفايل</h2><button class="close-btn" onclick="closeModal()">×</button></div><div class="modal-body"><div id="profile-container"></div></div></div></div>
-<div class="modal" id="all-users-modal"><div class="modal-content"><div class="modal-header"><h2>جميع المستخدمين</h2><button class="close-btn" onclick="closeModal()">×</button></div><div class="modal-body"><div id="users-list" class="users-list"></div></div></div></div>
-<div class="modal" id="premium-modal"><div class="modal-content"><div class="modal-header"><h2>الاشتراك المميز</h2><button class="close-btn" onclick="closeModal()">×</button></div><div class="modal-body"><ul class="premium-features"><li><i class="fas fa-check-circle"></i> ID مميز</li><li><i class="fas fa-check-circle"></i> ألوان متدرجة</li><li><i class="fas fa-check-circle"></i> إطار مميز</li></ul><input type="text" id="subscription-code" class="login-input" placeholder="كود الاشتراك"><button class="btn btn-premium" onclick="activatePremium()">تفعيل</button></div></div></div>
-<div class="modal" id="settings-modal"><div class="modal-content"><div class="modal-header"><h2>الإعدادات</h2><button class="close-btn" onclick="closeModal()">×</button></div><div class="modal-body"><div id="user-info"></div><button class="btn btn-login" onclick="logout()" style="background:#ff4444;">تسجيل خروج</button></div></div></div>
+        // تهيئة التطبيق وقاعدة البيانات
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const messagesRef = ref(db, 'messages');
 
-<script>
-// GitHub Token المقدم
-const GITHUB_TOKEN = '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';
-const GITHUB_REPO = 'chat-data';
-const GITHUB_OWNER = 'your-username';
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const messagesDiv = document.getElementById('messages');
 
-let currentUser = null;
-let messages = [];
-let users = {};
+        // إرسال الرسالة عند الضغط على الزر أو Enter
+        function sendMessage() {
+            const text = messageInput.value.trim();
+            if (text !== "") {
+                push(messagesRef, {
+                    text: text,
+                    time: new Date().toLocaleTimeString()
+                });
+                messageInput.value = "";
+            }
+        }
 
-// دالة لإرسال أمر إلى Python API عبر GitHub
-async function sendCommandToPython(command, data = {}) {
-    const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/commands/${Date.now()}.json`;
-    const content = btoa(JSON.stringify({ command, data, timestamp: Date.now(), user: currentUser?.username }));
-    
-    try {
-        const response = await fetch(url, {
-            method: 'PUT',
-            headers: {
-                'Authorization': `token ${GITHUB_TOKEN}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                message: `Command: ${command}`,
-                content: content
-            })
+        sendBtn.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
         });
-        return await response.json();
-    } catch (error) {
-        console.error('Error sending command:', error);
-        return null;
-    }
-}
 
-// دالة لقراءة البيانات من GitHub
-async function readFromGitHub(path) {
-    const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${path}`;
-    try {
-        const response = await fetch(url, {
-            headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
+        // استقبال الرسائل وعرضها فوراً
+        onChildAdded(messagesRef, (snapshot) => {
+            const msg = snapshot.val();
+            const msgDiv = document.createElement('div');
+            msgDiv.classList.add('message');
+            msgDiv.innerHTML = `<strong>زائر:</strong> <br> ${msg.text}`;
+            messagesDiv.appendChild(msgDiv);
+            
+            // النزول التلقائي لآخر رسالة
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
         });
-        if (response.ok) {
-            const data = await response.json();
-            return JSON.parse(atob(data.content));
-        }
-        return null;
-    } catch (error) {
-        return null;
-    }
-}
-
-// دالة لكتابة البيانات إلى GitHub
-async function writeToGitHub(path, data) {
-    const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${path}`;
-    const content = btoa(JSON.stringify(data, null, 2));
-    
-    // التحقق من وجود الملف للحصول على SHA
-    let sha = null;
-    try {
-        const existing = await fetch(url, { headers: { 'Authorization': `token ${GITHUB_TOKEN}` } });
-        if (existing.ok) {
-            const existingData = await existing.json();
-            sha = existingData.sha;
-        }
-    } catch(e) {}
-    
-    const body = { message: `Update ${path}`, content: content };
-    if (sha) body.sha = sha;
-    
-    const response = await fetch(url, {
-        method: 'PUT',
-        headers: {
-            'Authorization': `token ${GITHUB_TOKEN}`,
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(body)
-    });
-    return response.ok;
-}
-
-// حفظ المستخدمين
-async function saveUsers() {
-    await writeToGitHub('users.json', users);
-}
-
-// تحميل المستخدمين
-async function loadUsers() {
-    const data = await readFromGitHub('users.json');
-    if (data) users = data;
-}
-
-// حفظ الرسائل
-async function saveMessages() {
-    await writeToGitHub('messages.json', messages);
-}
-
-// تحميل الرسائل
-async function loadMessages() {
-    const data = await readFromGitHub('messages.json');
-    if (data) {
-        messages = data;
-        displayAllMessages();
-    }
-}
-
-// عرض جميع الرسائل
-function displayAllMessages() {
-    const container = document.getElementById('chat-container');
-    container.innerHTML = '';
-    messages.forEach(msg => displayMessage(msg));
-    scrollToBottom();
-}
-
-// عرض رسالة
-function displayMessage(message) {
-    const container = document.getElementById('chat-container');
-    const isMe = currentUser && message.senderId === currentUser.id;
-    
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `message ${isMe ? 'me' : 'other'} ${message.isPremium ? 'premium' : ''}`;
-    
-    const gradientStyle = message.isPremium && message.gradient ? 
-        `background: ${getGradientStyle(message.gradient)};` : '';
-    
-    messageDiv.innerHTML = `
-        <img src="${message.senderPhoto}" class="message-avatar" onclick="showUserProfile('${message.senderId}')">
-        <div class="message-content" style="${gradientStyle}">
-            <div class="message-sender ${message.isPremium ? 'sender-premium' : ''} ${message.isAdmin ? 'sender-admin' : ''}">
-                ${message.isSuperAdmin ? '<span class="super-admin-badge">Super Admin</span>' : ''}
-                ${message.isAdmin && !message.isSuperAdmin ? '👑' : ''}
-                ${message.senderName}
-                ${message.isPremium ? `<span class="premium-id-badge">${message.premiumId || message.senderId}</span>` : ''}
-            </div>
-            <div>${escapeHtml(message.text)}</div>
-            <div class="message-time">${new Date(message.timestamp).toLocaleTimeString('ar-SA')}</div>
-        </div>
-    `;
-    
-    container.appendChild(messageDiv);
-}
-
-function getGradientStyle(gradient) {
-    const gradients = {
-        1: 'linear-gradient(45deg, #00bcd4, #0097a7)',
-        2: 'linear-gradient(45deg, #ff4081, #f50057)',
-        3: 'linear-gradient(45deg, #651fff, #7c4dff)',
-        4: 'linear-gradient(45deg, #00e676, #00c853)',
-        5: 'linear-gradient(45deg, #ff9100, #ff3d00)',
-        6: 'linear-gradient(45deg, #00b0ff, #2979ff)'
-    };
-    return gradients[gradient] || gradients[1];
-}
-
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
-function scrollToBottom() {
-    const container = document.getElementById('chat-container');
-    container.scrollTop = container.scrollHeight;
-}
-
-// إرسال رسالة
-async function sendMessage() {
-    const input = document.getElementById('message-input');
-    const text = input.value.trim();
-    if (!text || !currentUser) return;
-    
-    const message = {
-        id: Date.now().toString(),
-        senderId: currentUser.id,
-        senderName: currentUser.displayName,
-        senderPhoto: currentUser.photo,
-        text: text,
-        timestamp: Date.now(),
-        isPremium: currentUser.isPremium,
-        premiumId: currentUser.premiumId,
-        gradient: currentUser.gradient,
-        isAdmin: currentUser.isAdmin,
-        isSuperAdmin: currentUser.isSuperAdmin
-    };
-    
-    messages.push(message);
-    await saveMessages();
-    displayMessage(message);
-    input.value = '';
-    scrollToBottom();
-    
-    // إرسال أمر إلى Python
-    await sendCommandToPython('new_message', { message: text, user: currentUser.username });
-}
-
-// تسجيل الدخول
-async function login() {
-    const username = document.getElementById('login-username').value.trim().toLowerCase();
-    const password = document.getElementById('login-password').value.trim();
-    
-    await loadUsers();
-    
-    if (users[username] && users[username].password === password) {
-        currentUser = users[username];
-        currentUser.username = username;
-        startChat();
-    } else {
-        showNotification('بيانات دخول غير صحيحة', 'error');
-    }
-}
-
-// تسجيل جديد
-async function register() {
-    const username = document.getElementById('register-username').value.trim().toLowerCase();
-    const password = document.getElementById('register-password').value.trim();
-    const displayName = document.getElementById('register-display-name').value.trim() || username;
-    const bio = document.getElementById('register-bio').value.trim() || "مرحباً! أنا جديد";
-    const selectedAvatar = document.querySelector('.avatar-option.selected').getAttribute('data-avatar');
-    
-    if (!username || !password) {
-        showNotification('املأ جميع الحقول', 'error');
-        return;
-    }
-    
-    await loadUsers();
-    
-    if (users[username]) {
-        showNotification('اسم المستخدم موجود', 'error');
-        return;
-    }
-    
-    currentUser = {
-        id: Math.floor(1000000000 + Math.random() * 9000000000).toString(),
-        username: username,
-        displayName: displayName,
-        password: password,
-        photo: selectedAvatar,
-        bio: bio,
-        isPremium: false,
-        isAdmin: false,
-        isSuperAdmin: false,
-        premiumId: null,
-        gradient: 1,
-        joinedAt: Date.now()
-    };
-    
-    users[username] = currentUser;
-    await saveUsers();
-    startChat();
-}
-
-// دخول الأدمن
-async function adminLogin() {
-    const username = document.getElementById('login-username').value.trim().toLowerCase();
-    const password = document.getElementById('login-password').value.trim();
-    
-    if (username === 'texn' && password === 'hamzagmail34567') {
-        await loadUsers();
-        
-        if (!users['texn']) {
-            users['texn'] = {
-                id: '1111',
-                username: 'texn',
-                displayName: '𝐑𝐄𝐌𝐀𝐒 ༗',
-                password: 'hamzagmail34567',
-                photo: 'https://i.pinimg.com/736x/8b/16/7a/8b167af653c2399dd93b952a48740620.jpg',
-                bio: 'Super Admin',
-                isPremium: true,
-                isAdmin: true,
-                isSuperAdmin: true,
-                premiumId: 'ADMIN',
-                gradient: 1,
-                joinedAt: Date.now()
-            };
-            await saveUsers();
-        }
-        
-        currentUser = users['texn'];
-        currentUser.username = 'texn';
-        startChat();
-        showNotification('مرحباً يا أدمن!', 'success');
-    } else {
-        showNotification('بيانات أدمن غير صحيحة', 'error');
-    }
-}
-
-// بدء الشات
-function startChat() {
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('chat-screen').style.display = 'flex';
-    document.getElementById('user-name').textContent = currentUser.displayName;
-    document.querySelector('.user-avatar').src = currentUser.photo;
-    
-    loadMessages();
-    
-    // الاستماع للرسائل الجديدة (polling كل ثانية)
-    setInterval(async () => {
-        const newMessages = await readFromGitHub('messages.json');
-        if (newMessages && JSON.stringify(newMessages) !== JSON.stringify(messages)) {
-            messages = newMessages;
-            displayAllMessages();
-        }
-    }, 1000);
-}
-
-// عرض بروفايل المستخدم
-async function showUserProfile(userId) {
-    await loadUsers();
-    let user = null;
-    for (let u in users) {
-        if (users[u].id === userId) {
-            user = users[u];
-            user.username = u;
-            break;
-        }
-    }
-    
-    if (!user) return;
-    
-    const container = document.getElementById('profile-container');
-    const isMe = currentUser && user.id === currentUser.id;
-    const daysSince = Math.floor((Date.now() - (user.joinedAt || Date.now())) / (1000 * 60 * 60 * 24));
-    
-    let badges = '';
-    if (user.isSuperAdmin) badges += '<div class="badge badge-super-admin">Super Admin</div>';
-    if (user.isAdmin && !user.isSuperAdmin) badges += '<div class="badge badge-admin">Admin</div>';
-    if (user.isPremium) badges += '<div class="badge badge-premium">مميز</div>';
-    
-    container.innerHTML = `
-        <img src="${user.photo}" class="profile-avatar">
-        <h2 class="profile-name">${user.displayName}</h2>
-        <div class="badges-container">${badges}</div>
-        <div class="profile-id">${user.id}</div>
-        <div class="profile-bio">${user.bio || "لا توجد نبذة"}</div>
-        <div class="profile-stats">
-            <div class="stat-item"><div class="stat-value">${daysSince}</div><div class="stat-label">أيام</div></div>
-            <div class="stat-item"><div class="stat-value">@${user.username}</div><div class="stat-label">المستخدم</div></div>
-        </div>
-    `;
-    
-    document.getElementById('profile-modal').style.display = 'flex';
-}
-
-function showMyProfile() {
-    if (currentUser) showUserProfile(currentUser.id);
-}
-
-// عرض جميع المستخدمين
-async function showAllUsersModal() {
-    await loadUsers();
-    const container = document.getElementById('users-list');
-    container.innerHTML = '';
-    
-    for (let u in users) {
-        const user = users[u];
-        const userDiv = document.createElement('div');
-        userDiv.className = 'user-item';
-        userDiv.onclick = () => showUserProfile(user.id);
-        userDiv.innerHTML = `
-            <img src="${user.photo}" class="user-item-avatar">
-            <div class="user-item-info">
-                <div class="user-item-name">${user.displayName}</div>
-                <div class="user-item-status">${user.isPremium ? '🌟 مميز' : '👤 عادي'}</div>
-            </div>
-        `;
-        container.appendChild(userDiv);
-    }
-    
-    document.getElementById('all-users-modal').style.display = 'flex';
-}
-
-// تفعيل الاشتراك المميز
-async function activatePremium() {
-    const code = document.getElementById('subscription-code').value.trim();
-    const validCodes = ['FAI-TRIAL-AB3C', 'FAI-TRIAL-F5F9', 'FAI-TRIAL-M3N5'];
-    
-    if (validCodes.includes(code)) {
-        currentUser.isPremium = true;
-        currentUser.premiumId = currentUser.id;
-        currentUser.premiumUntil = Date.now() + 30 * 24 * 60 * 60 * 1000;
-        users[currentUser.username] = currentUser;
-        await saveUsers();
-        
-        // إرسال إشعار نظام
-        messages.push({
-            id: Date.now().toString(),
-            senderId: 'system',
-            senderName: 'النظام',
-            text: `🎉 ${currentUser.displayName} أصبح الآن عضواً مميزاً!`,
-            timestamp: Date.now()
-        });
-        await saveMessages();
-        
-        showNotification('تم تفعيل الاشتراك المميز!', 'success');
-        closeModal();
-    } else {
-        showNotification('كود غير صالح', 'error');
-    }
-}
-
-// عرض مودال الاشتراك
-function showPremiumModal() {
-    document.getElementById('premium-modal').style.display = 'flex';
-}
-
-// عرض الإعدادات
-function showSettingsModal() {
-    const container = document.getElementById('user-info');
-    container.innerHTML = `
-        <p><strong>${currentUser.displayName}</strong></p>
-        <p>@${currentUser.username}</p>
-        <p>ID: ${currentUser.id}</p>
-        <p>الحالة: ${currentUser.isPremium ? 'مميز' : 'عادي'}</p>
-        <p>الدور: ${currentUser.isSuperAdmin ? 'Super Admin' : currentUser.isAdmin ? 'أدمن' : 'مستخدم'}</p>
-    `;
-    document.getElementById('settings-modal').style.display = 'flex';
-}
-
-// مسح الشات محلياً
-function clearChat() {
-    if (confirm('مسح الرسائل من العرض فقط؟')) {
-        document.getElementById('chat-container').innerHTML = '';
-    }
-}
-
-// تسجيل الخروج
-function logout() {
-    currentUser = null;
-    document.getElementById('login-screen').style.display = 'flex';
-    document.getElementById('chat-screen').style.display = 'none';
-}
-
-// إغلاق المودال
-function closeModal() {
-    document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
-}
-
-// إظهار الإشعارات
-function showNotification(message, type = 'info') {
-    const notif = document.getElementById('notification');
-    notif.textContent = message;
-    notif.className = `notification ${type}`;
-    notif.style.display = 'block';
-    setTimeout(() => notif.style.display = 'none', 3000);
-}
-
-// تبويبات تسجيل الدخول
-function showLoginTab() {
-    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-    document.querySelectorAll('.form-container').forEach(form => form.classList.remove('active'));
-    document.querySelector('.tab-button').classList.add('active');
-    document.getElementById('login-form').classList.add('active');
-}
-
-function showRegisterTab() {
-    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-    document.querySelectorAll('.form-container').forEach(form => form.classList.remove('active'));
-    document.querySelectorAll('.tab-button')[1].classList.add('active');
-    document.getElementById('register-form').classList.add('active');
-}
-
-// اختيار الصورة في التسجيل
-document.querySelectorAll('.avatar-option').forEach(opt => {
-    opt.addEventListener('click', function() {
-        document.querySelectorAll('.avatar-option').forEach(o => o.classList.remove('selected'));
-        this.classList.add('selected');
-    });
-});
-
-// إرسال بالـ Enter
-document.getElementById('message-input')?.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') sendMessage();
-});
-
-// تعريف الدوال عالمياً
-window.login = login;
-window.register = register;
-window.adminLogin = adminLogin;
-window.sendMessage = sendMessage;
-window.showPremiumModal = showPremiumModal;
-window.showAllUsersModal = showAllUsersModal;
-window.showSettingsModal = showSettingsModal;
-window.clearChat = clearChat;
-window.logout = logout;
-window.closeModal = closeModal;
-window.activatePremium = activatePremium;
-window.showUserProfile = showUserProfile;
-window.showMyProfile = showMyProfile;
-window.showLoginTab = showLoginTab;
-window.showRegisterTab = showRegisterTab;
-</script>
+    </script>
 </body>
 </html>
