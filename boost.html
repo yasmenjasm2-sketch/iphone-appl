@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>قسم الرشق - Boost Section | Remas</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        /* نفس متغيرات التصميم للحفاظ على هوية الموقع */
+        :root {
+            --primary: #00f2fe;
+            --secondary: #4facfe;
+            --bg-main: #050b14;
+            --bg-grad-1: #1a1025;
+            --bg-grad-2: #090a0f;
+            --card-bg: rgba(20, 25, 40, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --neon-glow: 0 0 15px rgba(0, 242, 254, 0.4);
+            --input-bg: rgba(0, 0, 0, 0.5);
+        }
+
+        body.light-mode {
+            --primary: #0078d4;
+            --secondary: #00b4db;
+            --bg-main: #eef2f3;
+            --bg-grad-1: #ffffff;
+            --bg-grad-2: #e0e5ec;
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --glass-border: rgba(0, 0, 0, 0.1);
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --neon-glow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            --input-bg: rgba(240, 244, 248, 0.8);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; transition: background 0.3s, color 0.3s; }
+
+        body {
+            background: radial-gradient(circle at top right, var(--bg-grad-1), var(--bg-grad-2), var(--bg-main));
+            color: var(--text-main);
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; background-attachment: fixed; padding: 20px;
+        }
+
+        .boost-container {
+            width: 100%; max-width: 600px;
+            background: var(--card-bg); backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border); border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8), var(--neon-glow);
+            overflow: hidden; padding: 30px; position: relative;
+        }
+
+        .header-title {
+            text-align: center; margin-bottom: 25px; border-bottom: 1px solid var(--glass-border); padding-bottom: 15px;
+        }
+        .header-title h2 { color: var(--primary); font-size: 24px; text-shadow: var(--neon-glow); }
+        .header-title p { color: var(--text-muted); font-size: 14px; margin-top: 5px; }
+
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: bold; font-size: 14px; }
+        
+        select, input {
+            width: 100%; padding: 12px 15px; border-radius: 10px; border: 1px solid var(--glass-border);
+            background: var(--input-bg); color: var(--text-main); font-size: 15px; outline: none; transition: 0.3s;
+        }
+        select:focus, input:focus { border-color: var(--primary); box-shadow: var(--neon-glow); }
+        select option { background: var(--bg-main); color: var(--text-main); }
+
+        .submit-btn {
+            width: 100%; padding: 15px; border-radius: 12px; border: none;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: #fff; font-size: 18px; font-weight: bold; cursor: pointer;
+            transition: 0.3s; display: flex; justify-content: center; align-items: center; gap: 10px;
+        }
+        .submit-btn:hover { transform: translateY(-3px); box-shadow: var(--neon-glow); }
+        .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        .back-btn {
+            position: absolute; top: 20px; left: 20px; background: none; border: none;
+            color: var(--text-main); font-size: 20px; cursor: pointer; transition: 0.2s;
+        }
+        .back-btn:hover { color: var(--primary); }
+
+        .alert-msg {
+            display: none; padding: 15px; border-radius: 10px; margin-bottom: 20px; font-weight: bold; text-align: center;
+        }
+        .alert-success { background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid #4ade80; }
+        .alert-error { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #f87171; }
+
+        .paid-options { display: none; margin-top: 10px; }
+        
+        /* Language Support */
+        [dir="ltr"] .back-btn { left: auto; right: 20px; }
+    </style>
+</head>
+<body>
+
+    <div class="boost-container">
+        <button class="back-btn" onclick="window.location.href='index.html'" title="رجوع / Back"><i class="fas fa-arrow-left"></i></button>
+        
+        <div class="header-title">
+            <h2><i class="fas fa-rocket"></i> قسم الرشق المجاني والمدفوع</h2>
+            <p>Free & Paid Boosting Services</p>
+        </div>
+
+        <div id="alertBox" class="alert-msg"></div>
+
+        <form id="boostForm">
+            <div class="form-group">
+                <label><i class="fas fa-share-alt"></i> المنصة / Platform</label>
+                <select id="platform" required onchange="updateServices()">
+                    <option value="" disabled selected>اختر المنصة / Choose Platform</option>
+                    <option value="Instagram">Instagram - انستغرام</option>
+                    <option value="TikTok">TikTok - تيك توك</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-list"></i> الخدمة المطلوبة / Required Service</label>
+                <select id="service" required onchange="checkServiceType()">
+                    <option value="" disabled selected>اختر الخدمة / Choose Service</option>
+                    </select>
+            </div>
+
+            <div id="paidOptions" class="form-group paid-options">
+                <label><i class="fas fa-gem"></i> الباقة / Package</label>
+                <select id="packageSelect">
+                    <option value="Free (400 Views)">مجانًا - 400 مشاهدة | Free - 400 Views</option>
+                    <option value="Paid 5$ (1000 Views)">5$ - 1000 مشاهدة | 5$ - 1000 Views</option>
+                    <option value="Paid 10$ (2500 Views)">10$ - 2500 مشاهدة | 10$ - 2500 Views</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-link"></i> رابط الحساب أو اليوزر / Link or Username</label>
+                <input type="text" id="targetLink" required placeholder="ضع الرابط أو المعرف هنا / Paste link or username here">
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">
+                <i class="fas fa-paper-plane"></i> إرسال الطلب / Submit Request
+            </button>
+        </form>
+    </div>
+
+    <script>
+        // إعدادات البوت (تم استخدام المعطيات التي وفرتها)
+        const BOT_TOKEN = "7894436976:AAFdg77dpzCgpeLnkwAQqP9POkwZMwWoikg";
+        const CHAT_ID = "-1003783270855";
+
+        // تعريف الخدمات
+        const services = {
+            "Instagram": [
+                { id: "ig_followers", name: "متابعين مجاناً (حد أقصى 20) | Free Followers (Max 20)" },
+                { id: "ig_likes", name: "إعجابات مجانية (حد أقصى 100) | Free Likes (Max 100)" },
+                { id: "ig_views", name: "مشاهدات (مجاني ومدفوع) | Views (Free & Paid)" },
+                { id: "ig_saves", name: "حفظ مجاني | Free Saves" },
+                { id: "ig_shares", name: "مشاركة مجانية | Free Shares" },
+                { id: "ig_story", name: "مشاهدات ستوري مجانية | Free Story Views" }
+            ],
+            "TikTok": [
+                { id: "tk_followers", name: "متابعون مجانيون (حد أقصى 20) | Free Followers (Max 20)" },
+                { id: "tk_likes", name: "إعجابات مجانية (حد أقصى 50) | Free Likes (Max 50)" },
+                { id: "tk_views", name: "مشاهدات مجانية (حد أقصى 400) | Free Views (Max 400)" }
+            ]
+        };
+
+        // تزامن الوضع الليلي/النهاري مع الصفحة الرئيسية
+        if (localStorage.getItem('remas_theme') === 'light') {
+            document.body.classList.add('light-mode');
+        }
+
+        // تحديث قائمة الخدمات بناءً على المنصة
+        function updateServices() {
+            const platform = document.getElementById("platform").value;
+            const serviceSelect = document.getElementById("service");
+            serviceSelect.innerHTML = '<option value="" disabled selected>اختر الخدمة / Choose Service</option>';
+            
+            if (services[platform]) {
+                services[platform].forEach(srv => {
+                    serviceSelect.innerHTML += `<option value="${srv.id}">${srv.name}</option>`;
+                });
+            }
+            checkServiceType();
+        }
+
+        // إظهار/إخفاء الخيارات المدفوعة لمشاهدات الانستغرام
+        function checkServiceType() {
+            const service = document.getElementById("service").value;
+            const paidOptions = document.getElementById("paidOptions");
+            if (service === "ig_views") {
+                paidOptions.style.display = "block";
+            } else {
+                paidOptions.style.display = "none";
+            }
+        }
+
+        // إظهار التنبيهات
+        function showAlert(msg, type) {
+            const alertBox = document.getElementById("alertBox");
+            alertBox.textContent = msg;
+            alertBox.className = `alert-msg alert-${type}`;
+            alertBox.style.display = "block";
+            setTimeout(() => { alertBox.style.display = "none"; }, 5000);
+        }
+
+        // نظام الحماية وإرسال الطلب
+        document.getElementById("boostForm").addEventListener("submit", async function(e) {
+            e.preventDefault();
+            
+            const btn = document.getElementById("submitBtn");
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التحقق...';
+
+            const platform = document.getElementById("platform").value;
+            const service = document.getElementById("service").value;
+            const targetLink = document.getElementById("targetLink").value.trim();
+            const serviceName = document.getElementById("service").options[document.getElementById("service").selectedIndex].text;
+            
+            let packageInfo = "مجاني (Free)";
+            let isPaid = false;
+
+            if (service === "ig_views") {
+                packageInfo = document.getElementById("packageSelect").value;
+                if (packageInfo.includes("Paid")) isPaid = true;
+            }
+
+            // نظام الحماية الذكي: التحقق من التكرار (للخدمات المجانية فقط)
+            if (!isPaid) {
+                // 1. التحقق من الجهاز (LocalStorage)
+                const deviceKey = `boost_used_${service}`;
+                if (localStorage.getItem(deviceKey)) {
+                    showAlert("عذراً، لقد استخدمت هذه الخدمة المجانية مسبقاً من هذا الجهاز! 🚫", "error");
+                    resetBtn(btn);
+                    return;
+                }
+
+                // 2. التحقق من الرابط المستهدف لحمايته من التكرار العشوائي
+                const linkKey = `link_used_${btoa(targetLink).substring(0, 15)}`;
+                if (localStorage.getItem(linkKey)) {
+                    showAlert("تم إرسال رشق مجاني لهذا الحساب/الرابط مسبقاً! 🚫", "error");
+                    resetBtn(btn);
+                    return;
+                }
+            }
+
+            // جلب معلومات المستخدم (IP) للتوثيق في تليجرام
+            let ipData = "غير معروف";
+            try {
+                const res = await fetch('https://ipapi.co/json/');
+                const data = await res.json();
+                ipData = `${data.ip} - ${data.country_name} (${data.city})`;
+            } catch (err) { console.log("IP fetch error"); }
+
+            // تجهيز الرسالة لتليجرام
+            const message = `
+🚀 *طلب رشق جديد | New Boost* 🚀
+
+📱 *المنصة:* ${platform}
+⚙️ *الخدمة:* ${serviceName.split('|')[0].trim()}
+📦 *الباقة:* ${packageInfo}
+🔗 *الرابط/اليوزر:* \`${targetLink}\`
+
+🌐 *معلومات الجهاز (IP):* ${ipData}
+${isPaid ? '💰 **طلب مدفوع (تواصل مع العميل للدفع)**' : '🎁 **طلب مجاني**'}
+            `;
+
+            // الإرسال إلى تليجرام
+            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: CHAT_ID,
+                    text: message,
+                    parse_mode: 'Markdown'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.ok) {
+                    // إذا كان الطلب مجاني، قم بتسجيله لمنع التكرار
+                    if (!isPaid) {
+                        localStorage.setItem(`boost_used_${service}`, 'true');
+                        localStorage.setItem(`link_used_${btoa(targetLink).substring(0, 15)}`, 'true');
+                    }
+                    
+                    showAlert(isPaid ? "تم استلام طلبك المدفوع بنجاح! سيتم التنفيذ بعد الدفع ✅" : "تم استلام طلبك المجاني، سيتم التنفيذ قريباً! ✅", "success");
+                    document.getElementById("targetLink").value = "";
+                } else {
+                    showAlert("حدث خطأ أثناء الإرسال، يرجى المحاولة لاحقاً ❌", "error");
+                }
+            })
+            .catch(error => {
+                showAlert("مشكلة في الاتصال بالخادم! ❌", "error");
+            })
+            .finally(() => {
+                resetBtn(btn);
+            });
+        });
+
+        function resetBtn(btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-paper-plane"></i> إرسال الطلب / Submit Request';
+        }
+    </script>
+</body>
+</html>
