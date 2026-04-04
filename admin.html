@@ -11,7 +11,7 @@
 
     <style>
         :root {
-            --primary: #f200ff; /* لون مميز للأدمن */
+            --primary: #f200ff;
             --bg-dark: #090a0f;
             --card-bg: rgba(20, 25, 40, 0.8);
             --glass-border: rgba(255, 255, 255, 0.1);
@@ -48,10 +48,12 @@
         .btn {
             background: var(--primary); color: white; border: none; padding: 12px 20px;
             border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.3s;
+            display: flex; justify-content: center; align-items: center; gap: 8px;
         }
         .btn:hover { box-shadow: var(--neon-glow); transform: translateY(-2px); }
+        .btn-danger { background: #ef4444; }
+        .btn-danger:hover { background: #dc2626; box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
 
-        /* جدول الزوار */
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { border: 1px solid var(--glass-border); padding: 10px; text-align: center; }
         th { background: rgba(242, 0, 255, 0.2); }
@@ -61,15 +63,12 @@
 
     <div class="container">
         <div class="card">
-            <h2><i class="fas fa-code"></i> نشر السكربتات</h2>
+            <h2><i class="fas fa-code"></i> إدارة السكربتات</h2>
             <div class="form-group">
-                <label>اختر مكان السكربت</label>
-                <select id="script-slot">
-                    <option value="1">الملف 1</option>
-                    <option value="2">الملف 2</option>
-                    <option value="3">الملف 3</option>
-                    <option value="4">الملف 4</option>
-                </select>
+                <label>السكربت المستهدف (إنشاء أو تعديل)</label>
+                <select id="script-selector" onchange="loadSelectedScript()">
+                    <option value="new">➕ --- إنشاء سكربت جديد --- ➕</option>
+                    </select>
             </div>
             <div class="form-group">
                 <label>اسم السكربت</label>
@@ -79,7 +78,11 @@
                 <label>كود السكربت (سيتم ضغطه تلقائياً)</label>
                 <textarea id="script-code" placeholder="الصق الكود هنا..."></textarea>
             </div>
-            <button class="btn" onclick="publishScript()" id="btn-script"><i class="fas fa-paper-plane"></i> إرسال السكربت</button>
+            
+            <div style="display: flex; gap: 10px;">
+                <button class="btn" onclick="saveScript()" id="btn-save" style="flex: 2;"><i class="fas fa-save"></i> حفظ ونشر السكربت</button>
+                <button class="btn btn-danger" onclick="deleteScript()" id="btn-delete" style="flex: 1; display: none;"><i class="fas fa-trash"></i> حذف السكربت</button>
+            </div>
         </div>
 
         <div class="card">
@@ -131,34 +134,101 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // --- 1. نشر السكربت (مع الضغط) ---
-        function publishScript() {
-            const slot = document.getElementById('script-slot').value;
-            const name = document.getElementById('script-name').value || "script senpa.io";
+        // جلب قائمة السكربتات وتحديث القائمة المنسدلة
+        function refreshScriptsList() {
+            const selector = document.getElementById('script-selector');
+            db.ref('senpa_scripts').on('value', snap => {
+                // حفظ الاختيار الحالي حتى لا يضيع عند التحديث
+                const currentValue = selector.value;
+                
+                selector.innerHTML = '<option value="new">➕ --- إنشاء سكربت جديد --- ➕</option>';
+                snap.forEach(child => {
+                    const option = document.createElement('option');
+                    option.value = child.key;
+                    option.text = child.val().title || "بدون اسم";
+                    selector.appendChild(option);
+                });
+
+                // إعادة الاختيار إذا كان لا يزال موجوداً
+                if([...selector.options].some(o => o.value === currentValue)) {
+                    selector.value = currentValue;
+                }
+            });
+        }
+
+        // عند تغيير السكربت المختار
+        function loadSelectedScript() {
+            const id = document.getElementById('script-selector').value;
+            const delBtn = document.getElementById('btn-delete');
+            const nameInput = document.getElementById('script-name');
+            const codeInput = document.getElementById('script-code');
+
+            if (id === 'new') {
+                nameInput.value = '';
+                codeInput.value = '';
+                delBtn.style.display = 'none';
+            } else {
+                delBtn.style.display = 'flex';
+                codeInput.value = 'جاري التحميل...';
+                
+                db.ref('senpa_scripts/' + id).once('value').then(snap => {
+                    const data = snap.val();
+                    nameInput.value = data.title || '';
+                    const decompressed = LZString.decompressFromUTF16(data.content);
+                    codeInput.value = decompressed ? decompressed : data.content;
+                });
+            }
+        }
+
+        // حفظ السكربت (جديد أو تعديل)
+        function saveScript() {
+            const id = document.getElementById('script-selector').value;
+            const name = document.getElementById('script-name').value;
             const code = document.getElementById('script-code').value;
-            const btn = document.getElementById('btn-script');
+            const btn = document.getElementById('btn-save');
 
-            if(!code) return alert("الرجاء وضع السكربت!");
+            if (!name || !code) return alert("الرجاء كتابة اسم وكود السكربت!");
 
-            btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> جاري الضغط والرفع...";
+            btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> جاري الحفظ...";
             
-            // ضغط النص باستخدام lz-string لتوفير مساحة كبيرة جداً في قاعدة البيانات
             const compressedCode = LZString.compressToUTF16(code);
+            
+            // تحديد ما إذا كنا ننشئ معرفاً جديداً أم نحدث قديماً
+            const ref = (id === 'new') ? db.ref('senpa_scripts').push() : db.ref('senpa_scripts/' + id);
 
-            db.ref('senpa_scripts/slot_' + slot).set({
+            ref.set({
                 title: name,
                 content: compressedCode,
                 updatedAt: new Date().toISOString()
             }).then(() => {
-                btn.innerHTML = "<i class='fas fa-check'></i> تم النشر بنجاح!";
-                setTimeout(() => btn.innerHTML = "<i class='fas fa-paper-plane'></i> إرسال السكربت", 2000);
+                btn.innerHTML = "<i class='fas fa-check'></i> تم الحفظ بنجاح!";
+                if (id === 'new') {
+                    // تفريغ الحقول بعد إنشاء جديد
+                    document.getElementById('script-name').value = '';
+                    document.getElementById('script-code').value = '';
+                }
+                setTimeout(() => btn.innerHTML = "<i class='fas fa-save'></i> حفظ ونشر السكربت", 2000);
             }).catch(err => {
                 alert("خطأ: " + err.message);
-                btn.innerHTML = "<i class='fas fa-paper-plane'></i> إرسال السكربت";
+                btn.innerHTML = "<i class='fas fa-save'></i> حفظ ونشر السكربت";
             });
         }
 
-        // --- 2. نشر الإعلان (مع ضغط الصورة) ---
+        // حذف السكربت
+        function deleteScript() {
+            const id = document.getElementById('script-selector').value;
+            if (id === 'new') return;
+
+            if (confirm("هل أنت متأكد من حذف هذا السكربت نهائياً؟ سينتزع من موقع الزوار فوراً.")) {
+                db.ref('senpa_scripts/' + id).remove().then(() => {
+                    alert("تم الحذف بنجاح!");
+                    document.getElementById('script-selector').value = 'new';
+                    loadSelectedScript(); // تفريغ الحقول
+                });
+            }
+        }
+
+        // --- نظام الإعلانات ---
         function publishAd() {
             const fileInput = document.getElementById('ad-image');
             const text = document.getElementById('ad-text').value;
@@ -175,9 +245,8 @@
             reader.onload = function(event) {
                 const img = new Image();
                 img.onload = function() {
-                    // استخدام Canvas لتصغير الصورة وضغطها (جودة 0.6) حتى لا تأخذ مساحة
                     const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 600; // أقصى عرض
+                    const MAX_WIDTH = 600; 
                     let width = img.width;
                     let height = img.height;
 
@@ -191,10 +260,8 @@
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
 
-                    // تحويل لـ Base64 مضغوط
                     const compressedBase64 = canvas.toDataURL('image/jpeg', 0.6);
 
-                    // إرسال لقاعدة البيانات
                     db.ref('senpa_ads/current').set({
                         image: compressedBase64,
                         text: text,
@@ -210,7 +277,7 @@
             reader.readAsDataURL(file);
         }
 
-        // --- 3. جلب الزوار ---
+        // --- سجل الزوار ---
         function loadVisitors() {
             db.ref('senpa_visitors').limitToLast(50).on('value', snap => {
                 const list = document.getElementById('visitors-list');
@@ -224,13 +291,13 @@
                         <td>${data.city || '-'}</td>
                         <td>${data.time || '-'}</td>
                     `;
-                    // إدراج في بداية الجدول ليكون الأحدث فوق
                     list.insertBefore(tr, list.firstChild);
                 });
             });
         }
 
         window.onload = () => {
+            refreshScriptsList();
             loadVisitors();
         };
     </script>
