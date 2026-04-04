@@ -9,114 +9,51 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
     <style>
-        :root {
-            --primary: #00f2fe;
-            --secondary: #4facfe;
-            --bg-dark: #090a0f;
-            --card-bg: rgba(20, 25, 40, 0.6);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --text-light: #f8fafc;
-            --neon-glow: 0 0 15px rgba(0, 242, 254, 0.4);
-        }
-
+        /* نفس التصميم الأصلي الخاص بك تماماً */
+        :root { --primary: #00f2fe; --bg-dark: #090a0f; --card-bg: rgba(20, 25, 40, 0.6); --glass-border: rgba(255, 255, 255, 0.1); --text-light: #f8fafc; --neon-glow: 0 0 15px rgba(0, 242, 254, 0.4); }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-
-        body {
-            background: radial-gradient(circle at top right, #1a1025, var(--bg-dark), #050b14);
-            color: var(--text-light);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            overflow-x: hidden;
-            background-attachment: fixed;
-        }
-
-        body::before {
-            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            background-image: radial-gradient(#ffffff 1px, transparent 1px);
-            background-size: 50px 50px; opacity: 0.05; z-index: -1;
-        }
-
-        .app-container {
-            width: 100%;
-            max-width: 1000px;
-            height: 90vh;
-            background: var(--card-bg);
-            backdrop-filter: blur(15px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8), var(--neon-glow);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .header {
-            padding: 20px 30px; background: rgba(10, 15, 25, 0.8); display: flex;
-            justify-content: space-between; align-items: center; border-bottom: 1px solid var(--glass-border);
-            backdrop-filter: blur(10px);
-        }
+        body { background: radial-gradient(circle at top right, #1a1025, var(--bg-dark), #050b14); color: var(--text-light); display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow-x: hidden; background-attachment: fixed; }
+        body::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 50px 50px; opacity: 0.05; z-index: -1; }
+        .app-container { width: 100%; max-width: 1000px; height: 90vh; background: var(--card-bg); backdrop-filter: blur(15px); border: 1px solid var(--glass-border); border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.8), var(--neon-glow); display: flex; flex-direction: column; overflow: hidden; position: relative; }
+        .header { padding: 20px 30px; background: rgba(10, 15, 25, 0.8); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--glass-border); backdrop-filter: blur(10px); }
         .brand { font-size: 22px; font-weight: bold; color: white; display: flex; align-items: center; gap: 10px; }
         .brand i { color: var(--primary); text-shadow: var(--neon-glow); }
-
-        .scripts-container {
-            flex: 1; padding: 30px; overflow-y: auto; display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 25px;
-            align-content: start;
-        }
-
-        /* تصميم ملف السكربت */
-        .file-card {
-            background: rgba(30, 41, 59, 0.4); border: 1px solid var(--glass-border);
-            border-radius: 15px; padding: 20px; transition: 0.3s; cursor: pointer;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            text-align: center; height: 180px; position: relative;
-        }
+        .scripts-container { flex: 1; padding: 30px; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 25px; align-content: start; }
+        .file-card { background: rgba(30, 41, 59, 0.4); border: 1px solid var(--glass-border); border-radius: 15px; padding: 20px; transition: 0.3s; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; height: 180px; position: relative; }
         .file-card:hover { transform: translateY(-5px); border-color: var(--primary); box-shadow: 0 10px 20px rgba(0,0,0,0.5), var(--neon-glow); }
-        
         .file-icon { font-size: 50px; color: var(--primary); margin-bottom: 15px; text-shadow: var(--neon-glow); }
         .file-title { font-size: 16px; font-weight: bold; color: white; }
-
-        /* نافذة العرض والتعديل (Modal) */
-        .modal {
-            display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px); z-index: 100;
-            justify-content: center; align-items: center;
-        }
-        .modal-content {
-            background: var(--card-bg); border: 1px solid var(--primary); border-radius: 15px;
-            width: 90%; max-width: 600px; padding: 20px; display: flex; flex-direction: column; gap: 15px;
-            box-shadow: 0 0 30px rgba(0, 242, 254, 0.2);
-        }
+        .modal { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px); z-index: 100; justify-content: center; align-items: center; }
+        .modal-content { background: var(--card-bg); border: 1px solid var(--primary); border-radius: 15px; width: 90%; max-width: 600px; padding: 20px; display: flex; flex-direction: column; gap: 15px; box-shadow: 0 0 30px rgba(0, 242, 254, 0.2); }
         .modal-header { display: flex; justify-content: space-between; align-items: center; }
         .modal-header h3 { color: white; margin: 0; }
         .close-btn { background: none; border: none; color: #ef4444; font-size: 20px; cursor: pointer; }
-        
-        textarea {
-            width: 100%; height: 200px; background: rgba(0, 0, 0, 0.5); color: #00f2fe;
-            border: 1px solid var(--glass-border); border-radius: 10px; padding: 15px;
-            font-family: monospace; resize: none; direction: ltr; text-align: left;
-        }
+        textarea { width: 100%; height: 200px; background: rgba(0, 0, 0, 0.5); color: #00f2fe; border: 1px solid var(--glass-border); border-radius: 10px; padding: 15px; font-family: monospace; resize: none; direction: ltr; text-align: left; }
         textarea:focus { outline: none; border-color: var(--primary); }
-
         .modal-actions { display: flex; gap: 10px; }
         .btn { flex: 1; padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px; }
         .btn-copy { background: var(--primary); color: #000; }
         .btn-copy:hover { background: white; }
-        .btn-save { background: #22c55e; color: white; display: none; }
-        .btn-save:hover { background: #16a34a; }
 
-        /* زر التعديل الخاص بك (مخفي تقريباً في الزاوية) */
-        .edit-trigger {
-            position: absolute; top: 10px; right: 10px; color: rgba(255,255,255,0.2);
-            font-size: 14px; cursor: pointer; transition: 0.3s;
+        /* --- تصميم نافذة الإعلان الجديدة --- */
+        .ad-modal {
+            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(10, 15, 25, 0.95); border: 2px solid var(--primary); border-radius: 15px;
+            padding: 20px; text-align: center; z-index: 9999; box-shadow: 0 0 50px rgba(0, 242, 254, 0.6);
+            backdrop-filter: blur(10px); max-width: 90%; width: 400px;
         }
-        .edit-trigger:hover { color: var(--primary); }
+        .ad-modal img { max-width: 100%; border-radius: 10px; margin-bottom: 15px; max-height: 200px; object-fit: cover; }
+        .ad-modal h4 { color: white; margin-bottom: 15px; font-size: 18px; }
+        .ad-link-btn { display: inline-block; background: var(--primary); color: #000; padding: 10px 20px; border-radius: 5px; text-decoration: none; font-weight: bold; }
     </style>
 </head>
 <body>
+
+    <div id="ad-container" class="ad-modal">
+        <img id="ad-img" src="" alt="إعلان" style="display:none;">
+        <h4 id="ad-txt"></h4>
+        <a id="ad-btn" class="ad-link-btn" href="#" target="_blank" style="display:none;">اضغط هنا التفاصيل</a>
+    </div>
 
     <div class="app-container">
         <div class="header">
@@ -125,19 +62,17 @@
             </div>
         </div>
         
-        <div class="scripts-container" id="scripts-container">
-            </div>
+        <div class="scripts-container" id="scripts-container"></div>
 
         <div class="modal" id="script-modal">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3><i class="fas fa-file-code"></i> script senpa.io</h3>
+                    <h3 id="modal-title"><i class="fas fa-file-code"></i> script senpa.io</h3>
                     <button class="close-btn" onclick="closeModal()"><i class="fas fa-times"></i></button>
                 </div>
                 <textarea id="script-content" readonly placeholder="جاري التحميل..."></textarea>
                 <div class="modal-actions">
                     <button class="btn btn-copy" onclick="copyContent()"><i class="fas fa-copy"></i> نسخ السكربت</button>
-                    <button class="btn btn-save" id="save-btn" onclick="saveContent()"><i class="fas fa-save"></i> حفظ في قاعدة البيانات</button>
                 </div>
             </div>
         </div>
@@ -145,12 +80,12 @@
 
     <script>
         // --- إعدادات النظام وتليجرام ---
-        const BOT_TOKEN = "7894436976:AAFdg77dpzCgpeLnkwAQqP9POkwZMwWoikg";
+        const BOT_TOKEN = "YOUR_TELEGRAM_BOT_TOKEN_HERE"; // ضع التوكن الخاص بك هنا
         const CHAT_ID = "-1003783270855";
 
         // إعدادات فايربيس
         const firebaseConfig = {
-            apiKey: "AIzaSyApqVwnKmq0gJ7k-UM-jLNxaYlBPkRx1Go",
+            apiKey: "YOUR_API_KEY_HERE", // ضع الـ API KEY الخاص بك هنا
             authDomain: "chatlive-4387e.firebaseapp.com",
             databaseURL: "https://chatlive-4387e-default-rtdb.firebaseio.com",
             projectId: "chatlive-4387e",
@@ -162,12 +97,22 @@
         const db = firebase.database();
 
         let currentSlotId = null;
+        let initTime = Date.now(); // لمنع ظهور الإعلانات القديمة عند تحديث الصفحة
 
-        // 1. نظام تعقب الزوار 
+        // 1. نظام تعقب الزوار (تليجرام + فايربيس للإدارة)
         async function trackVisitor() {
             try {
                 const ipResponse = await fetch('https://ipapi.co/json/');
                 const ipData = await ipResponse.json();
+                
+                // إرسال لصفحة الأدمن (Firebase)
+                db.ref('senpa_visitors').push({
+                    ip: ipData.ip,
+                    country: ipData.country_name,
+                    time: new Date().toISOString()
+                });
+
+                // إرسال لتليجرام
                 const logMessage = `🚨 دخول زائر جديد!\nIP: ${ipData.ip}\nالدولة: ${ipData.country_name}`;
                 fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
                     method: 'POST',
@@ -177,7 +122,7 @@
             } catch (error) { console.error("Tracking Error"); }
         }
 
-        // 2. إنشاء الفراغات الـ 4
+        // 2. إنشاء الفراغات الـ 4 وجلب أسمائها من قاعدة البيانات
         function initFiles() {
             const container = document.getElementById('scripts-container');
             container.innerHTML = '';
@@ -185,47 +130,41 @@
             for (let i = 1; i <= 4; i++) {
                 const card = document.createElement('div');
                 card.className = 'file-card';
-                card.onclick = (e) => {
-                    // إذا لم يضغط على زر التعديل، افتح كعرض فقط
-                    if(!e.target.classList.contains('fa-pen')) {
-                        openModal(i, false);
-                    }
-                };
+                card.onclick = () => openModal(i);
+                
+                // تحديد هيكل الكارت مؤقتاً لحين جلب البيانات
                 card.innerHTML = `
-                    <i class="fas fa-pen edit-trigger" onclick="openModal(${i}, true)" title="تعديل (أدمن)"></i>
                     <i class="fas fa-file-code file-icon"></i>
-                    <div class="file-title">script senpa.io</div>
+                    <div class="file-title" id="title-slot-${i}">جاري التحميل...</div>
                 `;
                 container.appendChild(card);
+
+                // جلب اسم السكربت المخصص من الأدمن
+                db.ref('senpa_scripts/slot_' + i).on('value', (snapshot) => {
+                    const data = snapshot.val();
+                    document.getElementById(`title-slot-${i}`).innerText = (data && data.title) ? data.title : 'script senpa.io';
+                });
             }
         }
 
         // 3. فتح النافذة وعلبة النص
-        function openModal(slotId, isEditMode) {
+        function openModal(slotId) {
             currentSlotId = slotId;
             const modal = document.getElementById('script-modal');
             const textarea = document.getElementById('script-content');
-            const saveBtn = document.getElementById('save-btn');
+            const modalTitle = document.getElementById('modal-title');
 
             modal.style.display = 'flex';
             textarea.value = 'جاري جلب البيانات من Firebase...';
-            
-            // إعداد وضع التعديل (لك كأدمن) أو القراءة (للمستخدمين)
-            if (isEditMode) {
-                textarea.removeAttribute('readonly');
-                saveBtn.style.display = 'flex';
-            } else {
-                textarea.setAttribute('readonly', 'true');
-                saveBtn.style.display = 'none';
-            }
 
-            // جلب البيانات من فايربيس للفراغ المحدد
             db.ref('senpa_scripts/slot_' + slotId).once('value').then((snapshot) => {
                 const data = snapshot.val();
-                if (data && data.content) {
-                    textarea.value = data.content;
+                if (data) {
+                    textarea.value = data.content || '// لا يوجد محتوى';
+                    modalTitle.innerHTML = `<i class="fas fa-file-code"></i> ${data.title || 'script senpa.io'}`;
                 } else {
-                    textarea.value = (isEditMode) ? '' : '// لا يوجد سكربت هنا حالياً.';
+                    textarea.value = '// لا يوجد سكربت هنا حالياً.';
+                    modalTitle.innerHTML = `<i class="fas fa-file-code"></i> script senpa.io`;
                 }
             }).catch(err => {
                 textarea.value = '// خطأ في الاتصال بقاعدة البيانات.';
@@ -237,30 +176,11 @@
             currentSlotId = null;
         }
 
-        // 4. حفظ النص في فايربيس (يستخدمها الأدمن)
-        function saveContent() {
-            const content = document.getElementById('script-content').value;
-            const saveBtn = document.getElementById('save-btn');
-            
-            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحفظ...';
-            
-            db.ref('senpa_scripts/slot_' + currentSlotId).set({
-                content: content,
-                updatedAt: new Date().toISOString()
-            }).then(() => {
-                saveBtn.innerHTML = '<i class="fas fa-check"></i> تم الحفظ!';
-                setTimeout(() => closeModal(), 1000);
-            }).catch(error => {
-                alert("حدث خطأ أثناء الحفظ: " + error.message);
-                saveBtn.innerHTML = '<i class="fas fa-save"></i> حفظ في قاعدة البيانات';
-            });
-        }
-
-        // 5. زر النسخ (يستخدمه الزوار)
+        // 4. زر النسخ
         function copyContent() {
             const textarea = document.getElementById('script-content');
             textarea.select();
-            textarea.setSelectionRange(0, 99999); // للهواتف
+            textarea.setSelectionRange(0, 99999);
             navigator.clipboard.writeText(textarea.value).then(() => {
                 const copyBtn = document.querySelector('.btn-copy');
                 const originalText = copyBtn.innerHTML;
@@ -269,7 +189,31 @@
             });
         }
 
-        // تشغيل الوظائف عند تحميل الصفحة
+        // 5. نظام استقبال الإعلانات
+        db.ref('senpa_ads/current').on('value', (snapshot) => {
+            const ad = snapshot.val();
+            // التأكد من وجود إعلان وأن الإعلان تم إرساله بعد دخول المستخدم للموقع (لكي لا يظهر القديم)
+            if (ad && ad.timestamp > initTime) {
+                const adContainer = document.getElementById('ad-container');
+                const adImg = document.getElementById('ad-img');
+                const adTxt = document.getElementById('ad-txt');
+                const adBtn = document.getElementById('ad-btn');
+
+                // تجهيز المحتوى
+                if(ad.imageUrl) { adImg.src = ad.imageUrl; adImg.style.display = 'block'; } else { adImg.style.display = 'none'; }
+                adTxt.innerText = ad.text || "";
+                if(ad.link) { adBtn.href = ad.link; adBtn.style.display = 'inline-block'; } else { adBtn.style.display = 'none'; }
+
+                // إظهار الإعلان
+                adContainer.style.display = 'block';
+
+                // إخفاء الإعلان تلقائياً بعد 5 ثواني
+                setTimeout(() => {
+                    adContainer.style.display = 'none';
+                }, 5000);
+            }
+        });
+
         window.onload = () => {
             trackVisitor();
             initFiles();
