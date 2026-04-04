@@ -32,14 +32,12 @@
             background-attachment: fixed;
         }
 
-        /* تأثيرات النجوم في الخلفية */
         body::before {
             content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
             background-image: radial-gradient(#ffffff 1px, transparent 1px);
             background-size: 50px 50px; opacity: 0.05; z-index: -1;
         }
 
-        /* حاوية التطبيق الرئيسية */
         .app-container {
             width: 100%;
             max-width: 1000px;
@@ -55,43 +53,8 @@
             position: relative;
         }
 
-        /* شاشة تسجيل الدخول */
-        #auth-screen {
-            display: flex; flex-direction: column; padding: 40px; height: 100%;
-            justify-content: center; max-width: 450px; margin: 0 auto; width: 100%;
-        }
-        
-        #auth-screen h2 { text-align: center; margin-bottom: 30px; color: var(--primary); text-shadow: var(--neon-glow); font-size: 28px;}
-        .input-group { margin-bottom: 20px; position: relative; }
-        .input-group i { position: absolute; right: 15px; top: 15px; color: #64748b; }
-        .input-group input {
-            width: 100%; padding: 12px 40px 12px 12px; border-radius: 12px; border: 1px solid #334155;
-            background: rgba(15, 23, 42, 0.6); color: white; outline: none; transition: 0.3s; font-size: 15px;
-        }
-        .input-group input:focus { border-color: var(--primary); box-shadow: 0 0 10px rgba(0, 242, 254, 0.2); }
-        
-        .file-upload { margin-bottom: 20px; text-align: center; }
-        .file-upload input { display: none; }
-        .file-upload label {
-            display: inline-block; padding: 12px 25px; background: rgba(51, 65, 85, 0.5); border: 1px dashed var(--primary);
-            border-radius: 12px; cursor: pointer; color: #cbd5e1; transition: 0.3s;
-        }
-        .file-upload label:hover { background: rgba(71, 85, 105, 0.8); }
-        #preview-img { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; display: none; margin: 15px auto; border: 2px solid var(--primary); box-shadow: var(--neon-glow); }
-
-        .btn {
-            width: 100%; padding: 14px; border: none; border-radius: 12px;
-            background: linear-gradient(45deg, var(--secondary), var(--primary));
-            color: #000; font-weight: 800; cursor: pointer; transition: 0.3s; font-size: 16px;
-            box-shadow: var(--neon-glow); text-transform: uppercase;
-        }
-        .btn:hover { transform: translateY(-3px); box-shadow: 0 0 20px rgba(0, 242, 254, 0.6); }
-        
-        .toggle-auth { text-align: center; margin-top: 20px; cursor: pointer; color: #94a3b8; font-size: 14px; transition: 0.3s; }
-        .toggle-auth:hover { color: var(--primary); }
-
-        /* شاشة السكربتات (لوحة التحكم) */
-        #scripts-screen { display: none; flex-direction: column; height: 100%; }
+        /* شاشة السكربتات (مفتوحة للجميع مباشرة) */
+        #scripts-screen { display: flex; flex-direction: column; height: 100%; }
         
         .header {
             padding: 20px 30px; background: rgba(10, 15, 25, 0.8); display: flex;
@@ -100,15 +63,7 @@
         }
         .brand { font-size: 22px; font-weight: bold; color: white; display: flex; align-items: center; gap: 10px; }
         .brand i { color: var(--primary); text-shadow: var(--neon-glow); }
-        
-        .header-buttons { display: flex; gap: 10px; align-items: center; }
-        .header-btn { padding: 8px 15px; border-radius: 10px; cursor: pointer; font-size: 14px; border: none; color: white; font-weight: bold; display: flex; align-items: center; gap: 8px; transition: 0.2s;}
-        .logout-btn { background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #fca5a5; }
-        .logout-btn:hover { background: #ef4444; color: white; }
-        .admin-btn { background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #6ee7b7; display: none; }
-        .admin-btn:hover { background: #10b981; color: white; }
 
-        /* شبكة عرض السكربتات */
         .scripts-container {
             flex: 1; padding: 30px; overflow-y: auto; display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px;
@@ -132,95 +87,23 @@
         .script-actions { display: flex; gap: 10px; }
         .install-btn { flex: 1; padding: 10px; border-radius: 8px; border: none; background: var(--primary); color: #000; font-weight: bold; cursor: pointer; transition: 0.2s; text-decoration: none; text-align: center; font-size: 14px; }
         .install-btn:hover { background: white; }
-        .copy-btn { width: 40px; height: 40px; border-radius: 8px; border: 1px solid #475569; background: transparent; color: #cbd5e1; cursor: pointer; transition: 0.2s; display: flex; justify-content: center; align-items: center; }
-        .copy-btn:hover { background: #475569; color: white; }
-
-        /* نافذة إعدادات الأدمن (Modal) */
-        .modal {
-            display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 100; justify-content: center; align-items: center;
-        }
-        .modal-content {
-            background: var(--bg-dark); width: 90%; max-width: 400px; padding: 30px; border-radius: 20px;
-            border: 1px solid var(--primary); box-shadow: var(--neon-glow); position: relative;
-        }
-        .close-modal { position: absolute; top: 15px; right: 20px; cursor: pointer; font-size: 24px; color: #ef4444; }
-        .modal-title { margin-bottom: 20px; color: white; font-size: 18px; border-bottom: 1px solid #334155; padding-bottom: 10px; }
-        .modal label { font-size: 12px; color: #94a3b8; margin-bottom: 5px; display: block; }
-        .modal input { width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 8px; background: #1e293b; border: 1px solid #475569; color: white; outline: none; }
         
+        .loading-text { text-align: center; color: var(--primary); font-size: 18px; margin-top: 50px; grid-column: 1/-1; }
         .system-logs { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); color: var(--primary); font-size: 12px; background: rgba(0,0,0,0.6); padding: 5px 15px; border-radius: 20px; pointer-events: none; opacity: 0; transition: opacity 0.5s; z-index: 50;}
     </style>
 </head>
 <body>
 
     <div class="app-container">
-        
-        <div id="auth-screen">
-            <h2 id="auth-title">تسجيل الدخول للمنصة</h2>
-            
-            <div id="register-fields" style="display: none;">
-                <div class="file-upload">
-                    <label for="avatarInput"><i class="fas fa-image"></i> اختيار صورة الحساب</label>
-                    <input type="file" id="avatarInput" accept="image/*">
-                    <img id="preview-img" alt="Preview">
-                </div>
-                <div class="input-group">
-                    <i class="fas fa-font"></i>
-                    <input type="text" id="reg-name" placeholder="الاسم المستعار" maxlength="25">
-                </div>
-            </div>
-
-            <div class="input-group">
-                <i class="fas fa-user"></i>
-                <input type="text" id="auth-username" placeholder="اسم المستخدم" minlength="5" maxlength="24">
-            </div>
-            <div class="input-group">
-                <i class="fas fa-lock"></i>
-                <input type="password" id="auth-password" placeholder="كلمة المرور">
-            </div>
-
-            <button class="btn" id="auth-btn" onclick="handleAuth()">دخول</button>
-            <div class="toggle-auth" id="toggle-auth-btn" onclick="toggleAuthMode()">طلب انضمام جديد</div>
-        </div>
-
         <div id="scripts-screen">
             <div class="header">
                 <div class="brand">
-                    <i class="fas fa-code"></i> Remas Scripts <span style="font-size: 10px; background: var(--primary); color: #000; padding: 2px 6px; border-radius: 4px; margin-right: 5px;">PRO</span>
-                </div>
-                <div class="header-buttons">
-                    <button class="header-btn admin-btn" id="adminSettingsBtn" onclick="openAdminSettings()">
-                        <i class="fas fa-cogs"></i> إعدادات الربط
-                    </button>
-                    <button class="header-btn logout-btn" onclick="logout()">
-                        <i class="fas fa-sign-out-alt"></i> خروج
-                    </button>
+                    <i class="fas fa-code"></i> Remas Scripts <span style="font-size: 10px; background: var(--primary); color: #000; padding: 2px 6px; border-radius: 4px; margin-right: 5px;">Public</span>
                 </div>
             </div>
             
             <div class="scripts-container" id="scripts-container">
-                </div>
-        </div>
-
-        <div class="modal" id="admin-modal">
-            <div class="modal-content">
-                <span class="close-modal" onclick="closeAdminSettings()">&times;</span>
-                <div class="modal-title"><i class="fab fa-github"></i> إعدادات الرفع التلقائي (GitHub)</div>
-                <p style="font-size: 12px; color: #cbd5e1; margin-bottom: 15px; line-height: 1.5;">
-                    عند إرسال ملف بصيغة <code>.user.js</code> لبوت تليجرام، سيقوم هذا المتصفح بتحميله ورفعه تلقائياً لهذا المستودع.
-                </p>
-                
-                <label>GitHub Personal Access Token (PAT)</label>
-                <input type="password" id="gh_token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
-                
-                <label>GitHub Username</label>
-                <input type="text" id="gh_user" placeholder="مثال: Hamza-AlHamada">
-                
-                <label>Repository Name</label>
-                <input type="text" id="gh_repo" placeholder="مثال: senpa-scripts">
-                
-                <button class="btn" onclick="saveAdminSettings()" style="padding: 10px; font-size: 14px;">حفظ الإعدادات</button>
+                <div class="loading-text"><i class="fas fa-spinner fa-spin"></i> جاري استدعاء السكربتات من المستودع...</div>
             </div>
         </div>
 
@@ -228,10 +111,15 @@
     </div>
 
     <script>
-        // --- إعدادات النظام ---
+        // --- إعدادات النظام وتليجرام ---
         const BOT_TOKEN = "7894436976:AAFdg77dpzCgpeLnkwAQqP9POkwZMwWoikg";
         const CHAT_ID = "-1003783270855";
 
+        // إعدادات GitHub (ضع اسم المستخدم واسم المستودع الخاص بك هنا)
+        const GITHUB_USERNAME = "Hamza-AlHamada"; // استبدله بيوزرك في غيت هوب
+        const GITHUB_REPO = "senpa-scripts";      // استبدله باسم المستودع
+
+        // إعدادات فايربيس (بقيت كما هي لتطبيقاتك الأخرى، لكن السكربتات لا تستهلك منها مساحة)
         const firebaseConfig = {
             apiKey: "AIzaSyApqVwnKmq0gJ7k-UM-jLNxaYlBPkRx1Go",
             authDomain: "chatlive-4387e.firebaseapp.com",
@@ -241,287 +129,127 @@
             messagingSenderId: "722728428486",
             appId: "1:722728428486:android:847b11a7743dfb7d5ac8c7"
         };
-
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        const usersRef = db.ref("users");
-        const scriptsRef = db.ref("tampermonkey_scripts");
 
-        let currentUser = null;
-        let isRegisterMode = false;
-        let selectedAvatarBase64 = "";
+        // 1. نظام تعقب الزوار المتقدم (IP & Fingerprint)
+        async function trackVisitor() {
+            try {
+                // جلب الـ IP ومعلومات الموقع الجغرافي
+                const ipResponse = await fetch('https://ipapi.co/json/');
+                const ipData = await ipResponse.json();
+                
+                // جلب بصمة الجهاز (المتصفح، النظام، أبعاد الشاشة)
+                const userAgent = navigator.userAgent;
+                const platform = navigator.platform;
+                const screenRes = `${screen.width}x${screen.height}`;
+                const language = navigator.language;
 
-        // --- تهيئة حساب الأدمن الرئيسي ---
-        function initMainAdmin() {
-            usersRef.child("hamza").once('value', snapshot => {
-                if (!snapshot.exists()) {
-                    usersRef.child("hamza").set({
-                        username: "hamza",
-                        displayName: "Remas",
-                        password: "gmailcom34567",
-                        id: "1111",
-                        role: "admin",
-                        banned: false,
-                        avatar: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
-                    });
-                }
-            });
-        }
-        initMainAdmin();
+                // تنسيق الرسالة لترسل لتليجرام
+                const logMessage = `
+🚨 **دخول زائر جديد للموقع!** 🚨
 
-        // --- دوال المصادقة ---
-        function toggleAuthMode() {
-            isRegisterMode = !isRegisterMode;
-            document.getElementById('auth-title').innerText = isRegisterMode ? "إنشاء حساب جديد" : "تسجيل الدخول للمنصة";
-            document.getElementById('auth-btn').innerText = isRegisterMode ? "إنشاء الحساب" : "دخول";
-            document.getElementById('toggle-auth-btn').innerText = isRegisterMode ? "لديك حساب؟ سجل دخولك" : "طلب انضمام جديد";
-            document.getElementById('register-fields').style.display = isRegisterMode ? "block" : "none";
-        }
+🌐 **معلومات الاتصال:**
+- IP: \`${ipData.ip}\`
+- الدولة: ${ipData.country_name}
+- المدينة: ${ipData.city}
+- مزود الخدمة: ${ipData.org}
 
-        document.getElementById('avatarInput').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    selectedAvatarBase64 = event.target.result;
-                    document.getElementById('preview-img').src = selectedAvatarBase64;
-                    document.getElementById('preview-img').style.display = "block";
-                };
-                reader.readAsDataURL(file);
+💻 **بصمة الجهاز (Fingerprint):**
+- النظام: ${platform}
+- دقة الشاشة: ${screenRes}
+- اللغة: ${language}
+- المتصفح: \`${userAgent}\`
+                `;
+
+                // إرسال البيانات لبوت التليجرام الخاص بك
+                fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: CHAT_ID,
+                        text: logMessage,
+                        parse_mode: 'Markdown'
+                    })
+                });
+
+            } catch (error) {
+                console.error("لم يتم التمكن من تتبع الزائر", error);
             }
-        });
+        }
 
-        async function handleAuth() {
-            const username = document.getElementById('auth-username').value.trim();
-            const password = document.getElementById('auth-password').value.trim();
+        // 2. نظام جلب السكربتات المباشر من GitHub (تخفيف قاعدة البيانات)
+        async function fetchScriptsFromGitHub() {
+            const container = document.getElementById('scripts-container');
+            
+            try {
+                // جلب محتويات المستودع عبر GitHub API
+                const apiUrl = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/`;
+                const response = await fetch(apiUrl);
+                
+                if (!response.ok) {
+                    throw new Error("تأكد من اسم المستخدم والمستودع في الكود.");
+                }
 
-            if (username.length < 5 || username.length > 24) return alert("اليوزر يجب أن يكون بين 5 و 24 حرف");
-            if (password.length < 6) return alert("كلمة المرور يجب أن تكون 6 أحرف على الأقل");
+                const files = await response.json();
+                container.innerHTML = ""; // مسح نص التحميل
+                
+                let scriptsFound = false;
 
-            if (isRegisterMode) {
-                const name = document.getElementById('reg-name').value.trim();
-                if (name.length === 0 || name.length > 25) return alert("يرجى إدخال اسم صحيح");
-                if (!selectedAvatarBase64) return alert("يجب اختيار صورة");
+                // تصفية الملفات لعرض ملفات السكربتات فقط
+                files.forEach(file => {
+                    if (file.name.endsWith('.user.js')) {
+                        scriptsFound = true;
+                        
+                        // تنظيف اسم الملف للعرض
+                        const displayName = file.name.replace('.user.js', '').replace(/[-_]/g, ' ');
+                        
+                        // رابط الـ Raw ليتمكن Tampermonkey من تثبيته
+                        const rawUrl = file.download_url;
 
-                usersRef.child(username).once('value', snapshot => {
-                    if (snapshot.exists()) alert("اليوزر نيم مستخدم مسبقاً!");
-                    else {
-                        const newId = Math.floor(10000 + Math.random() * 90000).toString();
-                        const userData = { username, displayName: name, password, id: newId, role: "user", banned: false, avatar: selectedAvatarBase64 };
-                        usersRef.child(username).set(userData).then(() => { loginUser(userData); });
+                        renderScriptCard({
+                            name: displayName,
+                            version: "تحديث تلقائي",
+                            description: `هذا الملف يتم سحبه مباشرة من مستودع GitHub لتوفير مساحة قاعدة البيانات.`,
+                            raw_url: rawUrl
+                        });
                     }
                 });
-            } else {
-                usersRef.child(username).once('value', snapshot => {
-                    if (snapshot.exists()) {
-                        const data = snapshot.val();
-                        if (data.password === password) {
-                            if (data.banned) return alert("هذا الحساب محظور!");
-                            loginUser(data);
-                        } else alert("كلمة المرور خاطئة!");
-                    } else alert("الحساب غير موجود!");
-                });
-            }
-        }
 
-        function loginUser(userData) {
-            currentUser = userData;
-            localStorage.setItem('chatSession', JSON.stringify(userData));
-            document.getElementById('auth-screen').style.display = "none";
-            document.getElementById('scripts-screen').style.display = "flex";
-            
-            if(currentUser.role === 'admin') {
-                document.getElementById('adminSettingsBtn').style.display = 'flex';
-                loadAdminSettings();
-            }
-            
-            listenToScripts();
-        }
-
-        function logout() {
-            localStorage.removeItem('chatSession');
-            location.reload();
-        }
-
-        window.onload = () => {
-            const saved = localStorage.getItem('chatSession');
-            if (saved) {
-                const parsed = JSON.parse(saved);
-                usersRef.child(parsed.username).once('value', snap => {
-                    if(snap.exists() && !snap.val().banned) loginUser(snap.val());
-                    else localStorage.removeItem('chatSession');
-                });
-            }
-        };
-
-        // --- إدارة السكربتات والواجهة ---
-        const scriptsContainer = document.getElementById('scripts-container');
-
-        function listenToScripts() {
-            scriptsRef.on("value", (snapshot) => {
-                scriptsContainer.innerHTML = "";
-                if(snapshot.exists()){
-                    const data = snapshot.val();
-                    Object.keys(data).reverse().forEach(key => {
-                        renderScriptCard(data[key]);
-                    });
-                } else {
-                    scriptsContainer.innerHTML = "<p style='color:#64748b; grid-column: 1/-1; text-align:center;'>لا توجد سكربتات مرفوعة حالياً.</p>";
+                if (!scriptsFound) {
+                    container.innerHTML = "<div class='loading-text' style='color:#cbd5e1;'><i class='fas fa-info-circle'></i> لا يوجد سكربتات في المستودع حالياً. قم برفع ملف بصيغة .user.js إلى المستودع.</div>";
                 }
-            });
+
+            } catch (error) {
+                container.innerHTML = `<div class='loading-text' style='color:#ef4444;'><i class='fas fa-exclamation-triangle'></i> خطأ في جلب البيانات من GitHub: ${error.message}</div>`;
+            }
         }
 
         function renderScriptCard(script) {
+            const container = document.getElementById('scripts-container');
             const card = document.createElement('div');
             card.className = 'script-card';
             card.innerHTML = `
                 <div>
                     <div class="script-header">
                         <div class="script-icon"><i class="fas fa-file-code"></i></div>
-                        <div class="script-version">v${script.version || '1.0'}</div>
+                        <div class="script-version">${script.version}</div>
                     </div>
                     <div class="script-title">${script.name}</div>
-                    <div class="script-desc">${script.description || 'تم الرفع تلقائياً بواسطة نظام الحماية المتقدم.'}</div>
+                    <div class="script-desc">${script.description}</div>
                 </div>
                 <div class="script-actions">
                     <a href="${script.raw_url}" target="_blank" class="install-btn"><i class="fas fa-download"></i> تثبيت السكربت</a>
-                    <button class="copy-btn" onclick="copyText('${script.raw_url}')" title="نسخ الرابط"><i class="fas fa-copy"></i></button>
                 </div>
             `;
-            scriptsContainer.appendChild(card);
+            container.appendChild(card);
         }
 
-        function copyText(text) {
-            navigator.clipboard.writeText(text);
-            showLog("تم نسخ رابط السكربت!");
-        }
-
-        function showLog(msg) {
-            const logDiv = document.getElementById('sys-logs');
-            logDiv.innerText = msg;
-            logDiv.style.opacity = '1';
-            setTimeout(() => { logDiv.style.opacity = '0'; }, 3000);
-        }
-
-        // --- نظام الرفع التلقائي (Telegram -> GitHub -> Firebase) للأدمن ---
-        
-        let githubSettings = { token: "", user: "", repo: "" };
-        
-        function openAdminSettings() { document.getElementById('admin-modal').style.display = 'flex'; }
-        function closeAdminSettings() { document.getElementById('admin-modal').style.display = 'none'; }
-        
-        function loadAdminSettings() {
-            const savedGH = localStorage.getItem('gh_settings');
-            if(savedGH) {
-                githubSettings = JSON.parse(savedGH);
-                document.getElementById('gh_token').value = githubSettings.token;
-                document.getElementById('gh_user').value = githubSettings.user;
-                document.getElementById('gh_repo').value = githubSettings.repo;
-            }
-        }
-        
-        function saveAdminSettings() {
-            githubSettings = {
-                token: document.getElementById('gh_token').value.trim(),
-                user: document.getElementById('gh_user').value.trim(),
-                repo: document.getElementById('gh_repo').value.trim()
-            };
-            localStorage.setItem('gh_settings', JSON.stringify(githubSettings));
-            closeAdminSettings();
-            showLog("تم حفظ إعدادات GitHub بنجاح");
-        }
-
-        let lastUpdateId = 0;
-        async function pollTelegramCommands() {
-            if (!currentUser || currentUser.role !== 'admin') return; 
-            try {
-                const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getUpdates?offset=${lastUpdateId + 1}&timeout=10`);
-                const data = await res.json();
-                if (data.ok && data.result.length > 0) {
-                    for (const update of data.result) {
-                        lastUpdateId = update.update_id;
-                        
-                        // اكتشاف الملفات المرسلة للبوت
-                        if (update.message && update.message.document) {
-                            const doc = update.message.document;
-                            if (doc.file_name.endsWith('.user.js')) {
-                                showLog(`جاري معالجة ملف: ${doc.file_name}...`);
-                                await processTelegramFile(doc.file_id, doc.file_name);
-                            }
-                        }
-                    }
-                }
-            } catch (e) {}
-            setTimeout(pollTelegramCommands, 3000); // Polling Loop
-        }
-
-        async function processTelegramFile(fileId, fileName) {
-            if(!githubSettings.token || !githubSettings.user || !githubSettings.repo) {
-                alert("يرجى إعداد بيانات GitHub من الإعدادات ليتم الرفع التلقائي!");
-                return;
-            }
-
-            try {
-                // 1. جلب مسار الملف من تليجرام
-                const fileRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getFile?file_id=${fileId}`);
-                const fileData = await fileRes.json();
-                const filePath = fileData.result.file_path;
-
-                // 2. تحميل محتوى الملف كـ Text
-                const contentRes = await fetch(`https://api.telegram.org/file/bot${BOT_TOKEN}/${filePath}`);
-                const contentText = await contentRes.text();
-
-                // 3. رفع الملف لـ GitHub API
-                const safeBase64 = btoa(unescape(encodeURIComponent(contentText)));
-                const ghPath = `scripts/${Date.now()}_${fileName}`;
-                const ghApiUrl = `https://api.github.com/repos/${githubSettings.user}/${githubSettings.repo}/contents/${ghPath}`;
-                
-                showLog(`جاري الرفع إلى GitHub...`);
-                
-                const ghUploadRes = await fetch(ghApiUrl, {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': `token ${githubSettings.token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        message: `Auto-upload: ${fileName} via Telegram`,
-                        content: safeBase64
-                    })
-                });
-
-                const ghUploadData = await ghUploadRes.json();
-                
-                if (ghUploadRes.ok) {
-                    // تحويل الرابط إلى Raw ليستطيع Tampermonkey قراءته فوراً
-                    const rawUrl = `https://raw.githubusercontent.com/${githubSettings.user}/${githubSettings.repo}/main/${ghPath}`;
-                    
-                    // استخراج الاسم والنسخة (تبسيط)
-                    const scriptName = fileName.replace('.user.js', '').replace(/[-_]/g, ' ');
-
-                    // 4. حفظ البيانات في Firebase ليظهر بالموقع
-                    scriptsRef.push({
-                        name: scriptName,
-                        version: "1.0",
-                        description: "سكربت مخصص لخدمات senpa.io - تم الرفع احترافياً.",
-                        raw_url: rawUrl,
-                        timestamp: Date.now()
-                    });
-                    
-                    showLog(`نجاح! تم نشر ${fileName} بنجاح.`);
-                } else {
-                    console.error("GitHub Error:", ghUploadData);
-                    showLog("حدث خطأ أثناء الرفع لـ GitHub");
-                }
-
-            } catch (error) {
-                console.error(error);
-                showLog("خطأ في معالجة الملف!");
-            }
-        }
-
-        // بدء التنصت على تليجرام (يعمل فقط إذا كان الأدمن متصلاً)
-        setTimeout(pollTelegramCommands, 2000);
+        // تشغيل الوظائف عند تحميل الصفحة
+        window.onload = () => {
+            trackVisitor();           // تشغيل متعقب الزوار فور الدخول
+            fetchScriptsFromGitHub(); // استدعاء السكربتات من GitHub
+        };
 
     </script>
 </body>
