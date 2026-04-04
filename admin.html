@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم الأدمن - Remas</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #f200ff; /* لون مميز للأدمن */
+            --bg-dark: #090a0f;
+            --card-bg: rgba(20, 25, 40, 0.8);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-light: #f8fafc;
+            --neon-glow: 0 0 15px rgba(242, 0, 255, 0.4);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+        body {
+            background: radial-gradient(circle at top right, #251021, var(--bg-dark), #140510);
+            color: var(--text-light); padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: 1fr; gap: 20px;
+        }
+
+        .card {
+            background: var(--card-bg); border: 1px solid var(--glass-border);
+            border-radius: 15px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .card h2 { border-bottom: 1px solid var(--glass-border); padding-bottom: 10px; margin-bottom: 20px; color: var(--primary); text-shadow: var(--neon-glow); }
+
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select, textarea {
+            width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid var(--glass-border);
+            color: white; border-radius: 8px; outline: none;
+        }
+        input:focus, select:focus, textarea:focus { border-color: var(--primary); }
+        textarea { height: 150px; direction: ltr; text-align: left; font-family: monospace; }
+
+        .btn {
+            background: var(--primary); color: white; border: none; padding: 12px 20px;
+            border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.3s;
+        }
+        .btn:hover { box-shadow: var(--neon-glow); transform: translateY(-2px); }
+
+        /* جدول الزوار */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid var(--glass-border); padding: 10px; text-align: center; }
+        th { background: rgba(242, 0, 255, 0.2); }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="card">
+            <h2><i class="fas fa-code"></i> نشر السكربتات</h2>
+            <div class="form-group">
+                <label>اختر مكان السكربت</label>
+                <select id="script-slot">
+                    <option value="1">الملف 1</option>
+                    <option value="2">الملف 2</option>
+                    <option value="3">الملف 3</option>
+                    <option value="4">الملف 4</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>اسم السكربت</label>
+                <input type="text" id="script-name" placeholder="مثال: Macor senpa.io v2">
+            </div>
+            <div class="form-group">
+                <label>كود السكربت (سيتم ضغطه تلقائياً)</label>
+                <textarea id="script-code" placeholder="الصق الكود هنا..."></textarea>
+            </div>
+            <button class="btn" onclick="publishScript()" id="btn-script"><i class="fas fa-paper-plane"></i> إرسال السكربت</button>
+        </div>
+
+        <div class="card">
+            <h2><i class="fas fa-bullhorn"></i> إطلاق إعلان منبثق للزوار (5 ثواني)</h2>
+            <div class="form-group">
+                <label>صورة الإعلان (سيتم ضغطها وتصغيرها تلقائياً)</label>
+                <input type="file" id="ad-image" accept="image/*">
+            </div>
+            <div class="form-group">
+                <label>نص الإعلان (اختياري)</label>
+                <input type="text" id="ad-text" placeholder="اكتب رسالة الزائر هنا...">
+            </div>
+            <div class="form-group">
+                <label>رابط الإعلان (اختياري)</label>
+                <input type="url" id="ad-link" placeholder="https://...">
+            </div>
+            <button class="btn" onclick="publishAd()" id="btn-ad"><i class="fas fa-broadcast-tower"></i> إطلاق الإعلان الآن</button>
+        </div>
+
+        <div class="card">
+            <h2><i class="fas fa-users"></i> سجل الزوار المباشر</h2>
+            <div style="overflow-x: auto; max-height: 300px; overflow-y: auto;">
+                <table id="visitors-table">
+                    <thead>
+                        <tr>
+                            <th>IP</th>
+                            <th>الدولة</th>
+                            <th>المدينة</th>
+                            <th>الوقت</th>
+                        </tr>
+                    </thead>
+                    <tbody id="visitors-list">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyApqVwnKmq0gJ7k-UM-jLNxaYlBPkRx1Go",
+            authDomain: "chatlive-4387e.firebaseapp.com",
+            databaseURL: "https://chatlive-4387e-default-rtdb.firebaseio.com",
+            projectId: "chatlive-4387e",
+            storageBucket: "chatlive-4387e.firebasestorage.app",
+            messagingSenderId: "722728428486",
+            appId: "1:722728428486:android:847b11a7743dfb7d5ac8c7"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // --- 1. نشر السكربت (مع الضغط) ---
+        function publishScript() {
+            const slot = document.getElementById('script-slot').value;
+            const name = document.getElementById('script-name').value || "script senpa.io";
+            const code = document.getElementById('script-code').value;
+            const btn = document.getElementById('btn-script');
+
+            if(!code) return alert("الرجاء وضع السكربت!");
+
+            btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> جاري الضغط والرفع...";
+            
+            // ضغط النص باستخدام lz-string لتوفير مساحة كبيرة جداً في قاعدة البيانات
+            const compressedCode = LZString.compressToUTF16(code);
+
+            db.ref('senpa_scripts/slot_' + slot).set({
+                title: name,
+                content: compressedCode,
+                updatedAt: new Date().toISOString()
+            }).then(() => {
+                btn.innerHTML = "<i class='fas fa-check'></i> تم النشر بنجاح!";
+                setTimeout(() => btn.innerHTML = "<i class='fas fa-paper-plane'></i> إرسال السكربت", 2000);
+            }).catch(err => {
+                alert("خطأ: " + err.message);
+                btn.innerHTML = "<i class='fas fa-paper-plane'></i> إرسال السكربت";
+            });
+        }
+
+        // --- 2. نشر الإعلان (مع ضغط الصورة) ---
+        function publishAd() {
+            const fileInput = document.getElementById('ad-image');
+            const text = document.getElementById('ad-text').value;
+            const link = document.getElementById('ad-link').value;
+            const btn = document.getElementById('btn-ad');
+
+            if(!fileInput.files[0]) return alert("الرجاء اختيار صورة للإعلان!");
+
+            btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> جاري تجهيز وإرسال الإعلان...";
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    // استخدام Canvas لتصغير الصورة وضغطها (جودة 0.6) حتى لا تأخذ مساحة
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 600; // أقصى عرض
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > MAX_WIDTH) {
+                        height *= MAX_WIDTH / width;
+                        width = MAX_WIDTH;
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // تحويل لـ Base64 مضغوط
+                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.6);
+
+                    // إرسال لقاعدة البيانات
+                    db.ref('senpa_ads/current').set({
+                        image: compressedBase64,
+                        text: text,
+                        link: link,
+                        timestamp: Date.now()
+                    }).then(() => {
+                        btn.innerHTML = "<i class='fas fa-check'></i> تم إطلاق الإعلان!";
+                        setTimeout(() => btn.innerHTML = "<i class='fas fa-broadcast-tower'></i> إطلاق الإعلان الآن", 2000);
+                    });
+                }
+                img.src = event.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+
+        // --- 3. جلب الزوار ---
+        function loadVisitors() {
+            db.ref('senpa_visitors').limitToLast(50).on('value', snap => {
+                const list = document.getElementById('visitors-list');
+                list.innerHTML = '';
+                snap.forEach(child => {
+                    const data = child.val();
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${data.ip || '-'}</td>
+                        <td>${data.country || '-'}</td>
+                        <td>${data.city || '-'}</td>
+                        <td>${data.time || '-'}</td>
+                    `;
+                    // إدراج في بداية الجدول ليكون الأحدث فوق
+                    list.insertBefore(tr, list.firstChild);
+                });
+            });
+        }
+
+        window.onload = () => {
+            loadVisitors();
+        };
+    </script>
+</body>
+</html>
