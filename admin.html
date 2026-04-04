@@ -24,15 +24,36 @@
         body {
             background: radial-gradient(circle at top right, #251021, var(--bg-dark), #140510);
             color: var(--text-light); padding: 20px;
+            min-height: 100vh;
         }
 
-        .container {
-            max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: 1fr; gap: 20px;
+        /* شاشة تسجيل الدخول */
+        #login-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-dark); z-index: 9999;
+            display: flex; justify-content: center; align-items: center;
+            flex-direction: column;
+        }
+
+        .login-box {
+            background: var(--card-bg); border: 1px solid var(--primary);
+            padding: 40px; border-radius: 15px; box-shadow: var(--neon-glow);
+            text-align: center; width: 90%; max-width: 400px;
+        }
+
+        .login-box h2 { color: var(--primary); margin-bottom: 20px; }
+        .login-box input { margin-bottom: 20px; text-align: center; font-size: 18px; letter-spacing: 2px; }
+
+        /* إخفاء المحتوى الرئيسي في البداية */
+        #main-container {
+            display: none;
+            max-width: 1000px; margin: 0 auto; grid-template-columns: 1fr; gap: 20px;
         }
 
         .card {
             background: var(--card-bg); border: 1px solid var(--glass-border);
             border-radius: 15px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            margin-bottom: 20px;
         }
         .card h2 { border-bottom: 1px solid var(--glass-border); padding-bottom: 10px; margin-bottom: 20px; color: var(--primary); text-shadow: var(--neon-glow); }
 
@@ -40,9 +61,9 @@
         label { display: block; margin-bottom: 5px; font-weight: bold; }
         input, select, textarea {
             width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid var(--glass-border);
-            color: white; border-radius: 8px; outline: none;
+            color: white; border-radius: 8px; outline: none; transition: 0.3s;
         }
-        input:focus, select:focus, textarea:focus { border-color: var(--primary); }
+        input:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 5px rgba(242, 0, 255, 0.3); }
         textarea { height: 150px; direction: ltr; text-align: left; font-family: monospace; }
 
         .btn {
@@ -61,21 +82,31 @@
 </head>
 <body>
 
-    <div class="container">
+    <div id="login-screen">
+        <div class="login-box">
+            <h2><i class="fas fa-lock"></i> لوحة الإدارة</h2>
+            <p style="margin-bottom: 15px; color: #aaa;">الرجاء إدخال كلمة المرور للوصول</p>
+            <input type="password" id="admin-password" placeholder="••••••••" onkeypress="handleLogin(event)">
+            <button class="btn" onclick="checkPassword()"><i class="fas fa-sign-in-alt"></i> دخول</button>
+            <p id="login-error" style="color: #ef4444; margin-top: 15px; display: none;">كلمة المرور خاطئة!</p>
+        </div>
+    </div>
+
+    <div id="main-container">
         <div class="card">
             <h2><i class="fas fa-code"></i> إدارة السكربتات</h2>
             <div class="form-group">
                 <label>السكربت المستهدف (إنشاء أو تعديل)</label>
                 <select id="script-selector" onchange="loadSelectedScript()">
                     <option value="new">➕ --- إنشاء سكربت جديد --- ➕</option>
-                    </select>
+                </select>
             </div>
             <div class="form-group">
                 <label>اسم السكربت</label>
                 <input type="text" id="script-name" placeholder="مثال: Macor senpa.io v2">
             </div>
             <div class="form-group">
-                <label>كود السكربت (سيتم ضغطه تلقائياً)</label>
+                <label>كود السكربت (سيتم ضغطه وتأمينه تلقائياً)</label>
                 <textarea id="script-code" placeholder="الصق الكود هنا..."></textarea>
             </div>
             
@@ -115,41 +146,100 @@
                         </tr>
                     </thead>
                     <tbody id="visitors-list">
-                        </tbody>
+                    </tbody>
                 </table>
             </div>
         </div>
     </div>
 
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyApqVwnKmq0gJ7k-UM-jLNxaYlBPkRx1Go",
-            authDomain: "chatlive-4387e.firebaseapp.com",
-            databaseURL: "https://chatlive-4387e-default-rtdb.firebaseio.com",
-            projectId: "chatlive-4387e",
-            storageBucket: "chatlive-4387e.firebasestorage.app",
-            messagingSenderId: "722728428486",
-            appId: "1:722728428486:android:847b11a7743dfb7d5ac8c7"
+        // --- قسم الحماية لمنع التخطي وأدوات المطورين ---
+        document.addEventListener('contextmenu', event => event.preventDefault()); // منع الكليك يمين
+        document.onkeydown = function(e) {
+            // منع F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
+            if(e.keyCode == 123 || 
+               (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74)) || 
+               (e.ctrlKey && e.keyCode == 85)) {
+                return false;
+            }
         };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
 
-        // جلب قائمة السكربتات وتحديث القائمة المنسدلة
+        // متغير للتحقق من حالة تسجيل الدخول
+        let isAuthenticated = false;
+
+        // التحقق من كلمة المرور
+        function checkPassword() {
+            const pass = document.getElementById('admin-password').value;
+            if(pass === "gmail34567") {
+                isAuthenticated = true;
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('main-container').style.display = 'block';
+                // تهيئة قاعدة البيانات فقط بعد تسجيل الدخول الناجح
+                initApp();
+            } else {
+                document.getElementById('login-error').style.display = 'block';
+                setTimeout(() => { document.getElementById('login-error').style.display = 'none'; }, 2000);
+            }
+        }
+
+        // دعم الضغط على Enter لتسجيل الدخول
+        function handleLogin(e) {
+            if(e.key === 'Enter') {
+                checkPassword();
+            }
+        }
+
+        // دالة حماية النصوص لمنع حقن السكربتات الخبيثة (XSS Protection)
+        function escapeHTML(str) {
+            if (!str) return '';
+            return str.replace(/[&<>'"]/g, 
+                tag => ({
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    "'": '&#39;',
+                    '"': '&quot;'
+                }[tag] || tag)
+            );
+        }
+
+        // --- إعدادات Firebase ---
+        let db;
+        function initApp() {
+            if (!isAuthenticated) return; // حماية إضافية
+            
+            const firebaseConfig = {
+                apiKey: "AIzaSyApqVwnKmq0gJ7k-UM-jLNxaYlBPkRx1Go",
+                authDomain: "chatlive-4387e.firebaseapp.com",
+                databaseURL: "https://chatlive-4387e-default-rtdb.firebaseio.com",
+                projectId: "chatlive-4387e",
+                storageBucket: "chatlive-4387e.firebasestorage.app",
+                messagingSenderId: "722728428486",
+                appId: "1:722728428486:android:847b11a7743dfb7d5ac8c7"
+            };
+            
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            db = firebase.database();
+            
+            refreshScriptsList();
+            loadVisitors();
+        }
+
+        // جلب قائمة السكربتات
         function refreshScriptsList() {
+            if (!isAuthenticated) return;
             const selector = document.getElementById('script-selector');
             db.ref('senpa_scripts').on('value', snap => {
-                // حفظ الاختيار الحالي حتى لا يضيع عند التحديث
                 const currentValue = selector.value;
-                
                 selector.innerHTML = '<option value="new">➕ --- إنشاء سكربت جديد --- ➕</option>';
                 snap.forEach(child => {
                     const option = document.createElement('option');
-                    option.value = child.key;
-                    option.text = child.val().title || "بدون اسم";
+                    option.value = escapeHTML(child.key);
+                    option.text = escapeHTML(child.val().title) || "بدون اسم";
                     selector.appendChild(option);
                 });
-
-                // إعادة الاختيار إذا كان لا يزال موجوداً
                 if([...selector.options].some(o => o.value === currentValue)) {
                     selector.value = currentValue;
                 }
@@ -158,6 +248,7 @@
 
         // عند تغيير السكربت المختار
         function loadSelectedScript() {
+            if (!isAuthenticated) return;
             const id = document.getElementById('script-selector').value;
             const delBtn = document.getElementById('btn-delete');
             const nameInput = document.getElementById('script-name');
@@ -173,17 +264,20 @@
                 
                 db.ref('senpa_scripts/' + id).once('value').then(snap => {
                     const data = snap.val();
-                    nameInput.value = data.title || '';
+                    nameInput.value = data.title ? data.title : ''; // لا نستخدم escape هنا لكي يراه الأدمن بشكله الطبيعي في مربع النص
                     const decompressed = LZString.decompressFromUTF16(data.content);
                     codeInput.value = decompressed ? decompressed : data.content;
                 });
             }
         }
 
-        // حفظ السكربت (جديد أو تعديل)
+        // حفظ السكربت (مع الحماية من الحقن)
         function saveScript() {
+            if (!isAuthenticated) return alert("غير مصرح لك!");
+            
             const id = document.getElementById('script-selector').value;
-            const name = document.getElementById('script-name').value;
+            // استخدام دالة الحماية للأسماء
+            const name = escapeHTML(document.getElementById('script-name').value); 
             const code = document.getElementById('script-code').value;
             const btn = document.getElementById('btn-save');
 
@@ -191,9 +285,9 @@
 
             btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> جاري الحفظ...";
             
+            // ضغط الكود يعتبر حماية إضافية تمنع تنفيذه كنص مباشر في قواعد البيانات
             const compressedCode = LZString.compressToUTF16(code);
             
-            // تحديد ما إذا كنا ننشئ معرفاً جديداً أم نحدث قديماً
             const ref = (id === 'new') ? db.ref('senpa_scripts').push() : db.ref('senpa_scripts/' + id);
 
             ref.set({
@@ -203,7 +297,6 @@
             }).then(() => {
                 btn.innerHTML = "<i class='fas fa-check'></i> تم الحفظ بنجاح!";
                 if (id === 'new') {
-                    // تفريغ الحقول بعد إنشاء جديد
                     document.getElementById('script-name').value = '';
                     document.getElementById('script-code').value = '';
                 }
@@ -216,6 +309,7 @@
 
         // حذف السكربت
         function deleteScript() {
+            if (!isAuthenticated) return;
             const id = document.getElementById('script-selector').value;
             if (id === 'new') return;
 
@@ -223,16 +317,26 @@
                 db.ref('senpa_scripts/' + id).remove().then(() => {
                     alert("تم الحذف بنجاح!");
                     document.getElementById('script-selector').value = 'new';
-                    loadSelectedScript(); // تفريغ الحقول
+                    loadSelectedScript();
                 });
             }
         }
 
-        // --- نظام الإعلانات ---
+        // إطلاق إعلان (مع الحماية من الحقن)
         function publishAd() {
+            if (!isAuthenticated) return;
             const fileInput = document.getElementById('ad-image');
-            const text = document.getElementById('ad-text').value;
-            const link = document.getElementById('ad-link').value;
+            // استخدام دالة الحماية للنصوص والروابط
+            const text = escapeHTML(document.getElementById('ad-text').value);
+            let link = document.getElementById('ad-link').value;
+            
+            // فلترة مبدئية للرابط لضمان أنه يبدأ ب http
+            if(link && !link.startsWith('http')) {
+                link = 'https://' + escapeHTML(link);
+            } else {
+                link = escapeHTML(link);
+            }
+
             const btn = document.getElementById('btn-ad');
 
             if(!fileInput.files[0]) return alert("الرجاء اختيار صورة للإعلان!");
@@ -277,29 +381,26 @@
             reader.readAsDataURL(file);
         }
 
-        // --- سجل الزوار ---
+        // سجل الزوار
         function loadVisitors() {
+            if (!isAuthenticated) return;
             db.ref('senpa_visitors').limitToLast(50).on('value', snap => {
                 const list = document.getElementById('visitors-list');
                 list.innerHTML = '';
                 snap.forEach(child => {
                     const data = child.val();
                     const tr = document.createElement('tr');
+                    // حماية بيانات الزوار عند العرض
                     tr.innerHTML = `
-                        <td>${data.ip || '-'}</td>
-                        <td>${data.country || '-'}</td>
-                        <td>${data.city || '-'}</td>
-                        <td>${data.time || '-'}</td>
+                        <td>${escapeHTML(data.ip) || '-'}</td>
+                        <td>${escapeHTML(data.country) || '-'}</td>
+                        <td>${escapeHTML(data.city) || '-'}</td>
+                        <td>${escapeHTML(data.time) || '-'}</td>
                     `;
                     list.insertBefore(tr, list.firstChild);
                 });
             });
         }
-
-        window.onload = () => {
-            refreshScriptsList();
-            loadVisitors();
-        };
     </script>
 </body>
 </html>
