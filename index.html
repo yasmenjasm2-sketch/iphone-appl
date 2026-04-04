@@ -53,9 +53,6 @@
             position: relative;
         }
 
-        /* شاشة السكربتات (مفتوحة للجميع مباشرة) */
-        #scripts-screen { display: flex; flex-direction: column; height: 100%; }
-        
         .header {
             padding: 20px 30px; background: rgba(10, 15, 25, 0.8); display: flex;
             justify-content: space-between; align-items: center; border-bottom: 1px solid var(--glass-border);
@@ -66,48 +63,84 @@
 
         .scripts-container {
             flex: 1; padding: 30px; overflow-y: auto; display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 25px;
             align-content: start;
         }
 
-        .script-card {
+        /* تصميم ملف السكربت */
+        .file-card {
             background: rgba(30, 41, 59, 0.4); border: 1px solid var(--glass-border);
-            border-radius: 15px; padding: 20px; transition: 0.3s; position: relative;
-            display: flex; flex-direction: column; justify-content: space-between;
+            border-radius: 15px; padding: 20px; transition: 0.3s; cursor: pointer;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; height: 180px; position: relative;
         }
-        .script-card:hover { transform: translateY(-5px); border-color: var(--primary); box-shadow: 0 10px 20px rgba(0,0,0,0.5), var(--neon-glow); }
+        .file-card:hover { transform: translateY(-5px); border-color: var(--primary); box-shadow: 0 10px 20px rgba(0,0,0,0.5), var(--neon-glow); }
         
-        .script-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
-        .script-icon { width: 45px; height: 45px; background: rgba(0, 242, 254, 0.1); border-radius: 12px; display: flex; justify-content: center; align-items: center; color: var(--primary); font-size: 20px; border: 1px solid rgba(0, 242, 254, 0.3); }
-        .script-version { background: rgba(255, 255, 255, 0.1); padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: bold; color: #cbd5e1; }
+        .file-icon { font-size: 50px; color: var(--primary); margin-bottom: 15px; text-shadow: var(--neon-glow); }
+        .file-title { font-size: 16px; font-weight: bold; color: white; }
+
+        /* نافذة العرض والتعديل (Modal) */
+        .modal {
+            display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px); z-index: 100;
+            justify-content: center; align-items: center;
+        }
+        .modal-content {
+            background: var(--card-bg); border: 1px solid var(--primary); border-radius: 15px;
+            width: 90%; max-width: 600px; padding: 20px; display: flex; flex-direction: column; gap: 15px;
+            box-shadow: 0 0 30px rgba(0, 242, 254, 0.2);
+        }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; }
+        .modal-header h3 { color: white; margin: 0; }
+        .close-btn { background: none; border: none; color: #ef4444; font-size: 20px; cursor: pointer; }
         
-        .script-title { font-size: 18px; font-weight: bold; margin-bottom: 10px; color: white; }
-        .script-desc { font-size: 13px; color: #94a3b8; line-height: 1.5; margin-bottom: 20px; flex: 1; }
-        
-        .script-actions { display: flex; gap: 10px; }
-        .install-btn { flex: 1; padding: 10px; border-radius: 8px; border: none; background: var(--primary); color: #000; font-weight: bold; cursor: pointer; transition: 0.2s; text-decoration: none; text-align: center; font-size: 14px; }
-        .install-btn:hover { background: white; }
-        
-        .loading-text { text-align: center; color: var(--primary); font-size: 18px; margin-top: 50px; grid-column: 1/-1; }
-        .system-logs { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); color: var(--primary); font-size: 12px; background: rgba(0,0,0,0.6); padding: 5px 15px; border-radius: 20px; pointer-events: none; opacity: 0; transition: opacity 0.5s; z-index: 50;}
+        textarea {
+            width: 100%; height: 200px; background: rgba(0, 0, 0, 0.5); color: #00f2fe;
+            border: 1px solid var(--glass-border); border-radius: 10px; padding: 15px;
+            font-family: monospace; resize: none; direction: ltr; text-align: left;
+        }
+        textarea:focus { outline: none; border-color: var(--primary); }
+
+        .modal-actions { display: flex; gap: 10px; }
+        .btn { flex: 1; padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px; }
+        .btn-copy { background: var(--primary); color: #000; }
+        .btn-copy:hover { background: white; }
+        .btn-save { background: #22c55e; color: white; display: none; }
+        .btn-save:hover { background: #16a34a; }
+
+        /* زر التعديل الخاص بك (مخفي تقريباً في الزاوية) */
+        .edit-trigger {
+            position: absolute; top: 10px; right: 10px; color: rgba(255,255,255,0.2);
+            font-size: 14px; cursor: pointer; transition: 0.3s;
+        }
+        .edit-trigger:hover { color: var(--primary); }
     </style>
 </head>
 <body>
 
     <div class="app-container">
-        <div id="scripts-screen">
-            <div class="header">
-                <div class="brand">
-                    <i class="fas fa-code"></i> Remas Scripts <span style="font-size: 10px; background: var(--primary); color: #000; padding: 2px 6px; border-radius: 4px; margin-right: 5px;">Public</span>
-                </div>
-            </div>
-            
-            <div class="scripts-container" id="scripts-container">
-                <div class="loading-text"><i class="fas fa-spinner fa-spin"></i> جاري استدعاء السكربتات من المستودع...</div>
+        <div class="header">
+            <div class="brand">
+                <i class="fas fa-code"></i> Remas Scripts <span style="font-size: 10px; background: var(--primary); color: #000; padding: 2px 6px; border-radius: 4px; margin-right: 5px;">Files</span>
             </div>
         </div>
+        
+        <div class="scripts-container" id="scripts-container">
+            </div>
 
-        <div class="system-logs" id="sys-logs"></div>
+        <div class="modal" id="script-modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3><i class="fas fa-file-code"></i> script senpa.io</h3>
+                    <button class="close-btn" onclick="closeModal()"><i class="fas fa-times"></i></button>
+                </div>
+                <textarea id="script-content" readonly placeholder="جاري التحميل..."></textarea>
+                <div class="modal-actions">
+                    <button class="btn btn-copy" onclick="copyContent()"><i class="fas fa-copy"></i> نسخ السكربت</button>
+                    <button class="btn btn-save" id="save-btn" onclick="saveContent()"><i class="fas fa-save"></i> حفظ في قاعدة البيانات</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -115,11 +148,7 @@
         const BOT_TOKEN = "7894436976:AAFdg77dpzCgpeLnkwAQqP9POkwZMwWoikg";
         const CHAT_ID = "-1003783270855";
 
-        // إعدادات GitHub (ضع اسم المستخدم واسم المستودع الخاص بك هنا)
-        const GITHUB_USERNAME = "Hamza-AlHamada"; // استبدله بيوزرك في غيت هوب
-        const GITHUB_REPO = "senpa-scripts";      // استبدله باسم المستودع
-
-        // إعدادات فايربيس (بقيت كما هي لتطبيقاتك الأخرى، لكن السكربتات لا تستهلك منها مساحة)
+        // إعدادات فايربيس
         const firebaseConfig = {
             apiKey: "AIzaSyApqVwnKmq0gJ7k-UM-jLNxaYlBPkRx1Go",
             authDomain: "chatlive-4387e.firebaseapp.com",
@@ -132,125 +161,119 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // 1. نظام تعقب الزوار المتقدم (IP & Fingerprint)
+        let currentSlotId = null;
+
+        // 1. نظام تعقب الزوار 
         async function trackVisitor() {
             try {
-                // جلب الـ IP ومعلومات الموقع الجغرافي
                 const ipResponse = await fetch('https://ipapi.co/json/');
                 const ipData = await ipResponse.json();
-                
-                // جلب بصمة الجهاز (المتصفح، النظام، أبعاد الشاشة)
-                const userAgent = navigator.userAgent;
-                const platform = navigator.platform;
-                const screenRes = `${screen.width}x${screen.height}`;
-                const language = navigator.language;
-
-                // تنسيق الرسالة لترسل لتليجرام
-                const logMessage = `
-🚨 **دخول زائر جديد للموقع!** 🚨
-
-🌐 **معلومات الاتصال:**
-- IP: \`${ipData.ip}\`
-- الدولة: ${ipData.country_name}
-- المدينة: ${ipData.city}
-- مزود الخدمة: ${ipData.org}
-
-💻 **بصمة الجهاز (Fingerprint):**
-- النظام: ${platform}
-- دقة الشاشة: ${screenRes}
-- اللغة: ${language}
-- المتصفح: \`${userAgent}\`
-                `;
-
-                // إرسال البيانات لبوت التليجرام الخاص بك
+                const logMessage = `🚨 دخول زائر جديد!\nIP: ${ipData.ip}\nالدولة: ${ipData.country_name}`;
                 fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        chat_id: CHAT_ID,
-                        text: logMessage,
-                        parse_mode: 'Markdown'
-                    })
+                    body: JSON.stringify({ chat_id: CHAT_ID, text: logMessage })
                 });
-
-            } catch (error) {
-                console.error("لم يتم التمكن من تتبع الزائر", error);
-            }
+            } catch (error) { console.error("Tracking Error"); }
         }
 
-        // 2. نظام جلب السكربتات المباشر من GitHub (تخفيف قاعدة البيانات)
-        async function fetchScriptsFromGitHub() {
+        // 2. إنشاء الفراغات الـ 4
+        function initFiles() {
             const container = document.getElementById('scripts-container');
+            container.innerHTML = '';
             
-            try {
-                // جلب محتويات المستودع عبر GitHub API
-                const apiUrl = `https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/`;
-                const response = await fetch(apiUrl);
-                
-                if (!response.ok) {
-                    throw new Error("تأكد من اسم المستخدم والمستودع في الكود.");
-                }
-
-                const files = await response.json();
-                container.innerHTML = ""; // مسح نص التحميل
-                
-                let scriptsFound = false;
-
-                // تصفية الملفات لعرض ملفات السكربتات فقط
-                files.forEach(file => {
-                    if (file.name.endsWith('.user.js')) {
-                        scriptsFound = true;
-                        
-                        // تنظيف اسم الملف للعرض
-                        const displayName = file.name.replace('.user.js', '').replace(/[-_]/g, ' ');
-                        
-                        // رابط الـ Raw ليتمكن Tampermonkey من تثبيته
-                        const rawUrl = file.download_url;
-
-                        renderScriptCard({
-                            name: displayName,
-                            version: "تحديث تلقائي",
-                            description: `هذا الملف يتم سحبه مباشرة من مستودع GitHub لتوفير مساحة قاعدة البيانات.`,
-                            raw_url: rawUrl
-                        });
+            for (let i = 1; i <= 4; i++) {
+                const card = document.createElement('div');
+                card.className = 'file-card';
+                card.onclick = (e) => {
+                    // إذا لم يضغط على زر التعديل، افتح كعرض فقط
+                    if(!e.target.classList.contains('fa-pen')) {
+                        openModal(i, false);
                     }
-                });
-
-                if (!scriptsFound) {
-                    container.innerHTML = "<div class='loading-text' style='color:#cbd5e1;'><i class='fas fa-info-circle'></i> لا يوجد سكربتات في المستودع حالياً. قم برفع ملف بصيغة .user.js إلى المستودع.</div>";
-                }
-
-            } catch (error) {
-                container.innerHTML = `<div class='loading-text' style='color:#ef4444;'><i class='fas fa-exclamation-triangle'></i> خطأ في جلب البيانات من GitHub: ${error.message}</div>`;
+                };
+                card.innerHTML = `
+                    <i class="fas fa-pen edit-trigger" onclick="openModal(${i}, true)" title="تعديل (أدمن)"></i>
+                    <i class="fas fa-file-code file-icon"></i>
+                    <div class="file-title">script senpa.io</div>
+                `;
+                container.appendChild(card);
             }
         }
 
-        function renderScriptCard(script) {
-            const container = document.getElementById('scripts-container');
-            const card = document.createElement('div');
-            card.className = 'script-card';
-            card.innerHTML = `
-                <div>
-                    <div class="script-header">
-                        <div class="script-icon"><i class="fas fa-file-code"></i></div>
-                        <div class="script-version">${script.version}</div>
-                    </div>
-                    <div class="script-title">${script.name}</div>
-                    <div class="script-desc">${script.description}</div>
-                </div>
-                <div class="script-actions">
-                    <a href="${script.raw_url}" target="_blank" class="install-btn"><i class="fas fa-download"></i> تثبيت السكربت</a>
-                </div>
-            `;
-            container.appendChild(card);
+        // 3. فتح النافذة وعلبة النص
+        function openModal(slotId, isEditMode) {
+            currentSlotId = slotId;
+            const modal = document.getElementById('script-modal');
+            const textarea = document.getElementById('script-content');
+            const saveBtn = document.getElementById('save-btn');
+
+            modal.style.display = 'flex';
+            textarea.value = 'جاري جلب البيانات من Firebase...';
+            
+            // إعداد وضع التعديل (لك كأدمن) أو القراءة (للمستخدمين)
+            if (isEditMode) {
+                textarea.removeAttribute('readonly');
+                saveBtn.style.display = 'flex';
+            } else {
+                textarea.setAttribute('readonly', 'true');
+                saveBtn.style.display = 'none';
+            }
+
+            // جلب البيانات من فايربيس للفراغ المحدد
+            db.ref('senpa_scripts/slot_' + slotId).once('value').then((snapshot) => {
+                const data = snapshot.val();
+                if (data && data.content) {
+                    textarea.value = data.content;
+                } else {
+                    textarea.value = (isEditMode) ? '' : '// لا يوجد سكربت هنا حالياً.';
+                }
+            }).catch(err => {
+                textarea.value = '// خطأ في الاتصال بقاعدة البيانات.';
+            });
+        }
+
+        function closeModal() {
+            document.getElementById('script-modal').style.display = 'none';
+            currentSlotId = null;
+        }
+
+        // 4. حفظ النص في فايربيس (يستخدمها الأدمن)
+        function saveContent() {
+            const content = document.getElementById('script-content').value;
+            const saveBtn = document.getElementById('save-btn');
+            
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحفظ...';
+            
+            db.ref('senpa_scripts/slot_' + currentSlotId).set({
+                content: content,
+                updatedAt: new Date().toISOString()
+            }).then(() => {
+                saveBtn.innerHTML = '<i class="fas fa-check"></i> تم الحفظ!';
+                setTimeout(() => closeModal(), 1000);
+            }).catch(error => {
+                alert("حدث خطأ أثناء الحفظ: " + error.message);
+                saveBtn.innerHTML = '<i class="fas fa-save"></i> حفظ في قاعدة البيانات';
+            });
+        }
+
+        // 5. زر النسخ (يستخدمه الزوار)
+        function copyContent() {
+            const textarea = document.getElementById('script-content');
+            textarea.select();
+            textarea.setSelectionRange(0, 99999); // للهواتف
+            navigator.clipboard.writeText(textarea.value).then(() => {
+                const copyBtn = document.querySelector('.btn-copy');
+                const originalText = copyBtn.innerHTML;
+                copyBtn.innerHTML = '<i class="fas fa-check"></i> تم النسخ!';
+                setTimeout(() => copyBtn.innerHTML = originalText, 2000);
+            });
         }
 
         // تشغيل الوظائف عند تحميل الصفحة
         window.onload = () => {
-            trackVisitor();           // تشغيل متعقب الزوار فور الدخول
-            fetchScriptsFromGitHub(); // استدعاء السكربتات من GitHub
+            trackVisitor();
+            initFiles();
         };
-
     </script>
 </body>
 </html>
