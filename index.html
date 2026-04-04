@@ -6,53 +6,116 @@
     <title>Remas Scripts - senpa.io</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
     <style>
-        /* نفس التصميم الأصلي الخاص بك تماماً */
-        :root { --primary: #00f2fe; --bg-dark: #090a0f; --card-bg: rgba(20, 25, 40, 0.6); --glass-border: rgba(255, 255, 255, 0.1); --text-light: #f8fafc; --neon-glow: 0 0 15px rgba(0, 242, 254, 0.4); }
+        :root {
+            --primary: #00f2fe;
+            --secondary: #4facfe;
+            --bg-dark: #090a0f;
+            --card-bg: rgba(20, 25, 40, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-light: #f8fafc;
+            --neon-glow: 0 0 15px rgba(0, 242, 254, 0.4);
+        }
+
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background: radial-gradient(circle at top right, #1a1025, var(--bg-dark), #050b14); color: var(--text-light); display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow-x: hidden; background-attachment: fixed; }
-        body::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 50px 50px; opacity: 0.05; z-index: -1; }
-        .app-container { width: 100%; max-width: 1000px; height: 90vh; background: var(--card-bg); backdrop-filter: blur(15px); border: 1px solid var(--glass-border); border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.8), var(--neon-glow); display: flex; flex-direction: column; overflow: hidden; position: relative; }
-        .header { padding: 20px 30px; background: rgba(10, 15, 25, 0.8); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--glass-border); backdrop-filter: blur(10px); }
+
+        body {
+            background: radial-gradient(circle at top right, #1a1025, var(--bg-dark), #050b14);
+            color: var(--text-light);
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; overflow-x: hidden; background-attachment: fixed;
+        }
+
+        body::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background-image: radial-gradient(#ffffff 1px, transparent 1px);
+            background-size: 50px 50px; opacity: 0.05; z-index: -1;
+        }
+
+        .app-container {
+            width: 100%; max-width: 1000px; height: 90vh;
+            background: var(--card-bg); backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border); border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8), var(--neon-glow);
+            display: flex; flex-direction: column; overflow: hidden; position: relative;
+        }
+
+        .header {
+            padding: 20px 30px; background: rgba(10, 15, 25, 0.8); display: flex;
+            justify-content: space-between; align-items: center; border-bottom: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+        }
         .brand { font-size: 22px; font-weight: bold; color: white; display: flex; align-items: center; gap: 10px; }
         .brand i { color: var(--primary); text-shadow: var(--neon-glow); }
-        .scripts-container { flex: 1; padding: 30px; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 25px; align-content: start; }
-        .file-card { background: rgba(30, 41, 59, 0.4); border: 1px solid var(--glass-border); border-radius: 15px; padding: 20px; transition: 0.3s; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; height: 180px; position: relative; }
+
+        .scripts-container {
+            flex: 1; padding: 30px; overflow-y: auto; display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 25px;
+            align-content: start;
+        }
+
+        .file-card {
+            background: rgba(30, 41, 59, 0.4); border: 1px solid var(--glass-border);
+            border-radius: 15px; padding: 20px; transition: 0.3s; cursor: pointer;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; height: 180px; position: relative;
+        }
         .file-card:hover { transform: translateY(-5px); border-color: var(--primary); box-shadow: 0 10px 20px rgba(0,0,0,0.5), var(--neon-glow); }
+        
         .file-icon { font-size: 50px; color: var(--primary); margin-bottom: 15px; text-shadow: var(--neon-glow); }
         .file-title { font-size: 16px; font-weight: bold; color: white; }
-        .modal { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px); z-index: 100; justify-content: center; align-items: center; }
-        .modal-content { background: var(--card-bg); border: 1px solid var(--primary); border-radius: 15px; width: 90%; max-width: 600px; padding: 20px; display: flex; flex-direction: column; gap: 15px; box-shadow: 0 0 30px rgba(0, 242, 254, 0.2); }
+
+        .modal {
+            display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px); z-index: 100;
+            justify-content: center; align-items: center;
+        }
+        .modal-content {
+            background: var(--card-bg); border: 1px solid var(--primary); border-radius: 15px;
+            width: 90%; max-width: 600px; padding: 20px; display: flex; flex-direction: column; gap: 15px;
+            box-shadow: 0 0 30px rgba(0, 242, 254, 0.2);
+        }
         .modal-header { display: flex; justify-content: space-between; align-items: center; }
         .modal-header h3 { color: white; margin: 0; }
         .close-btn { background: none; border: none; color: #ef4444; font-size: 20px; cursor: pointer; }
-        textarea { width: 100%; height: 200px; background: rgba(0, 0, 0, 0.5); color: #00f2fe; border: 1px solid var(--glass-border); border-radius: 10px; padding: 15px; font-family: monospace; resize: none; direction: ltr; text-align: left; }
+        
+        textarea {
+            width: 100%; height: 200px; background: rgba(0, 0, 0, 0.5); color: #00f2fe;
+            border: 1px solid var(--glass-border); border-radius: 10px; padding: 15px;
+            font-family: monospace; resize: none; direction: ltr; text-align: left;
+        }
         textarea:focus { outline: none; border-color: var(--primary); }
+
         .modal-actions { display: flex; gap: 10px; }
         .btn { flex: 1; padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px; }
         .btn-copy { background: var(--primary); color: #000; }
         .btn-copy:hover { background: white; }
 
-        /* --- تصميم نافذة الإعلان الجديدة --- */
-        .ad-modal {
-            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: rgba(10, 15, 25, 0.95); border: 2px solid var(--primary); border-radius: 15px;
-            padding: 20px; text-align: center; z-index: 9999; box-shadow: 0 0 50px rgba(0, 242, 254, 0.6);
-            backdrop-filter: blur(10px); max-width: 90%; width: 400px;
+        /* نافذة الإعلان المنبثق */
+        .ad-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.9); z-index: 9999; justify-content: center; align-items: center; flex-direction: column;
+            text-align: center; backdrop-filter: blur(10px);
         }
-        .ad-modal img { max-width: 100%; border-radius: 10px; margin-bottom: 15px; max-height: 200px; object-fit: cover; }
-        .ad-modal h4 { color: white; margin-bottom: 15px; font-size: 18px; }
-        .ad-link-btn { display: inline-block; background: var(--primary); color: #000; padding: 10px 20px; border-radius: 5px; text-decoration: none; font-weight: bold; }
+        .ad-content { max-width: 90%; max-height: 80%; }
+        .ad-image { max-width: 100%; max-height: 60vh; border-radius: 15px; border: 2px solid var(--primary); box-shadow: var(--neon-glow); }
+        .ad-text { margin-top: 20px; font-size: 24px; font-weight: bold; color: white; text-shadow: 0 0 10px var(--primary); }
+        .ad-link { margin-top: 15px; display: inline-block; padding: 10px 25px; background: var(--primary); color: #000; text-decoration: none; border-radius: 25px; font-weight: bold; }
+        .ad-timer { margin-top: 20px; font-size: 16px; color: #ccc; }
     </style>
 </head>
 <body>
 
-    <div id="ad-container" class="ad-modal">
-        <img id="ad-img" src="" alt="إعلان" style="display:none;">
-        <h4 id="ad-txt"></h4>
-        <a id="ad-btn" class="ad-link-btn" href="#" target="_blank" style="display:none;">اضغط هنا التفاصيل</a>
+    <div class="ad-overlay" id="ad-overlay">
+        <div class="ad-content">
+            <img id="ad-image" class="ad-image" src="" alt="إعلان">
+            <div id="ad-text" class="ad-text"></div>
+            <a id="ad-link" class="ad-link" href="#" target="_blank" style="display: none;">اضغط هنا</a>
+            <div class="ad-timer" id="ad-timer">يغلق تلقائياً بعد <span>5</span> ثواني...</div>
+        </div>
     </div>
 
     <div class="app-container">
@@ -67,7 +130,7 @@
         <div class="modal" id="script-modal">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3 id="modal-title"><i class="fas fa-file-code"></i> script senpa.io</h3>
+                    <h3 id="script-modal-title"><i class="fas fa-file-code"></i> script senpa.io</h3>
                     <button class="close-btn" onclick="closeModal()"><i class="fas fa-times"></i></button>
                 </div>
                 <textarea id="script-content" readonly placeholder="جاري التحميل..."></textarea>
@@ -79,13 +142,11 @@
     </div>
 
     <script>
-        // --- إعدادات النظام وتليجرام ---
-        const BOT_TOKEN = "YOUR_TELEGRAM_BOT_TOKEN_HERE"; // ضع التوكن الخاص بك هنا
+        const BOT_TOKEN = "7894436976:AAFdg77dpzCgpeLnkwAQqP9POkwZMwWoikg";
         const CHAT_ID = "-1003783270855";
 
-        // إعدادات فايربيس
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY_HERE", // ضع الـ API KEY الخاص بك هنا
+            apiKey: "AIzaSyApqVwnKmq0gJ7k-UM-jLNxaYlBPkRx1Go",
             authDomain: "chatlive-4387e.firebaseapp.com",
             databaseURL: "https://chatlive-4387e-default-rtdb.firebaseio.com",
             projectId: "chatlive-4387e",
@@ -97,32 +158,34 @@
         const db = firebase.database();
 
         let currentSlotId = null;
-        let initTime = Date.now(); // لمنع ظهور الإعلانات القديمة عند تحديث الصفحة
+        let lastAdTimestamp = 0;
 
-        // 1. نظام تعقب الزوار (تليجرام + فايربيس للإدارة)
+        // نظام تعقب الزوار 
         async function trackVisitor() {
             try {
                 const ipResponse = await fetch('https://ipapi.co/json/');
                 const ipData = await ipResponse.json();
                 
-                // إرسال لصفحة الأدمن (Firebase)
-                db.ref('senpa_visitors').push({
-                    ip: ipData.ip,
-                    country: ipData.country_name,
-                    time: new Date().toISOString()
-                });
-
-                // إرسال لتليجرام
+                // إرسال للتليجرام
                 const logMessage = `🚨 دخول زائر جديد!\nIP: ${ipData.ip}\nالدولة: ${ipData.country_name}`;
                 fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ chat_id: CHAT_ID, text: logMessage })
                 });
+
+                // إرسال لقاعدة البيانات ليراها الأدمن
+                db.ref('senpa_visitors').push({
+                    ip: ipData.ip,
+                    country: ipData.country_name,
+                    city: ipData.city,
+                    time: new Date().toLocaleString()
+                });
+
             } catch (error) { console.error("Tracking Error"); }
         }
 
-        // 2. إنشاء الفراغات الـ 4 وجلب أسمائها من قاعدة البيانات
+        // إنشاء الفراغات الـ 4
         function initFiles() {
             const container = document.getElementById('scripts-container');
             container.innerHTML = '';
@@ -132,51 +195,48 @@
                 card.className = 'file-card';
                 card.onclick = () => openModal(i);
                 
-                // تحديد هيكل الكارت مؤقتاً لحين جلب البيانات
-                card.innerHTML = `
-                    <i class="fas fa-file-code file-icon"></i>
-                    <div class="file-title" id="title-slot-${i}">جاري التحميل...</div>
-                `;
-                container.appendChild(card);
-
-                // جلب اسم السكربت المخصص من الأدمن
-                db.ref('senpa_scripts/slot_' + i).on('value', (snapshot) => {
-                    const data = snapshot.val();
-                    document.getElementById(`title-slot-${i}`).innerText = (data && data.title) ? data.title : 'script senpa.io';
+                // جلب اسم السكربت إن وجد
+                db.ref('senpa_scripts/slot_' + i).once('value').then(snap => {
+                    let title = "script senpa.io " + i;
+                    if(snap.exists() && snap.val().title) title = snap.val().title;
+                    card.innerHTML = `
+                        <i class="fas fa-file-code file-icon"></i>
+                        <div class="file-title">${title}</div>
+                    `;
                 });
+                
+                container.appendChild(card);
             }
         }
 
-        // 3. فتح النافذة وعلبة النص
         function openModal(slotId) {
             currentSlotId = slotId;
             const modal = document.getElementById('script-modal');
             const textarea = document.getElementById('script-content');
-            const modalTitle = document.getElementById('modal-title');
+            const titleEl = document.getElementById('script-modal-title');
 
             modal.style.display = 'flex';
-            textarea.value = 'جاري جلب البيانات من Firebase...';
+            textarea.value = 'جاري جلب البيانات...';
 
             db.ref('senpa_scripts/slot_' + slotId).once('value').then((snapshot) => {
                 const data = snapshot.val();
-                if (data) {
-                    textarea.value = data.content || '// لا يوجد محتوى';
-                    modalTitle.innerHTML = `<i class="fas fa-file-code"></i> ${data.title || 'script senpa.io'}`;
+                if (data && data.content) {
+                    titleEl.innerHTML = `<i class="fas fa-file-code"></i> ${data.title || 'script'}`;
+                    // فك الضغط لعرض النص للمستخدم
+                    const decompressed = LZString.decompressFromUTF16(data.content);
+                    textarea.value = decompressed ? decompressed : data.content; 
                 } else {
                     textarea.value = '// لا يوجد سكربت هنا حالياً.';
-                    modalTitle.innerHTML = `<i class="fas fa-file-code"></i> script senpa.io`;
                 }
             }).catch(err => {
-                textarea.value = '// خطأ في الاتصال بقاعدة البيانات.';
+                textarea.value = '// خطأ في الاتصال.';
             });
         }
 
         function closeModal() {
             document.getElementById('script-modal').style.display = 'none';
-            currentSlotId = null;
         }
 
-        // 4. زر النسخ
         function copyContent() {
             const textarea = document.getElementById('script-content');
             textarea.select();
@@ -189,34 +249,51 @@
             });
         }
 
-        // 5. نظام استقبال الإعلانات
-        db.ref('senpa_ads/current').on('value', (snapshot) => {
-            const ad = snapshot.val();
-            // التأكد من وجود إعلان وأن الإعلان تم إرساله بعد دخول المستخدم للموقع (لكي لا يظهر القديم)
-            if (ad && ad.timestamp > initTime) {
-                const adContainer = document.getElementById('ad-container');
-                const adImg = document.getElementById('ad-img');
-                const adTxt = document.getElementById('ad-txt');
-                const adBtn = document.getElementById('ad-btn');
+        // نظام استقبال الإعلانات
+        function listenForAds() {
+            db.ref('senpa_ads/current').on('value', snapshot => {
+                const ad = snapshot.val();
+                // عرض الإعلان فقط إذا كان جديداً (تم نشره في آخر 10 ثواني لتجنب ظهوره عند كل تحديث للصفحة)
+                if (ad && ad.timestamp > lastAdTimestamp && (Date.now() - ad.timestamp < 10000)) {
+                    lastAdTimestamp = ad.timestamp;
+                    showAd(ad);
+                }
+            });
+        }
 
-                // تجهيز المحتوى
-                if(ad.imageUrl) { adImg.src = ad.imageUrl; adImg.style.display = 'block'; } else { adImg.style.display = 'none'; }
-                adTxt.innerText = ad.text || "";
-                if(ad.link) { adBtn.href = ad.link; adBtn.style.display = 'inline-block'; } else { adBtn.style.display = 'none'; }
-
-                // إظهار الإعلان
-                adContainer.style.display = 'block';
-
-                // إخفاء الإعلان تلقائياً بعد 5 ثواني
-                setTimeout(() => {
-                    adContainer.style.display = 'none';
-                }, 5000);
+        function showAd(ad) {
+            const overlay = document.getElementById('ad-overlay');
+            document.getElementById('ad-image').src = ad.image;
+            document.getElementById('ad-text').innerText = ad.text || "";
+            
+            const linkBtn = document.getElementById('ad-link');
+            if(ad.link) {
+                linkBtn.href = ad.link;
+                linkBtn.style.display = 'inline-block';
+            } else {
+                linkBtn.style.display = 'none';
             }
-        });
+
+            overlay.style.display = 'flex';
+            
+            let timeLeft = 5;
+            const timerSpan = document.querySelector('#ad-timer span');
+            timerSpan.innerText = timeLeft;
+
+            const interval = setInterval(() => {
+                timeLeft--;
+                timerSpan.innerText = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(interval);
+                    overlay.style.display = 'none';
+                }
+            }, 1000);
+        }
 
         window.onload = () => {
             trackVisitor();
             initFiles();
+            listenForAds();
         };
     </script>
 </body>
