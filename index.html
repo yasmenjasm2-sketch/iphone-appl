@@ -94,7 +94,6 @@
         .btn-copy { background: var(--primary); color: #000; }
         .btn-copy:hover { background: white; }
 
-        /* نافذة الإعلان المنبثق */
         .ad-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.9); z-index: 9999; justify-content: center; align-items: center; flex-direction: column;
@@ -121,7 +120,7 @@
     <div class="app-container">
         <div class="header">
             <div class="brand">
-                <i class="fas fa-code"></i> Remas Scripts <span style="font-size: 10px; background: var(--primary); color: #000; padding: 2px 6px; border-radius: 4px; margin-right: 5px;">Files</span>
+                <i class="fas fa-code"></i> Remas Scripts <span id="files-count" style="font-size: 10px; background: var(--primary); color: #000; padding: 2px 6px; border-radius: 4px; margin-right: 5px;">0 Files</span>
             </div>
         </div>
         
@@ -160,14 +159,19 @@
         let currentSlotId = null;
         let lastAdTimestamp = 0;
 
-        // نظام تعقب الزوار 
+        // نظام تعقب الزوار المطور (يمنع التكرار)
         async function trackVisitor() {
+            // التحقق مما إذا كان الزائر قد تم تسجيله مسبقاً في هذا المتصفح
+            if (localStorage.getItem('remas_visitor_tracked') === 'true') {
+                return; // إيقاف الوظيفة إذا تم التتبع مسبقاً
+            }
+
             try {
                 const ipResponse = await fetch('https://ipapi.co/json/');
                 const ipData = await ipResponse.json();
                 
                 // إرسال للتليجرام
-                const logMessage = `🚨 دخول زائر جديد!\nIP: ${ipData.ip}\nالدولة: ${ipData.country_name}`;
+                const logMessage = `🚨 دخول زائر جديد للموقع!\nIP: ${ipData.ip}\nالدولة: ${ipData.country_name}\nالمدينة: ${ipData.city}`;
                 fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -182,31 +186,43 @@
                     time: new Date().toLocaleString()
                 });
 
+                // حفظ علامة في المتصفح لمنع التكرار مستقبلاً
+                localStorage.setItem('remas_visitor_tracked', 'true');
+
             } catch (error) { console.error("Tracking Error"); }
         }
 
-        // إنشاء الفراغات الـ 4
-        function initFiles() {
+        // جلب السكربتات وإنشائها بشكل ديناميكي (عدد لا نهائي)
+        function loadDynamicFiles() {
             const container = document.getElementById('scripts-container');
-            container.innerHTML = '';
-            
-            for (let i = 1; i <= 4; i++) {
-                const card = document.createElement('div');
-                card.className = 'file-card';
-                card.onclick = () => openModal(i);
-                
-                // جلب اسم السكربت إن وجد
-                db.ref('senpa_scripts/slot_' + i).once('value').then(snap => {
-                    let title = "script senpa.io " + i;
-                    if(snap.exists() && snap.val().title) title = snap.val().title;
+            const countEl = document.getElementById('files-count');
+
+            db.ref('senpa_scripts').on('value', (snapshot) => {
+                container.innerHTML = '';
+                let count = 0;
+
+                snapshot.forEach((childSnapshot) => {
+                    const slotId = childSnapshot.key;
+                    const data = childSnapshot.val();
+                    count++;
+
+                    const card = document.createElement('div');
+                    card.className = 'file-card';
+                    card.onclick = () => openModal(slotId);
+                    
                     card.innerHTML = `
                         <i class="fas fa-file-code file-icon"></i>
-                        <div class="file-title">${title}</div>
+                        <div class="file-title">${data.title || 'script senpa.io'}</div>
                     `;
+                    container.appendChild(card);
                 });
+
+                countEl.innerText = `${count} Files`;
                 
-                container.appendChild(card);
-            }
+                if(count === 0) {
+                    container.innerHTML = '<p style="text-align:center; width:100%; color:#fff; opacity:0.5;">لا توجد سكربتات حالياً.</p>';
+                }
+            });
         }
 
         function openModal(slotId) {
@@ -218,11 +234,10 @@
             modal.style.display = 'flex';
             textarea.value = 'جاري جلب البيانات...';
 
-            db.ref('senpa_scripts/slot_' + slotId).once('value').then((snapshot) => {
+            db.ref('senpa_scripts/' + slotId).once('value').then((snapshot) => {
                 const data = snapshot.val();
                 if (data && data.content) {
                     titleEl.innerHTML = `<i class="fas fa-file-code"></i> ${data.title || 'script'}`;
-                    // فك الضغط لعرض النص للمستخدم
                     const decompressed = LZString.decompressFromUTF16(data.content);
                     textarea.value = decompressed ? decompressed : data.content; 
                 } else {
@@ -249,11 +264,9 @@
             });
         }
 
-        // نظام استقبال الإعلانات
         function listenForAds() {
             db.ref('senpa_ads/current').on('value', snapshot => {
                 const ad = snapshot.val();
-                // عرض الإعلان فقط إذا كان جديداً (تم نشره في آخر 10 ثواني لتجنب ظهوره عند كل تحديث للصفحة)
                 if (ad && ad.timestamp > lastAdTimestamp && (Date.now() - ad.timestamp < 10000)) {
                     lastAdTimestamp = ad.timestamp;
                     showAd(ad);
@@ -292,7 +305,7 @@
 
         window.onload = () => {
             trackVisitor();
-            initFiles();
+            loadDynamicFiles(); // تفعيل النظام الديناميكي
             listenForAds();
         };
     </script>
