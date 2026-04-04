@@ -4,10 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>قسم الرشق - Boost Section | Remas</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
     <style>
-        /* نفس متغيرات التصميم للحفاظ على هوية الموقع */
         :root {
             --primary: #00f2fe;
             --secondary: #4facfe;
@@ -20,6 +21,8 @@
             --text-muted: #94a3b8;
             --neon-glow: 0 0 15px rgba(0, 242, 254, 0.4);
             --input-bg: rgba(0, 0, 0, 0.5);
+            --pending: #f59e0b;
+            --success: #10b981;
         }
 
         body.light-mode {
@@ -36,26 +39,21 @@
             --input-bg: rgba(240, 244, 248, 0.8);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; transition: background 0.3s, color 0.3s; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; transition: 0.3s; }
 
         body {
             background: radial-gradient(circle at top right, var(--bg-grad-1), var(--bg-grad-2), var(--bg-main));
-            color: var(--text-main);
-            display: flex; justify-content: center; align-items: center;
-            min-height: 100vh; background-attachment: fixed; padding: 20px;
+            color: var(--text-main); display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh; background-attachment: fixed; padding: 20px; gap: 20px;
         }
 
-        .boost-container {
-            width: 100%; max-width: 600px;
-            background: var(--card-bg); backdrop-filter: blur(15px);
+        .boost-container, .orders-container, .admin-container {
+            width: 100%; max-width: 600px; background: var(--card-bg); backdrop-filter: blur(15px);
             border: 1px solid var(--glass-border); border-radius: 20px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8), var(--neon-glow);
-            overflow: hidden; padding: 30px; position: relative;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8), var(--neon-glow); padding: 30px; position: relative;
         }
 
-        .header-title {
-            text-align: center; margin-bottom: 25px; border-bottom: 1px solid var(--glass-border); padding-bottom: 15px;
-        }
+        .header-title { text-align: center; margin-bottom: 25px; border-bottom: 1px solid var(--glass-border); padding-bottom: 15px; }
         .header-title h2 { color: var(--primary); font-size: 24px; text-shadow: var(--neon-glow); }
         .header-title p { color: var(--text-muted); font-size: 14px; margin-top: 5px; }
 
@@ -64,45 +62,61 @@
         
         select, input {
             width: 100%; padding: 12px 15px; border-radius: 10px; border: 1px solid var(--glass-border);
-            background: var(--input-bg); color: var(--text-main); font-size: 15px; outline: none; transition: 0.3s;
+            background: var(--input-bg); color: var(--text-main); font-size: 15px; outline: none;
         }
         select:focus, input:focus { border-color: var(--primary); box-shadow: var(--neon-glow); }
         select option { background: var(--bg-main); color: var(--text-main); }
 
         .submit-btn {
-            width: 100%; padding: 15px; border-radius: 12px; border: none;
-            background: linear-gradient(45deg, var(--primary), var(--secondary));
-            color: #fff; font-size: 18px; font-weight: bold; cursor: pointer;
-            transition: 0.3s; display: flex; justify-content: center; align-items: center; gap: 10px;
+            width: 100%; padding: 15px; border-radius: 12px; border: none; background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: #fff; font-size: 18px; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px;
         }
         .submit-btn:hover { transform: translateY(-3px); box-shadow: var(--neon-glow); }
         .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-        .back-btn {
-            position: absolute; top: 20px; left: 20px; background: none; border: none;
-            color: var(--text-main); font-size: 20px; cursor: pointer; transition: 0.2s;
-        }
+        .back-btn { position: absolute; top: 20px; left: 20px; background: none; border: none; color: var(--text-main); font-size: 20px; cursor: pointer; }
         .back-btn:hover { color: var(--primary); }
 
-        .alert-msg {
-            display: none; padding: 15px; border-radius: 10px; margin-bottom: 20px; font-weight: bold; text-align: center;
-        }
-        .alert-success { background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid #4ade80; }
-        .alert-error { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #f87171; }
+        .alert-msg { display: none; padding: 15px; border-radius: 10px; margin-bottom: 20px; font-weight: bold; text-align: center; }
+        .alert-success { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; }
+        .alert-error { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; }
 
-        .paid-options { display: none; margin-top: 10px; }
-        
-        /* Language Support */
+        /* ستايل الطلبات */
+        .order-card {
+            background: var(--input-bg); border: 1px solid var(--glass-border); border-radius: 12px;
+            padding: 15px; margin-bottom: 15px; cursor: pointer; position: relative; overflow: hidden;
+        }
+        .order-card:hover { border-color: var(--primary); }
+        .order-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .status-badge { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; display: flex; align-items: center; gap: 5px; }
+        .status-pending { background: rgba(245, 158, 11, 0.2); color: var(--pending); border: 1px solid var(--pending); }
+        .status-success { background: rgba(16, 185, 129, 0.2); color: var(--success); border: 1px solid var(--success); }
+        .order-details { display: none; margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--glass-border); font-size: 14px; color: var(--text-muted); }
+        .order-card.open .order-details { display: block; }
+
+        /* لوحة الإدارة */
+        .admin-container { display: none; border: 2px dashed #ef4444; }
+        .admin-title { color: #ef4444; margin-bottom: 15px; text-align: center; }
+
         [dir="ltr"] .back-btn { left: auto; right: 20px; }
     </style>
 </head>
 <body>
 
+    <div class="admin-container" id="adminPanel">
+        <h3 class="admin-title"><i class="fas fa-user-shield"></i> لوحة الإدارة السريعة</h3>
+        <div class="form-group">
+            <label>رقم IP العميل (من تليجرام)</label>
+            <input type="text" id="adminIP" placeholder="مثال: 192.168.1.1">
+        </div>
+        <button class="submit-btn" onclick="markOrdersCompleted()" style="background: #ef4444;">تحويل الطلبات إلى "تم التنفيذ"</button>
+    </div>
+
     <div class="boost-container">
         <button class="back-btn" onclick="window.location.href='index.html'" title="رجوع / Back"><i class="fas fa-arrow-left"></i></button>
         
         <div class="header-title">
-            <h2><i class="fas fa-rocket"></i> قسم الرشق المجاني والمدفوع</h2>
+            <h2><i class="fas fa-rocket"></i> قسم الرشق</h2>
             <p>Free & Paid Boosting Services</p>
         </div>
 
@@ -120,22 +134,20 @@
 
             <div class="form-group">
                 <label><i class="fas fa-list"></i> الخدمة المطلوبة / Required Service</label>
-                <select id="service" required onchange="checkServiceType()">
+                <select id="service" required onchange="updatePackages()">
                     <option value="" disabled selected>اختر الخدمة / Choose Service</option>
-                    </select>
-            </div>
-
-            <div id="paidOptions" class="form-group paid-options">
-                <label><i class="fas fa-gem"></i> الباقة / Package</label>
-                <select id="packageSelect">
-                    <option value="Free (400 Views)">مجانًا - 400 مشاهدة | Free - 400 Views</option>
-                    <option value="Paid 5$ (1000 Views)">5$ - 1000 مشاهدة | 5$ - 1000 Views</option>
-                    <option value="Paid 10$ (2500 Views)">10$ - 2500 مشاهدة | 10$ - 2500 Views</option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label><i class="fas fa-link"></i> رابط الحساب أو اليوزر / Link or Username</label>
+                <label><i class="fas fa-gem"></i> الباقة / Package</label>
+                <select id="packageSelect" required>
+                    <option value="" disabled selected>اختر الباقة / Choose Package</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-link"></i> الرابط أو المعرف / Link or Username</label>
                 <input type="text" id="targetLink" required placeholder="ضع الرابط أو المعرف هنا / Paste link or username here">
             </div>
 
@@ -145,164 +157,229 @@
         </form>
     </div>
 
+    <div class="orders-container">
+        <div class="header-title" style="margin-bottom: 15px; padding-bottom: 10px;">
+            <h3 style="color: var(--primary);"><i class="fas fa-box-open"></i> طلباتي | My Orders</h3>
+            <p style="font-size: 12px;">اضغط على الطلب لعرض التفاصيل</p>
+        </div>
+        <div id="ordersList">
+            <p style="text-align: center; color: var(--text-muted);">جاري التحميل...</p>
+        </div>
+    </div>
+
     <script>
-        // إعدادات البوت (تم استخدام المعطيات التي وفرتها)
+        // إعدادات البوت والـ Firebase الخاصة بك
         const BOT_TOKEN = "7894436976:AAFdg77dpzCgpeLnkwAQqP9POkwZMwWoikg";
         const CHAT_ID = "-1003783270855";
 
-        // تعريف الخدمات
+        const firebaseConfig = {
+            apiKey: "AIzaSyApqVwnKmq0gJ7k-UM-jLNxaYlBPkRx1Go",
+            authDomain: "chatlive-4387e.firebaseapp.com",
+            databaseURL: "https://chatlive-4387e-default-rtdb.firebaseio.com",
+            projectId: "chatlive-4387e",
+            storageBucket: "chatlive-4387e.firebasestorage.app",
+            messagingSenderId: "722728428486",
+            appId: "1:722728428486:android:847b11a7743dfb7d5ac8c7"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        let userIP = "";
+        let sanitizedIP = "";
+
+        // جلب الـ IP وتهيئة بيانات المستخدم
+        fetch('https://ipapi.co/json/').then(r => r.json()).then(data => {
+            userIP = data.ip;
+            sanitizedIP = userIP.replace(/\./g, '_'); // Firebase لا يقبل النقاط في المفاتيح
+            loadMyOrders();
+        }).catch(err => {
+            document.getElementById('ordersList').innerHTML = "<p style='text-align:center;'>فشل في جلب البيانات.</p>";
+        });
+
+        // تعريف الخدمات والباقات بدقة
         const services = {
-            "Instagram": [
-                { id: "ig_followers", name: "متابعين مجاناً (حد أقصى 20) | Free Followers (Max 20)" },
-                { id: "ig_likes", name: "إعجابات مجانية (حد أقصى 100) | Free Likes (Max 100)" },
-                { id: "ig_views", name: "مشاهدات (مجاني ومدفوع) | Views (Free & Paid)" },
-                { id: "ig_saves", name: "حفظ مجاني | Free Saves" },
-                { id: "ig_shares", name: "مشاركة مجانية | Free Shares" },
-                { id: "ig_story", name: "مشاهدات ستوري مجانية | Free Story Views" }
-            ],
-            "TikTok": [
-                { id: "tk_followers", name: "متابعون مجانيون (حد أقصى 20) | Free Followers (Max 20)" },
-                { id: "tk_likes", name: "إعجابات مجانية (حد أقصى 50) | Free Likes (Max 50)" },
-                { id: "tk_views", name: "مشاهدات مجانية (حد أقصى 400) | Free Views (Max 400)" }
-            ]
+            "Instagram": {
+                "ig_followers": { name: "متابعين / Followers", packages: ["مجانًا (حد أقصى 20) | Free (Max 20)"] },
+                "ig_likes": { name: "إعجابات / Likes", packages: ["مجانًا (حد أقصى 100) | Free (Max 100)"] },
+                "ig_views": { 
+                    name: "مشاهدات / Views", 
+                    packages: [
+                        "مجانًا (حد أقصى 400) | Free (Max 400)",
+                        "مدفوع 5$ (1000 مشاهدة) | Paid 5$ (1000 Views)",
+                        "مدفوع 10$ (2500 مشاهدة) | Paid 10$ (2500 Views)"
+                    ] 
+                },
+                "ig_saves": { name: "حفظ / Saves", packages: ["مجانًا | Free Saves"] },
+                "ig_shares": { name: "مشاركة / Shares", packages: ["مجانًا | Free Shares"] },
+                "ig_story": { name: "مشاهدات ستوري / Story Views", packages: ["مجانًا | Free Story Views"] }
+            },
+            "TikTok": {
+                "tk_followers": { name: "متابعون / Followers", packages: ["مجانًا (حد أقصى 20) | Free (Max 20)"] },
+                "tk_likes": { name: "إعجابات / Likes", packages: ["مجانًا (حد أقصى 50) | Free (Max 50)"] },
+                "tk_views": { name: "مشاهدات / Views", packages: ["مجانًا (حد أقصى 400) | Free (Max 400)"] }
+            }
         };
 
-        // تزامن الوضع الليلي/النهاري مع الصفحة الرئيسية
-        if (localStorage.getItem('remas_theme') === 'light') {
-            document.body.classList.add('light-mode');
+        if (localStorage.getItem('remas_theme') === 'light') document.body.classList.add('light-mode');
+
+        // إظهار لوحة الإدارة إذا كان الرابط يحتوي على ?admin=1
+        if (window.location.search.includes("admin=1")) {
+            document.getElementById("adminPanel").style.display = "block";
         }
 
-        // تحديث قائمة الخدمات بناءً على المنصة
         function updateServices() {
             const platform = document.getElementById("platform").value;
             const serviceSelect = document.getElementById("service");
             serviceSelect.innerHTML = '<option value="" disabled selected>اختر الخدمة / Choose Service</option>';
             
             if (services[platform]) {
-                services[platform].forEach(srv => {
-                    serviceSelect.innerHTML += `<option value="${srv.id}">${srv.name}</option>`;
-                });
+                for (const [key, val] of Object.entries(services[platform])) {
+                    serviceSelect.innerHTML += `<option value="${key}">${val.name}</option>`;
+                }
             }
-            checkServiceType();
+            updatePackages();
         }
 
-        // إظهار/إخفاء الخيارات المدفوعة لمشاهدات الانستغرام
-        function checkServiceType() {
-            const service = document.getElementById("service").value;
-            const paidOptions = document.getElementById("paidOptions");
-            if (service === "ig_views") {
-                paidOptions.style.display = "block";
-            } else {
-                paidOptions.style.display = "none";
-            }
-        }
-
-        // إظهار التنبيهات
-        function showAlert(msg, type) {
-            const alertBox = document.getElementById("alertBox");
-            alertBox.textContent = msg;
-            alertBox.className = `alert-msg alert-${type}`;
-            alertBox.style.display = "block";
-            setTimeout(() => { alertBox.style.display = "none"; }, 5000);
-        }
-
-        // نظام الحماية وإرسال الطلب
-        document.getElementById("boostForm").addEventListener("submit", async function(e) {
-            e.preventDefault();
-            
-            const btn = document.getElementById("submitBtn");
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التحقق...';
-
+        function updatePackages() {
             const platform = document.getElementById("platform").value;
             const service = document.getElementById("service").value;
-            const targetLink = document.getElementById("targetLink").value.trim();
+            const packageSelect = document.getElementById("packageSelect");
+            packageSelect.innerHTML = '<option value="" disabled selected>اختر الباقة / Choose Package</option>';
+
+            if (platform && service && services[platform][service]) {
+                services[platform][service].packages.forEach(pkg => {
+                    packageSelect.innerHTML += `<option value="${pkg}">${pkg}</option>`;
+                });
+            }
+        }
+
+        function showAlert(msg, type) {
+            const alertBox = document.getElementById("alertBox");
+            alertBox.textContent = msg; alertBox.className = `alert-msg alert-${type}`;
+            alertBox.style.display = "block"; setTimeout(() => { alertBox.style.display = "none"; }, 5000);
+        }
+
+        // جلب طلبات المستخدم من Firebase وعرضها
+        function loadMyOrders() {
+            if(!sanitizedIP) return;
+            db.ref('senpa_orders/' + sanitizedIP).on('value', snap => {
+                const ordersList = document.getElementById('ordersList');
+                ordersList.innerHTML = "";
+                const data = snap.val();
+                
+                if (!data) {
+                    ordersList.innerHTML = "<p style='text-align:center; color: var(--text-muted);'>لا توجد طلبات سابقة.</p>";
+                    return;
+                }
+
+                // عكس الترتيب ليظهر الأحدث أولاً
+                const orderKeys = Object.keys(data).reverse();
+                
+                orderKeys.forEach(key => {
+                    const order = data[key];
+                    const isCompleted = order.status === "completed";
+                    const statusHtml = isCompleted 
+                        ? `<span class="status-badge status-success"><i class="fas fa-check-circle"></i> تم التنفيذ</span>`
+                        : `<span class="status-badge status-pending"><i class="fas fa-clock"></i> قيد الانتظار</span>`;
+
+                    const card = document.createElement('div');
+                    card.className = "order-card";
+                    card.onclick = function() { this.classList.toggle('open'); };
+                    card.innerHTML = `
+                        <div class="order-header">
+                            <strong>${order.platform} - ${order.serviceName}</strong>
+                            ${statusHtml}
+                        </div>
+                        <div class="order-details">
+                            <p><strong>📦 الباقة:</strong> ${order.packageInfo}</p>
+                            <p><strong>🔗 الرابط:</strong> ${order.target}</p>
+                            <p><strong>🕒 الوقت:</strong> ${order.time}</p>
+                            ${isCompleted ? '<p style="color:var(--success); margin-top:10px;"><i class="fas fa-bullhorn"></i> تم إيصال طلبك بنجاح!</p>' : '<p style="color:var(--pending); margin-top:10px;"><i class="fas fa-hourglass-half"></i> طلبك قيد المراجعة والتنفيذ...</p>'}
+                        </div>
+                    `;
+                    ordersList.appendChild(card);
+                });
+            });
+        }
+
+        // إرسال الطلب
+        document.getElementById("boostForm").addEventListener("submit", async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById("submitBtn");
+            btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإرسال...';
+
+            const platform = document.getElementById("platform").value;
+            const serviceKey = document.getElementById("service").value;
             const serviceName = document.getElementById("service").options[document.getElementById("service").selectedIndex].text;
-            
-            let packageInfo = "مجاني (Free)";
-            let isPaid = false;
+            const packageInfo = document.getElementById("packageSelect").value;
+            const targetLink = document.getElementById("targetLink").value.trim();
+            const isPaid = packageInfo.includes("مدفوع") || packageInfo.includes("Paid");
 
-            if (service === "ig_views") {
-                packageInfo = document.getElementById("packageSelect").value;
-                if (packageInfo.includes("Paid")) isPaid = true;
-            }
-
-            // نظام الحماية الذكي: التحقق من التكرار (للخدمات المجانية فقط)
+            // منع التكرار للخدمات المجانية عبر LocalStorage كطبقة حماية إضافية
             if (!isPaid) {
-                // 1. التحقق من الجهاز (LocalStorage)
-                const deviceKey = `boost_used_${service}`;
-                if (localStorage.getItem(deviceKey)) {
-                    showAlert("عذراً، لقد استخدمت هذه الخدمة المجانية مسبقاً من هذا الجهاز! 🚫", "error");
-                    resetBtn(btn);
-                    return;
-                }
-
-                // 2. التحقق من الرابط المستهدف لحمايته من التكرار العشوائي
-                const linkKey = `link_used_${btoa(targetLink).substring(0, 15)}`;
-                if (localStorage.getItem(linkKey)) {
-                    showAlert("تم إرسال رشق مجاني لهذا الحساب/الرابط مسبقاً! 🚫", "error");
-                    resetBtn(btn);
+                if (localStorage.getItem(`boost_${serviceKey}`)) {
+                    showAlert("عذراً، استخدمت هذه الخدمة المجانية مسبقاً! 🚫", "error");
+                    btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> إرسال الطلب';
                     return;
                 }
             }
 
-            // جلب معلومات المستخدم (IP) للتوثيق في تليجرام
-            let ipData = "غير معروف";
-            try {
-                const res = await fetch('https://ipapi.co/json/');
-                const data = await res.json();
-                ipData = `${data.ip} - ${data.country_name} (${data.city})`;
-            } catch (err) { console.log("IP fetch error"); }
+            // حفظ الطلب في Firebase لكي يظهر في "طلباتي"
+            const newOrderRef = db.ref('senpa_orders/' + sanitizedIP).push();
+            const orderData = {
+                platform: platform,
+                serviceName: serviceName,
+                packageInfo: packageInfo,
+                target: targetLink,
+                status: "pending", // قيد الانتظار الافتراضي
+                time: new Date().toLocaleString('en-US', { hour12: true })
+            };
 
-            // تجهيز الرسالة لتليجرام
+            await newOrderRef.set(orderData);
+
+            // إرسال رسالة تليجرام لك
             const message = `
-🚀 *طلب رشق جديد | New Boost* 🚀
+🚀 *طلب رشق جديد* 🚀
 
 📱 *المنصة:* ${platform}
-⚙️ *الخدمة:* ${serviceName.split('|')[0].trim()}
+⚙️ *الخدمة:* ${serviceName}
 📦 *الباقة:* ${packageInfo}
-🔗 *الرابط/اليوزر:* \`${targetLink}\`
+🔗 *الرابط:* \`${targetLink}\`
+🌐 *ايبى العميل:* \`${userIP}\`
 
-🌐 *معلومات الجهاز (IP):* ${ipData}
-${isPaid ? '💰 **طلب مدفوع (تواصل مع العميل للدفع)**' : '🎁 **طلب مجاني**'}
+${isPaid ? '💰 **طلب مدفوع! تواصل مع العميل**' : '🎁 **طلب مجاني**'}
+💡 *لتغيير حالة الطلب إلى "تم التنفيذ"، انسخ الـ IP وضعه في لوحة الإدارة بالموقع.*
             `;
 
-            // الإرسال إلى تليجرام
             fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    chat_id: CHAT_ID,
-                    text: message,
-                    parse_mode: 'Markdown'
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.ok) {
-                    // إذا كان الطلب مجاني، قم بتسجيله لمنع التكرار
-                    if (!isPaid) {
-                        localStorage.setItem(`boost_used_${service}`, 'true');
-                        localStorage.setItem(`link_used_${btoa(targetLink).substring(0, 15)}`, 'true');
-                    }
-                    
-                    showAlert(isPaid ? "تم استلام طلبك المدفوع بنجاح! سيتم التنفيذ بعد الدفع ✅" : "تم استلام طلبك المجاني، سيتم التنفيذ قريباً! ✅", "success");
-                    document.getElementById("targetLink").value = "";
-                } else {
-                    showAlert("حدث خطأ أثناء الإرسال، يرجى المحاولة لاحقاً ❌", "error");
-                }
-            })
-            .catch(error => {
-                showAlert("مشكلة في الاتصال بالخادم! ❌", "error");
-            })
-            .finally(() => {
-                resetBtn(btn);
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chat_id: CHAT_ID, text: message, parse_mode: 'Markdown' })
+            }).then(() => {
+                if (!isPaid) localStorage.setItem(`boost_${serviceKey}`, 'true');
+                showAlert("تم إرسال طلبك بنجاح! تابعه من الأسفل ✅", "success");
+                document.getElementById("targetLink").value = "";
+            }).finally(() => {
+                btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> إرسال الطلب';
             });
         });
 
-        function resetBtn(btn) {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-paper-plane"></i> إرسال الطلب / Submit Request';
+        // وظيفة الإدارة السريعة لتحويل الطلبات إلى تم التنفيذ
+        function markOrdersCompleted() {
+            const adminInput = document.getElementById("adminIP").value.trim();
+            if(!adminInput) return alert("أدخل الـ IP أولاً");
+            const targetIP = adminInput.replace(/\./g, '_');
+            
+            db.ref('senpa_orders/' + targetIP).once('value', snap => {
+                if(snap.exists()) {
+                    snap.forEach(child => {
+                        child.ref.update({ status: "completed" });
+                    });
+                    alert("تم تحويل جميع طلبات هذا الـ IP إلى 'تم التنفيذ' بنجاح ✅");
+                    document.getElementById("adminIP").value = "";
+                } else {
+                    alert("لا يوجد طلبات لهذا الـ IP.");
+                }
+            });
         }
     </script>
 </body>
