@@ -27,7 +27,6 @@
             min-height: 100vh;
         }
 
-        /* شاشة تسجيل الدخول */
         #login-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg-dark); z-index: 9999;
@@ -44,7 +43,6 @@
         .login-box h2 { color: var(--primary); margin-bottom: 20px; }
         .login-box input { margin-bottom: 20px; text-align: center; font-size: 18px; letter-spacing: 2px; }
 
-        /* إخفاء المحتوى الرئيسي في البداية */
         #main-container {
             display: none;
             max-width: 1100px; margin: 0 auto; grid-template-columns: 1fr; gap: 20px;
@@ -73,16 +71,10 @@
         }
         .btn:hover { box-shadow: var(--neon-glow); transform: translateY(-2px); }
         
-        /* أزرار الإدارة والألوان الإضافية */
-        .btn-danger { background: #ef4444; }
-        .btn-danger:hover { background: #dc2626; box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
-        .btn-success { background: #10b981; }
-        .btn-success:hover { background: #059669; box-shadow: 0 0 15px rgba(16, 185, 129, 0.4); }
-        .btn-warning { background: #f59e0b; }
-        .btn-warning:hover { background: #d97706; box-shadow: 0 0 15px rgba(245, 158, 11, 0.4); }
-        .btn-dark { background: #334155; }
-        .btn-dark:hover { background: #1e293b; box-shadow: 0 0 15px rgba(51, 65, 85, 0.4); }
-        
+        .btn-danger { background: #ef4444; } .btn-danger:hover { background: #dc2626; box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
+        .btn-success { background: #10b981; } .btn-success:hover { background: #059669; box-shadow: 0 0 15px rgba(16, 185, 129, 0.4); }
+        .btn-warning { background: #f59e0b; color: black;} .btn-warning:hover { background: #d97706; box-shadow: 0 0 15px rgba(245, 158, 11, 0.4); }
+        .btn-dark { background: #334155; } .btn-dark:hover { background: #1e293b; box-shadow: 0 0 15px rgba(51, 65, 85, 0.4); }
         .btn-sm { width: auto; padding: 6px 12px; font-size: 14px; margin: 2px; }
 
         .status-badge { padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; }
@@ -111,11 +103,26 @@
 
     <div id="main-container">
 
+        <div class="card" style="border-color: #ffd700;">
+            <h2 style="color: #ffd700; text-shadow: 0 0 15px rgba(255, 215, 0, 0.4);"><i class="fas fa-coins"></i> إدارة رصيد النقاط للعملاء (الرشق بريميوم)</h2>
+            <p style="color: #aaa; font-size: 13px; margin-bottom: 15px;">
+                قم بإدخال IP العميل لإضافة أو سحب نقاط (دولارات) من حسابه.
+            </p>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <div class="form-group" style="flex: 1; min-width: 200px;">
+                    <label>IP العميل المستهدف</label>
+                    <input type="text" id="wallet-ip" placeholder="مثال: 192.168.1.1">
+                </div>
+                <div class="form-group" style="flex: 1; min-width: 200px;">
+                    <label>المبلغ المراد إضافته ($)</label>
+                    <input type="number" id="wallet-amount" placeholder="مثال: 10 أو -5 للسحب" step="0.01">
+                </div>
+            </div>
+            <button class="btn btn-warning" onclick="chargeWallet()" id="btn-wallet"><i class="fas fa-wallet"></i> تنفيذ العملية لشحن الرصيد</button>
+        </div>
+
         <div class="card">
             <h2><i class="fas fa-rocket"></i> إدارة طلبات الرشق</h2>
-            <p style="color: #aaa; font-size: 13px; margin-bottom: 15px;">
-                تغيير الحالة إلى "مكتمل" أو "مرفوض" سيحدث الطلب فوراً في صفحة العميل. الحذف النهائي سيزيله تماماً من السيرفر.
-            </p>
             <div style="overflow-x: auto; max-height: 400px; overflow-y: auto;">
                 <table id="orders-table">
                     <thead>
@@ -138,7 +145,7 @@
         <div class="card">
             <h2><i class="fas fa-code"></i> إدارة السكربتات</h2>
             <div class="form-group">
-                <label>السكربت المستهدف (إنشاء أو تعديل)</label>
+                <label>السكربت المستهدف</label>
                 <select id="script-selector" onchange="loadSelectedScript()">
                     <option value="new">➕ --- إنشاء سكربت جديد --- ➕</option>
                 </select>
@@ -148,10 +155,9 @@
                 <input type="text" id="script-name" placeholder="مثال: Macor senpa.io v2">
             </div>
             <div class="form-group">
-                <label>كود السكربت (سيتم ضغطه وتأمينه تلقائياً)</label>
+                <label>كود السكربت</label>
                 <textarea id="script-code" placeholder="الصق الكود هنا..."></textarea>
             </div>
-            
             <div style="display: flex; gap: 10px;">
                 <button class="btn" onclick="saveScript()" id="btn-save" style="flex: 2;"><i class="fas fa-save"></i> حفظ ونشر السكربت</button>
                 <button class="btn btn-danger" onclick="deleteScript()" id="btn-delete" style="flex: 1; display: none;"><i class="fas fa-trash"></i> حذف السكربت</button>
@@ -159,9 +165,9 @@
         </div>
 
         <div class="card">
-            <h2><i class="fas fa-bullhorn"></i> إطلاق إعلان منبثق للزوار (5 ثواني)</h2>
+            <h2><i class="fas fa-bullhorn"></i> إطلاق إعلان منبثق للزوار</h2>
             <div class="form-group">
-                <label>صورة الإعلان (سيتم ضغطها وتصغيرها تلقائياً)</label>
+                <label>صورة الإعلان</label>
                 <input type="file" id="ad-image" accept="image/*">
             </div>
             <div class="form-group">
@@ -197,11 +203,7 @@
     <script>
         document.addEventListener('contextmenu', event => event.preventDefault()); 
         document.onkeydown = function(e) {
-            if(e.keyCode == 123 || 
-               (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74)) || 
-               (e.ctrlKey && e.keyCode == 85)) {
-                return false;
-            }
+            if(e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74)) || (e.ctrlKey && e.keyCode == 85)) { return false; }
         };
 
         let isAuthenticated = false;
@@ -219,21 +221,16 @@
             }
         }
 
-        function handleLogin(e) {
-            if(e.key === 'Enter') checkPassword();
-        }
+        function handleLogin(e) { if(e.key === 'Enter') checkPassword(); }
 
         function escapeHTML(str) {
             if (!str) return '';
-            return str.replace(/[&<>'"]/g, 
-                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
-            );
+            return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
         }
 
         let db;
         function initApp() {
             if (!isAuthenticated) return;
-            
             const firebaseConfig = {
                 apiKey: "AIzaSyApqVwnKmq0gJ7k-UM-jLNxaYlBPkRx1Go",
                 authDomain: "chatlive-4387e.firebaseapp.com",
@@ -243,16 +240,40 @@
                 messagingSenderId: "722728428486",
                 appId: "1:722728428486:android:847b11a7743dfb7d5ac8c7"
             };
-            
             if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
             db = firebase.database();
             
             refreshScriptsList();
             loadVisitors();
-            loadOrders(); // تحميل طلبات الرشق
+            loadOrders(); 
         }
 
-        // ---------- قسم إدارة الطلبات (الرشق) ----------
+        // ---------- نظام شحن محفظة النقاط ----------
+        function chargeWallet() {
+            if (!isAuthenticated) return;
+            const ipInput = document.getElementById('wallet-ip').value.trim();
+            const amountInput = parseFloat(document.getElementById('wallet-amount').value);
+            const btn = document.getElementById('btn-wallet');
+
+            if (!ipInput || isNaN(amountInput)) return alert("الرجاء إدخال IP صحيح ومبلغ الشحن!");
+
+            const sanitizedIP = ipInput.replace(/\./g, '_');
+            btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> جاري التنفيذ...";
+            
+            const ref = db.ref('senpa_points/' + sanitizedIP);
+            ref.once('value', snap => {
+                let currentBalance = snap.val() ? parseFloat(snap.val().balance) : 0;
+                let newBalance = currentBalance + amountInput;
+                
+                ref.update({ balance: newBalance }).then(() => {
+                    alert(`تمت العملية بنجاح! الرصيد الجديد لـ ${ipInput} هو: ${newBalance.toFixed(2)}$`);
+                    document.getElementById('wallet-amount').value = '';
+                    btn.innerHTML = "<i class='fas fa-wallet'></i> تنفيذ العملية لشحن الرصيد";
+                });
+            });
+        }
+
+        // ---------- قسم إدارة الطلبات ----------
         function loadOrders() {
             if (!isAuthenticated) return;
             db.ref('senpa_orders').on('value', snap => {
@@ -270,7 +291,7 @@
                     });
                 });
 
-                allOrders.reverse(); // لترتيب الأحدث من الأعلى
+                allOrders.reverse();
 
                 if (allOrders.length === 0) {
                     list.innerHTML = '<tr><td colspan="6" style="color: #aaa;">لا توجد طلبات رشق حالياً</td></tr>';
@@ -283,24 +304,27 @@
                     else if (data.status === 'rejected') statusBadge = '<span class="status-badge bg-rejected"><i class="fas fa-times-circle"></i> مرفوض</span>';
                     else statusBadge = '<span class="status-badge bg-pending"><i class="fas fa-clock"></i> قيد الانتظار</span>';
 
+                    const typeTag = data.type === "premium" ? '<br><span style="color: gold; font-size: 11px;"><i class="fas fa-crown"></i> مدفوع بالنقط</span>' : '<br><span style="color: #00f2fe; font-size: 11px;">عادي</span>';
+
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
                         <td>
-                            <div style="color: #fff; font-weight: bold;">${escapeHTML(data.ip || data.sanitizedIP)}</div>
+                            <div style="color: #fff; font-weight: bold;">${escapeHTML(data.ip || data.sanitizedIP.replace(/_/g, '.'))}</div>
                             <div style="font-size: 11px; color: #888; margin-top: 5px;">${escapeHTML(data.time || '')}</div>
+                            ${typeTag}
                         </td>
                         <td>
                             <strong style="color: var(--primary);">${escapeHTML(data.platform || '')}</strong><br>
                             <small>${escapeHTML(data.serviceName || '')}</small>
                         </td>
                         <td style="font-size: 12px;">${escapeHTML(data.packageInfo || '')}</td>
-                        <td><a href="${escapeHTML(data.target || '#')}" target="_blank"><i class="fas fa-external-link-alt"></i> فتح الرابط</a></td>
+                        <td><a href="${escapeHTML(data.target || '#')}" target="_blank"><i class="fas fa-external-link-alt"></i> فتح</a></td>
                         <td>${statusBadge}</td>
                         <td>
-                            <button class="btn btn-sm btn-success" onclick="updateOrderStatus('${data.sanitizedIP}', '${data.id}', 'completed')" title="تحديد كمكتمل"><i class="fas fa-check"></i></button>
-                            <button class="btn btn-sm btn-danger" onclick="updateOrderStatus('${data.sanitizedIP}', '${data.id}', 'rejected')" title="تحديد كمرفوض"><i class="fas fa-times"></i></button>
-                            <button class="btn btn-sm btn-warning" onclick="updateOrderStatus('${data.sanitizedIP}', '${data.id}', 'pending')" title="تحديد كقيد الانتظار"><i class="fas fa-clock"></i></button>
-                            <button class="btn btn-sm btn-dark" onclick="deleteOrder('${data.sanitizedIP}', '${data.id}')" title="حذف نهائي من السيرفر"><i class="fas fa-trash"></i></button>
+                            <button class="btn btn-sm btn-success" onclick="updateOrderStatus('${data.sanitizedIP}', '${data.id}', 'completed')" title="مكتمل"><i class="fas fa-check"></i></button>
+                            <button class="btn btn-sm btn-danger" onclick="updateOrderStatus('${data.sanitizedIP}', '${data.id}', 'rejected')" title="مرفوض"><i class="fas fa-times"></i></button>
+                            <button class="btn btn-sm btn-warning" onclick="updateOrderStatus('${data.sanitizedIP}', '${data.id}', 'pending')" title="قيد الانتظار"><i class="fas fa-clock"></i></button>
+                            <button class="btn btn-sm btn-dark" onclick="deleteOrder('${data.sanitizedIP}', '${data.id}')" title="حذف نهائي"><i class="fas fa-trash"></i></button>
                         </td>
                     `;
                     list.appendChild(tr);
@@ -315,12 +339,9 @@
 
         function deleteOrder(ip, orderId) {
             if(!isAuthenticated) return;
-            if(confirm('تحذير: سيتم مسح هذا الطلب من قاعدة البيانات نهائياً ولن يظهر للعميل مجدداً. هل أنت متأكد؟')) {
-                db.ref(`senpa_orders/${ip}/${orderId}`).remove();
-            }
+            if(confirm('هل أنت متأكد من الحذف النهائي للطلب؟')) db.ref(`senpa_orders/${ip}/${orderId}`).remove();
         }
 
-        // ---------- إدارة السكربتات والإعلانات والزوار ----------
         function refreshScriptsList() {
             if (!isAuthenticated) return;
             const selector = document.getElementById('script-selector');
@@ -329,8 +350,7 @@
                 selector.innerHTML = '<option value="new">➕ --- إنشاء سكربت جديد --- ➕</option>';
                 snap.forEach(child => {
                     const option = document.createElement('option');
-                    option.value = escapeHTML(child.key);
-                    option.text = escapeHTML(child.val().title) || "بدون اسم";
+                    option.value = escapeHTML(child.key); option.text = escapeHTML(child.val().title) || "بدون اسم";
                     selector.appendChild(option);
                 });
                 if([...selector.options].some(o => o.value === currentValue)) selector.value = currentValue;
@@ -341,42 +361,33 @@
             if (!isAuthenticated) return;
             const id = document.getElementById('script-selector').value;
             const delBtn = document.getElementById('btn-delete');
-            const nameInput = document.getElementById('script-name');
-            const codeInput = document.getElementById('script-code');
-
             if (id === 'new') {
-                nameInput.value = ''; codeInput.value = ''; delBtn.style.display = 'none';
+                document.getElementById('script-name').value = ''; document.getElementById('script-code').value = ''; delBtn.style.display = 'none';
             } else {
-                delBtn.style.display = 'flex'; codeInput.value = 'جاري التحميل...';
+                delBtn.style.display = 'flex'; document.getElementById('script-code').value = 'جاري التحميل...';
                 db.ref('senpa_scripts/' + id).once('value').then(snap => {
                     const data = snap.val();
-                    nameInput.value = data.title ? data.title : '';
+                    document.getElementById('script-name').value = data.title ? data.title : '';
                     const decompressed = LZString.decompressFromUTF16(data.content);
-                    codeInput.value = decompressed ? decompressed : data.content;
+                    document.getElementById('script-code').value = decompressed ? decompressed : data.content;
                 });
             }
         }
 
         function saveScript() {
-            if (!isAuthenticated) return alert("غير مصرح لك!");
+            if (!isAuthenticated) return;
             const id = document.getElementById('script-selector').value;
             const name = escapeHTML(document.getElementById('script-name').value); 
             const code = document.getElementById('script-code').value;
             const btn = document.getElementById('btn-save');
-
             if (!name || !code) return alert("الرجاء كتابة اسم وكود السكربت!");
-
             btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> جاري الحفظ...";
             const compressedCode = LZString.compressToUTF16(code);
             const ref = (id === 'new') ? db.ref('senpa_scripts').push() : db.ref('senpa_scripts/' + id);
-
             ref.set({ title: name, content: compressedCode, updatedAt: new Date().toISOString() }).then(() => {
                 btn.innerHTML = "<i class='fas fa-check'></i> تم الحفظ بنجاح!";
                 if (id === 'new') { document.getElementById('script-name').value = ''; document.getElementById('script-code').value = ''; }
                 setTimeout(() => btn.innerHTML = "<i class='fas fa-save'></i> حفظ ونشر السكربت", 2000);
-            }).catch(err => {
-                alert("خطأ: " + err.message);
-                btn.innerHTML = "<i class='fas fa-save'></i> حفظ ونشر السكربت";
             });
         }
 
@@ -384,11 +395,9 @@
             if (!isAuthenticated) return;
             const id = document.getElementById('script-selector').value;
             if (id === 'new') return;
-            if (confirm("هل أنت متأكد من حذف هذا السكربت نهائياً؟ سينتزع من موقع الزوار فوراً.")) {
+            if (confirm("هل أنت متأكد؟")) {
                 db.ref('senpa_scripts/' + id).remove().then(() => {
-                    alert("تم الحذف بنجاح!");
-                    document.getElementById('script-selector').value = 'new';
-                    loadSelectedScript();
+                    document.getElementById('script-selector').value = 'new'; loadSelectedScript();
                 });
             }
         }
@@ -398,32 +407,21 @@
             const fileInput = document.getElementById('ad-image');
             const text = escapeHTML(document.getElementById('ad-text').value);
             let link = document.getElementById('ad-link').value;
-            
-            if(link && !link.startsWith('http')) link = 'https://' + escapeHTML(link);
-            else link = escapeHTML(link);
-
             const btn = document.getElementById('btn-ad');
-            if(!fileInput.files[0]) return alert("الرجاء اختيار صورة للإعلان!");
-
+            if(!fileInput.files[0]) return alert("الرجاء اختيار صورة!");
             btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> جاري التجهيز...";
             const file = fileInput.files[0];
             const reader = new FileReader();
-            
             reader.onload = function(event) {
                 const img = new Image();
                 img.onload = function() {
                     const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 600; 
                     let width = img.width; let height = img.height;
-                    if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                    if (width > 600) { height *= 600 / width; width = 600; }
                     canvas.width = width; canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-
-                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.6);
-
+                    const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height);
                     db.ref('senpa_ads/current').set({
-                        image: compressedBase64, text: text, link: link, timestamp: Date.now()
+                        image: canvas.toDataURL('image/jpeg', 0.6), text: text, link: link, timestamp: Date.now()
                     }).then(() => {
                         btn.innerHTML = "<i class='fas fa-check'></i> تم إطلاق الإعلان!";
                         setTimeout(() => btn.innerHTML = "<i class='fas fa-broadcast-tower'></i> إطلاق الإعلان الآن", 2000);
@@ -437,17 +435,10 @@
         function loadVisitors() {
             if (!isAuthenticated) return;
             db.ref('senpa_visitors').limitToLast(50).on('value', snap => {
-                const list = document.getElementById('visitors-list');
-                list.innerHTML = '';
+                const list = document.getElementById('visitors-list'); list.innerHTML = '';
                 snap.forEach(child => {
-                    const data = child.val();
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td>${escapeHTML(data.ip) || '-'}</td>
-                        <td>${escapeHTML(data.country) || '-'}</td>
-                        <td>${escapeHTML(data.city) || '-'}</td>
-                        <td>${escapeHTML(data.time) || '-'}</td>
-                    `;
+                    const data = child.val(); const tr = document.createElement('tr');
+                    tr.innerHTML = `<td>${escapeHTML(data.ip) || '-'}</td><td>${escapeHTML(data.country) || '-'}</td><td>${escapeHTML(data.city) || '-'}</td><td>${escapeHTML(data.time) || '-'}</td>`;
                     list.insertBefore(tr, list.firstChild);
                 });
             });
