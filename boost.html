@@ -73,7 +73,7 @@
             color: #fff; font-size: 18px; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px;
         }
         .submit-btn:hover { transform: translateY(-3px); box-shadow: var(--neon-glow); }
-        .submit-btn:disabled { background: #334155; opacity: 0.7; cursor: not-allowed; transform: none; box-shadow: none; }
+        .submit-btn:disabled { background: #334155; opacity: 0.8; cursor: not-allowed; transform: none; box-shadow: none; }
 
         .back-btn { position: absolute; top: 20px; left: 20px; background: none; border: none; color: var(--text-main); font-size: 20px; cursor: pointer; }
         .back-btn:hover { color: var(--primary); }
@@ -176,7 +176,8 @@
         let userIP = "";
         let sanitizedIP = "";
         let isVPNDetected = false;
-        let hasGlobalOrder = false; // للتحقق من الحد الأقصى للطلبات
+        let hasGlobalOrder = false; 
+        let countdownTimer;
 
         if (localStorage.getItem('remas_theme') === 'light') document.body.classList.add('light-mode');
 
@@ -194,7 +195,7 @@
             if (data.timezone && browserTz !== data.timezone) {
                 isVPNDetected = true;
             }
-            // الفحص الثاني: مزود الخدمة ينتمي لسيرفرات سحابية بدلاً من شركات إنترنت حقيقية
+            // الفحص الثاني: مزود الخدمة ينتمي لسيرفرات سحابية
             if (suspiciousWords.some(word => isp.includes(word))) {
                 isVPNDetected = true;
             }
@@ -266,7 +267,39 @@
             alertBox.style.display = "block"; setTimeout(() => { alertBox.style.display = "none"; }, 8000);
         }
 
-        // جلب طلبات المستخدم وفحص الحد الأقصى
+        // دالة التحكم بوقت الانتظار (6 ساعات)
+        function startCooldown(lastOrderTimestamp) {
+            if (isVPNDetected) return; // لا تفعل شيء إذا كان VPN مفعل
+
+            const btn = document.getElementById("submitBtn");
+            const sixHoursMs = 6 * 60 * 60 * 1000; // 6 ساعات بالملي ثانية
+            clearInterval(countdownTimer);
+
+            countdownTimer = setInterval(() => {
+                const now = Date.now();
+                const timePassed = now - lastOrderTimestamp;
+
+                if (timePassed < sixHoursMs) {
+                    hasGlobalOrder = true;
+                    btn.disabled = true;
+                    
+                    const timeLeft = sixHoursMs - timePassed;
+                    const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+                    const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+                    btn.innerHTML = `<i class="fas fa-lock"></i> يفتح بعد: ${hours}س و ${minutes}د و ${seconds}ث`;
+                } else {
+                    // انقضت الـ 6 ساعات
+                    hasGlobalOrder = false;
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-paper-plane"></i> إرسال الطلب / Submit Request';
+                    clearInterval(countdownTimer);
+                }
+            }, 1000);
+        }
+
+        // جلب طلبات المستخدم وفحص الوقت
         function loadMyOrders() {
             if(!sanitizedIP) return;
             db.ref('senpa_orders/' + sanitizedIP).on('value', snap => {
@@ -276,20 +309,25 @@
                 
                 if (!data) {
                     ordersList.innerHTML = "<p style='text-align:center; color: var(--text-muted);'>لا توجد طلبات سابقة.</p>";
-                    hasGlobalOrder = false;
+                    
+                    // التحقق من المتصفح في حال مسح قاعدة البيانات وبقى المتصفح
+                    const localTimestamp = parseInt(localStorage.getItem("remas_last_order_time"));
+                    if(localTimestamp) startCooldown(localTimestamp);
+                    else hasGlobalOrder = false;
+
                     return;
                 }
 
-                // بما أن لديه بيانات في القاعدة، إذن هو طلب مسبقاً!
-                hasGlobalOrder = true;
-                const btn = document.getElementById("submitBtn");
-                btn.disabled = true;
-                btn.innerHTML = '<i class="fas fa-lock"></i> لقد استهلكت حد الطلبات المسموح لك';
-                
-                // عرض الطلبات
+                // عرض الطلبات واستخراج أحدث وقت طلب
                 const orderKeys = Object.keys(data).reverse();
+                let latestTimestamp = parseInt(localStorage.getItem("remas_last_order_time")) || 0;
+
                 orderKeys.forEach(key => {
                     const order = data[key];
+                    if (order.timestamp && order.timestamp > latestTimestamp) {
+                        latestTimestamp = order.timestamp;
+                    }
+
                     let statusHtml = '';
                     let detailsMsg = '';
 
@@ -321,6 +359,11 @@
                     `;
                     ordersList.appendChild(card);
                 });
+
+                // تفعيل عداد الـ 6 ساعات
+                if (latestTimestamp > 0) {
+                    startCooldown(latestTimestamp);
+                }
             });
         }
 
@@ -328,14 +371,14 @@
         document.getElementById("boostForm").addEventListener("submit", async function(e) {
             e.preventDefault();
 
-            // تحقق نهائي من الـ VPN والحد الأقصى قبل الإرسال
+            // تحقق نهائي من الـ VPN 
             if (isVPNDetected) {
                 showAlert("لا يمكنك الطلب أثناء استخدام VPN.", "error");
                 return;
             }
 
-            if (hasGlobalOrder || localStorage.getItem("remas_has_ordered")) {
-                showAlert("عذراً! الحد الأقصى هو (طلب واحد فقط) لكل مستخدم. لا يمكنك تقديم طلبات أخرى.", "error");
+            if (hasGlobalOrder) {
+                showAlert("عذراً! لا يزال هناك وقت متبقٍ قبل أن تتمكن من طلب رشق جديد.", "error");
                 return;
             }
 
@@ -349,6 +392,8 @@
             const targetLink = document.getElementById("targetLink").value.trim();
             const isPaid = packageInfo.includes("مدفوع") || packageInfo.includes("Paid");
 
+            const currentTimestamp = Date.now();
+
             // حفظ الطلب في Firebase
             const newOrderRef = db.ref('senpa_orders/' + sanitizedIP).push();
             const orderData = {
@@ -356,8 +401,9 @@
                 serviceName: serviceName,
                 packageInfo: packageInfo,
                 target: targetLink,
-                status: "pending", // قيد الانتظار
-                time: new Date().toLocaleString('en-US', { hour12: true })
+                status: "pending", 
+                time: new Date().toLocaleString('en-US', { hour12: true }),
+                timestamp: currentTimestamp // حفظ الوقت الدقيق بالملي ثانية
             };
 
             await newOrderRef.set(orderData);
@@ -380,12 +426,15 @@ ${isPaid ? '💰 **طلب مدفوع! تواصل مع العميل**' : '🎁 **
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ chat_id: CHAT_ID, text: message, parse_mode: 'Markdown' })
             }).then(() => {
-                // حفظ بصمة في المتصفح كطبقة حماية إضافية
-                localStorage.setItem("remas_has_ordered", "true");
-                hasGlobalOrder = true;
-
-                showAlert("تم إرسال طلبك بنجاح! תابعه في الأسفل ✅. (لا يمكنك إرسال طلبات أخرى)", "success");
+                // حفظ بصمة الوقت في المتصفح
+                localStorage.setItem("remas_last_order_time", currentTimestamp);
+                
+                showAlert("تم إرسال طلبك بنجاح! תابعه في الأسفل ✅. (يمكنك الطلب مجدداً بعد 6 ساعات)", "success");
                 document.getElementById("targetLink").value = "";
+                
+                // تشغيل العد التنازلي فوراً بعد الإرسال
+                startCooldown(currentTimestamp);
+
             }).catch(() => {
                 btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> إرسال الطلب';
             });
