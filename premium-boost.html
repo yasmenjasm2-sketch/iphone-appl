@@ -2,618 +2,322 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>الرشق بريميوم | خدمات متكاملة ونظام نقاط</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الرشق بريميوم - Premium Boost | Remas</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <script src="https://www.paypal.com/sdk/js?client-id=test&currency=USD"></script>
+
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', 'Tajawal', system-ui, sans-serif;
+        :root {
+            --primary: #ffd700; /* اللون الذهبي */
+            --bg-main: #050b14;
+            --bg-grad-1: #1a1025;
+            --bg-grad-2: #090a0f;
+            --card-bg: rgba(20, 25, 40, 0.8);
+            --glass-border: rgba(255, 215, 0, 0.3);
+            --text-main: #f8fafc;
+            --neon-glow: 0 0 15px rgba(255, 215, 0, 0.4);
+            --input-bg: rgba(0, 0, 0, 0.5);
         }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; transition: 0.3s; }
+
         body {
-            background: radial-gradient(circle at 10% 20%, #0a0f1e, #03060c);
-            color: #f0f3fa;
-            padding: 20px;
+            background: radial-gradient(circle at top right, var(--bg-grad-1), var(--bg-grad-2), var(--bg-main));
+            color: var(--text-main); display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh; padding: 20px; gap: 20px;
         }
-        .glass-card {
-            background: rgba(15, 25, 45, 0.65);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 215, 0, 0.25);
-            border-radius: 28px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5), 0 0 15px rgba(255,215,0,0.2);
-            transition: 0.25s ease;
-        }
+
         .container {
-            max-width: 1400px;
-            margin: 0 auto;
+            width: 100%; max-width: 550px; padding: 30px; background: var(--card-bg); backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border); border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.8), var(--neon-glow);
         }
-        /* header & user area */
-        .user-panel {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            align-items: center;
-            gap: 20px;
-            margin-bottom: 30px;
-            padding: 20px 28px;
+
+        .header-title { text-align: center; margin-bottom: 25px; border-bottom: 1px solid var(--glass-border); padding-bottom: 15px; }
+        .header-title h2 { color: var(--primary); font-size: 24px; text-shadow: var(--neon-glow); }
+        .header-title p { color: #aaa; font-size: 14px; margin-top: 5px; }
+
+        .wallet-box {
+            background: rgba(255, 215, 0, 0.1); border: 1px solid var(--primary); border-radius: 12px;
+            padding: 15px; text-align: center; margin-bottom: 20px;
         }
-        .logo h1 {
-            font-size: 1.9rem;
-            background: linear-gradient(135deg, #FFD966, #FFB347);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
+        .wallet-box h3 { color: var(--primary); margin: 0; font-size: 22px; }
+        .wallet-box p { margin: 5px 0 0; font-size: 12px; color: #ccc; }
+
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: bold; font-size: 14px; color: var(--primary); }
+        
+        select, input {
+            width: 100%; padding: 12px 15px; border-radius: 10px; border: 1px solid var(--glass-border);
+            background: var(--input-bg); color: var(--text-main); font-size: 15px; outline: none;
         }
-        .points-wallet {
-            background: rgba(0,0,0,0.6);
-            border-radius: 60px;
-            padding: 10px 24px;
-            border-right: 3px solid gold;
+        select:focus, input:focus { border-color: var(--primary); box-shadow: var(--neon-glow); }
+        select option { background: var(--bg-main); color: var(--text-main); }
+
+        .price-display {
+            text-align: center; font-size: 20px; font-weight: bold; color: #10b981; margin: 15px 0; display: none;
         }
-        .points-wallet span {
-            font-size: 1.6rem;
-            font-weight: bold;
-            color: #FFD966;
+
+        .btn-pay {
+            width: 100%; padding: 15px; border-radius: 12px; border: none; font-weight: bold; font-size: 18px;
+            background: linear-gradient(45deg, #ffd700, #ff8c00); color: black; cursor: pointer;
+            display: flex; justify-content: center; align-items: center; gap: 10px;
         }
-        .user-phone-area {
-            display: flex;
-            gap: 12px;
-            background: rgba(0,0,0,0.5);
-            padding: 8px 20px;
-            border-radius: 60px;
-            align-items: center;
-        }
-        .user-phone-area input {
-            background: transparent;
-            border: 1px solid #ffd96655;
-            padding: 8px 14px;
-            border-radius: 40px;
-            color: white;
-            outline: none;
-        }
-        .btn-gold {
-            background: linear-gradient(95deg, #f5b042, #ffd966);
-            border: none;
-            padding: 8px 20px;
-            border-radius: 40px;
-            font-weight: bold;
-            color: #1a1a2e;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .btn-gold:hover {
-            transform: scale(1.02);
-            box-shadow: 0 0 12px rgba(255,200,0,0.7);
-        }
-        .discount-area {
-            display: flex;
-            gap: 12px;
-            margin: 20px 0 20px;
-            justify-content: center;
-        }
-        .discount-area input {
-            background: #111827;
-            border: 1px solid #ffd966;
-            padding: 10px 16px;
-            border-radius: 50px;
-            color: white;
-            width: 220px;
-        }
-        .services-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 28px;
-            margin-top: 20px;
-        }
-        .service-card {
-            background: rgba(10, 18, 30, 0.8);
-            backdrop-filter: blur(8px);
-            border-radius: 32px;
-            padding: 20px;
-            transition: all 0.2s;
-            border: 1px solid rgba(255, 215, 0, 0.3);
-        }
-        .service-card:hover {
-            border-color: #ffd966;
-            transform: translateY(-5px);
-        }
-        .service-title {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-        }
-        .price-tag {
-            color: #FFD966;
-            font-size: 1.3rem;
-            font-weight: bold;
-        }
-        .points-price {
-            font-size: 0.85rem;
-            color: #b9c3db;
-        }
-        .badge-free {
-            background: #2e7d32;
-            padding: 4px 10px;
-            border-radius: 30px;
-            font-size: 0.7rem;
-        }
-        .card-buttons {
-            display: flex;
-            gap: 12px;
-            margin-top: 20px;
-            flex-wrap: wrap;
-        }
-        .btn-buy-money {
-            background: linear-gradient(145deg, #1e2a3a, #0f1722);
-            border: 1px solid #ffd966;
-            color: #ffd966;
-            padding: 8px 16px;
-            border-radius: 40px;
-            cursor: pointer;
-            font-weight: bold;
-            flex: 1;
-        }
-        .btn-buy-points {
-            background: #ffd96620;
-            border: 1px solid #ffd966;
-            color: #FFD966;
-            padding: 8px 16px;
-            border-radius: 40px;
-            cursor: pointer;
-            font-weight: bold;
-            flex: 1;
-        }
-        .btn-buy-points:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-        }
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-        .modal-content {
-            background: #0b1120;
-            border-radius: 32px;
-            max-width: 450px;
-            width: 90%;
-            padding: 28px;
-            border: 1px solid gold;
-        }
-        .close-modal {
-            float: left;
-            font-size: 28px;
-            cursor: pointer;
-        }
-        hr {
-            border-color: #ffd96655;
-            margin: 10px 0;
-        }
-        footer {
-            text-align: center;
-            margin-top: 50px;
-            font-size: 0.8rem;
-            opacity: 0.7;
-        }
-        @media (max-width: 700px) {
-            .user-panel { flex-direction: column; align-items: stretch; }
-        }
+        .btn-pay:hover { box-shadow: var(--neon-glow); transform: translateY(-3px); }
+        .btn-pay:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        .back-btn { display: inline-block; margin-top: 20px; color: white; text-decoration: none; text-align: center; width: 100%; }
+        .back-btn:hover { color: var(--primary); }
+
+        .alert-msg { display: none; padding: 15px; border-radius: 10px; margin-bottom: 20px; font-weight: bold; text-align: center; }
+        .alert-success { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; }
+        .alert-error { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; }
     </style>
 </head>
 <body>
-<div class="container">
-    <!-- شريط المستخدم ونقاط -->
-    <div class="glass-card user-panel">
-        <div class="logo">
-            <h1><i class="fas fa-bolt"></i> الرشق بريميوم</h1>
-            <small style="display:block;">خدمات فورية باحترافية عالمية</small>
+
+    <div class="container">
+        <div class="header-title">
+            <h2><i class="fas fa-crown"></i> الرشق بريميوم</h2>
+            <p>خدمات مدفوعة موثوقة وسريعة التنفيذ</p>
         </div>
-        <div class="points-wallet">
-            <i class="fas fa-coins"></i> رصيد النقاط : <span id="userPointsSpan">0</span> نقطة <span style="font-size:12px;">(1 نقطة = 1$)</span>
+
+        <div class="wallet-box">
+            <p>رصيدك الحالي (النقاط)</p>
+            <h3 id="userBalance"><i class="fas fa-spinner fa-spin"></i></h3>
+            <p style="font-size: 10px;">(يتم شحن الرصيد من قبل الإدارة عبر الـ IP الخاص بك)</p>
+            <p style="font-size: 11px; color: #888;" id="userIpDisplay"></p>
         </div>
-        <div class="user-phone-area">
-            <i class="fas fa-fingerprint"></i>
-            <input type="tel" id="phoneInput" placeholder="رقم الهاتف (بصمة)" value="+966500000001">
-            <button class="btn-gold" id="loginBtn"><i class="fas fa-sign-in-alt"></i> دخول / تسجيل</button>
-        </div>
+
+        <div id="alertBox" class="alert-msg"></div>
+
+        <form id="premiumForm">
+            <div class="form-group">
+                <label><i class="fas fa-share-alt"></i> المنصة</label>
+                <select id="platform" required onchange="updateServices()">
+                    <option value="" disabled selected>اختر المنصة</option>
+                    <option value="Instagram">Instagram - انستغرام</option>
+                    <option value="TikTok">TikTok - تيك توك</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-list"></i> الخدمة المطلوبة</label>
+                <select id="service" required onchange="updatePackages()">
+                    <option value="" disabled selected>اختر الخدمة أولاً</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-gem"></i> الباقة والسعر</label>
+                <select id="packageSelect" required onchange="showPrice()">
+                    <option value="" disabled selected>اختر الباقة</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-link"></i> الرابط أو المعرف</label>
+                <input type="text" id="targetLink" required placeholder="ضع الرابط هنا">
+            </div>
+
+            <div class="price-display" id="priceDisplay">الإجمالي: 0.00$</div>
+
+            <button type="submit" class="btn-pay" id="submitBtn">
+                <i class="fas fa-coins"></i> دفع وتقديم الطلب
+            </button>
+        </form>
+
+        <a href="index.html" class="back-btn"><i class="fas fa-arrow-right"></i> العودة للرئيسية</a>
     </div>
 
-    <!-- كود الخصم -->
-    <div class="discount-area">
-        <input type="text" id="couponCode" placeholder="كود الخصم (مثال: WELCOME10)">
-        <button id="applyCouponBtn" class="btn-gold">تطبيق الخصم</button>
-        <span id="discountMsg" style="font-size:13px; align-self:center;"></span>
-    </div>
+    <script>
+        const BOT_TOKEN = "7894436976:AAFdg77dpzCgpeLnkwAQqP9POkwZMwWoikg";
+        const CHAT_ID = "-1003783270855";
 
-    <!-- حاويات الخدمات -->
-    <h2 style="margin: 20px 0 0 0;"><i class="fab fa-instagram"></i> إنستغرام</h2>
-    <div id="instagramServices" class="services-grid"></div>
+        const firebaseConfig = {
+            apiKey: "AIzaSyApqVwnKmq0gJ7k-UM-jLNxaYlBPkRx1Go",
+            authDomain: "chatlive-4387e.firebaseapp.com",
+            databaseURL: "https://chatlive-4387e-default-rtdb.firebaseio.com",
+            projectId: "chatlive-4387e",
+            storageBucket: "chatlive-4387e.firebasestorage.app",
+            messagingSenderId: "722728428486",
+            appId: "1:722728428486:android:847b11a7743dfb7d5ac8c7"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
-    <h2 style="margin: 30px 0 0 0;"><i class="fab fa-tiktok"></i> تيك توك</h2>
-    <div id="tiktokServices" class="services-grid"></div>
+        let userIP = "";
+        let sanitizedIP = "";
+        let currentBalance = 0;
+        let selectedPrice = 0;
 
-    <h2 style="margin: 30px 0 0 0;"><i class="fas fa-gift"></i> خدمات مجانية (بلمسة واحدة)</h2>
-    <div id="freeServices" class="services-grid"></div>
-
-    <footer>
-        <i class="fas fa-shield-alt"></i> نظام نقاط آمن | الخصم يطبق على السعر قبل الدفع | الدفع عبر PayPal / Visa
-    </footer>
-</div>
-
-<!-- مودال الدفع بالدولار -->
-<div id="paymentModal" class="modal">
-    <div class="modal-content">
-        <span class="close-modal" id="closeModalBtn">&times;</span>
-        <h3 style="margin-bottom: 15px;"><i class="fas fa-credit-card"></i> إتمام الدفع بالدولار</h3>
-        <div id="modalServiceInfo"></div>
-        <div style="margin: 15px 0;">
-            <div id="paypal-button-container-modal"></div>
-            <hr>
-            <div class="visa-form">
-                <input type="text" id="cardName" placeholder="الاسم على البطاقة" style="width:100%; margin:5px 0; padding:10px;">
-                <input type="text" id="cardNumber" placeholder="رقم البطاقة" maxlength="16" style="width:100%; margin:5px 0; padding:10px;">
-                <div style="display:flex; gap:10px;">
-                    <input type="text" id="cardExp" placeholder="MM/YY" style="flex:1;">
-                    <input type="text" id="cardCvc" placeholder="CVC" style="flex:1;">
-                </div>
-                <button id="mockVisaPayBtn" class="btn-gold" style="width:100%; margin-top:12px;">دفع عبر البطاقة</button>
-            </div>
-        </div>
-        <small style="color:#aaa;">محاكاة آمنة | سيتم تفعيل الخدمة فوراً مع مكافأة نقاط 10%</small>
-    </div>
-</div>
-
-<script>
-    // ------------------- بيانات الخدمات --------------------
-    const SERVICES = {
-        instagram: [
-            { name: "متابعون انستقرام", amount: "10k متابع", price: 39.99, pointsPrice: 39.99, freeBonus: "" },
-            { name: "متابعون انستقرام", amount: "5k متابع", price: 25.99, pointsPrice: 25.99, freeBonus: "" },
-            { name: "متابعون انستقرام", amount: "1000 متابع", price: 11.99, pointsPrice: 11.99, freeBonus: "" },
-            { name: "إعجابات انستقرام", amount: "1000 لايك", price: 5.99, pointsPrice: 5.99, freeBonus: "🎁 +500 لايك مجاناً" },
-            { name: "مشاهدات انستقرام", amount: "2500 مشاهد", price: 4.99, pointsPrice: 4.99, freeBonus: "" },
-            { name: "مشاهدات انستقرام", amount: "1350 مشاهد", price: 2.99, pointsPrice: 2.99, freeBonus: "" }
-        ],
-        tiktok: [
-            { name: "إعجابات تيك توك", amount: "2000 لايك", price: 17.99, pointsPrice: 17.99, freeBonus: "" },
-            { name: "إعجابات تيك توك", amount: "1100 لايك", price: 8.99, pointsPrice: 8.99, freeBonus: "" },
-            { name: "إعجابات تيك توك", amount: "700 لايك", price: 4.99, pointsPrice: 4.99, freeBonus: "" },
-            { name: "مشاهدات تيك توك", amount: "2500 مشاهد", price: 3.99, pointsPrice: 3.99, freeBonus: "🎬 +870 مشاهد مجانية" },
-            { name: "متابعون تيك توك", amount: "10k متابع", price: 44.99, pointsPrice: 44.99, freeBonus: "" },
-            { name: "متابعون تيك توك", amount: "5k متابع", price: 23.99, pointsPrice: 23.99, freeBonus: "" },
-            { name: "متابعون تيك توك", amount: "1000 متابع", price: 12.99, pointsPrice: 12.99, freeBonus: "" }
-        ],
-        free: [
-            { name: "حفظ انستغرام (Saves)", amount: "غير محدود مجاني", price: 0, pointsPrice: 0, freeBonus: "Free saves" },
-            { name: "مشاركات انستغرام (Shares)", amount: "مجاني", price: 0, freeBonus: "Free shares" },
-            { name: "مشاهدات ستوري انستغرام", amount: "مجاني", price: 0, freeBonus: "Story views" },
-            { name: "إعجابات يوتيوب", amount: "مجاني", price: 0, freeBonus: "YouTube likes" },
-            { name: "متابعين سبوتيفاي", amount: "مجاني", price: 0, freeBonus: "Spotify followers" },
-            { name: "تشغيل سبوتيفاي", amount: "مجاني", price: 0, freeBonus: "Spotify plays" },
-            { name: "حفظ سبوتيفاي", amount: "مجاني", price: 0, freeBonus: "Spotify saves" }
-        ]
-    };
-
-    // متغيرات جلسة
-    let currentUserPhone = null;
-    let currentUserIP = null;
-    let activeDiscount = 0;  // نسبة خصم 0-100
-    let selectedServiceForPayment = null;   // تخزين الخدمة عند الضغط على شراء بالدولار
-
-    // ------------------- دوال مساعدة IP -------------------
-    async function fetchIP() {
-        try {
-            const res = await fetch('https://api.ipify.org?format=json');
-            const data = await res.json();
-            return data.ip;
-        } catch(e) { return "0.0.0.0"; }
-    }
-
-    // ------------------- إدارة localStorage للمستخدمين -------------------
-    function loadUsers() {
-        let users = localStorage.getItem("arshaq_users");
-        if(!users) {
-            let defaultUser = { phone: "+966500000001", points: 250, ip: "", lastIP: "" };
-            localStorage.setItem("arshaq_users", JSON.stringify([defaultUser]));
-            return [defaultUser];
-        }
-        return JSON.parse(users);
-    }
-
-    function saveUsers(users) {
-        localStorage.setItem("arshaq_users", JSON.stringify(users));
-    }
-
-    function findUserByPhone(phone) {
-        let users = loadUsers();
-        return users.find(u => u.phone === phone);
-    }
-
-    function updateUserPoints(phone, newPoints, newIP = null) {
-        let users = loadUsers();
-        let idx = users.findIndex(u => u.phone === phone);
-        if(idx !== -1) {
-            users[idx].points = Math.max(0, newPoints);
-            if(newIP) users[idx].lastIP = newIP;
-            saveUsers(users);
-            if(currentUserPhone === phone) refreshUserUI();
-        } else {
-            // إنشاء مستخدم جديد
-            let newUser = { phone: phone, points: newPoints, ip: newIP || "", lastIP: newIP || "" };
-            users.push(newUser);
-            saveUsers(users);
-            if(currentUserPhone === phone) refreshUserUI();
-        }
-    }
-
-    function getUserPoints(phone) {
-        let user = findUserByPhone(phone);
-        return user ? user.points : 0;
-    }
-
-    async function initUser(phone) {
-        if(!phone) return false;
-        let ip = await fetchIP();
-        currentUserIP = ip;
-        let users = loadUsers();
-        let exist = users.find(u => u.phone === phone);
-        if(exist) {
-            exist.lastIP = ip;
-            saveUsers(users);
-            currentUserPhone = phone;
-        } else {
-            let newUser = { phone: phone, points: 0, ip: ip, lastIP: ip };
-            users.push(newUser);
-            saveUsers(users);
-            currentUserPhone = phone;
-        }
-        refreshUserUI();
-        return true;
-    }
-
-    function refreshUserUI() {
-        if(currentUserPhone) {
-            let pts = getUserPoints(currentUserPhone);
-            document.getElementById("userPointsSpan").innerText = pts;
-        } else {
-            document.getElementById("userPointsSpan").innerText = "0";
-        }
-    }
-
-    // إضافة نقاط للمستخدم (من admin او مكافأة)
-    function addPointsToUser(phone, pointsToAdd, reason = "reward") {
-        let current = getUserPoints(phone);
-        let newPoints = current + pointsToAdd;
-        updateUserPoints(phone, newPoints);
-        if(currentUserPhone === phone) refreshUserUI();
-        return newPoints;
-    }
-
-    // خصم نقاط
-    function deductPoints(phone, amount) {
-        let current = getUserPoints(phone);
-        if(current >= amount) {
-            updateUserPoints(phone, current - amount);
-            refreshUserUI();
-            return true;
-        }
-        return false;
-    }
-
-    // تطبيق الخصم
-    function applyDiscount(price) {
-        let discounted = price * (1 - activeDiscount/100);
-        return Math.round(discounted * 100) / 100;
-    }
-
-    // عرض رسالة نجاح الخدمة مع البونص المجاني
-    function processServiceOrder(serviceItem, paymentMethod, finalPricePaid = 0) {
-        let bonusMsg = "";
-        if(serviceItem.freeBonus && serviceItem.freeBonus.includes("+")) bonusMsg = `🎉 مكافأة: ${serviceItem.freeBonus}`;
-        if(serviceItem.amount === "2500 مشاهد" && serviceItem.name.includes("تيك توك")) bonusMsg = "🎬 +870 مشاهد إضافية مجانية (تمت الإضافة)";
-        if(serviceItem.name.includes("إعجابات انستقرام") && serviceItem.amount === "1000 لايك") bonusMsg = "❤️ +500 لايك مجاني هدية";
-        
-        let confirmMsg = `✅ تم شراء ${serviceItem.name} (${serviceItem.amount}) بنجاح عبر ${paymentMethod}. ${bonusMsg}`;
-        alert(confirmMsg);
-        // بعد الشراء بالدولار نضيف نقاط ولاء 10% من المبلغ المدفوع (بعد الخصم)
-        if(paymentMethod === "USD" && finalPricePaid > 0) {
-            let cashback = Math.floor(finalPricePaid * 0.1);
-            if(cashback > 0) {
-                addPointsToUser(currentUserPhone, cashback, "cashback");
-                alert(`🎁 مكافأة ولاء: ${cashback} نقطة تمت إضافتها إلى رصيدك (10% من قيمة الشراء)`);
-            }
-        }
-    }
-
-    // ------------------- عرض الخدمات -------------------
-    function renderServices() {
-        const instaDiv = document.getElementById("instagramServices");
-        const tiktokDiv = document.getElementById("tiktokServices");
-        const freeDiv = document.getElementById("freeServices");
-        instaDiv.innerHTML = "";
-        tiktokDiv.innerHTML = "";
-        freeDiv.innerHTML = "";
-
-        SERVICES.instagram.forEach(s => {
-            instaDiv.appendChild(createServiceCard(s, "instagram"));
-        });
-        SERVICES.tiktok.forEach(s => {
-            tiktokDiv.appendChild(createServiceCard(s, "tiktok"));
-        });
-        SERVICES.free.forEach(s => {
-            freeDiv.appendChild(createFreeCard(s));
-        });
-    }
-
-    function createServiceCard(service, platform) {
-        let div = document.createElement("div");
-        div.className = "service-card";
-        let originalPrice = service.price;
-        let afterDiscount = applyDiscount(originalPrice);
-        let pointsNeeded = applyDiscount(service.pointsPrice);
-        div.innerHTML = `
-            <div class="service-title">
-                <span>${service.name}</span>
-                <span class="price-tag">$${originalPrice}</span>
-            </div>
-            <div><i class="fas fa-chart-line"></i> ${service.amount}</div>
-            <div class="points-price"><i class="fas fa-star-of-life"></i> بالسعر بعد الخصم: $${afterDiscount.toFixed(2)} أو ${pointsNeeded.toFixed(2)} نقطة</div>
-            ${service.freeBonus ? `<div style="font-size:12px; color:#FFD966;">✨ ${service.freeBonus}</div>` : ""}
-            <div class="card-buttons">
-                <button class="btn-buy-money" data-service='${JSON.stringify(service)}' data-originalprice='${originalPrice}' data-finalprice='${afterDiscount}'>💵 شراء بالدولار</button>
-                <button class="btn-buy-points" data-service='${JSON.stringify(service)}' data-pointsneeded='${pointsNeeded}'>⭐ شراء بالنقاط (${pointsNeeded.toFixed(2)} نقطة)</button>
-            </div>
-        `;
-        const buyMoneyBtn = div.querySelector(".btn-buy-money");
-        const buyPointsBtn = div.querySelector(".btn-buy-points");
-        buyMoneyBtn.addEventListener("click", (e) => {
-            let serv = JSON.parse(buyMoneyBtn.dataset.service);
-            let finalPrice = parseFloat(buyMoneyBtn.dataset.finalprice);
-            if(!currentUserPhone) { alert("الرجاء تسجيل الدخول برقم الهاتف أولاً"); return; }
-            openPaymentModal(serv, finalPrice);
-        });
-        buyPointsBtn.addEventListener("click", (e) => {
-            if(!currentUserPhone) { alert("الرجاء تسجيل الدخول"); return; }
-            let serv = JSON.parse(buyPointsBtn.dataset.service);
-            let needed = parseFloat(buyPointsBtn.dataset.pointsneeded);
-            let currentPoints = getUserPoints(currentUserPhone);
-            if(currentPoints >= needed) {
-                if(confirm(`شراء ${serv.name} (${serv.amount}) بـ ${needed} نقطة. هل تريد المتابعة؟`)) {
-                    deductPoints(currentUserPhone, needed);
-                    processServiceOrder(serv, "نقاط", 0);
+        // المنتجات المطلوبة فقط
+        const premiumServices = {
+            "Instagram": {
+                "ig_followers": {
+                    name: "متابعين انستغرام",
+                    packages: [
+                        { text: "10K متابع - 39.99$", price: 39.99 },
+                        { text: "5K متابع - 25.99$", price: 25.99 },
+                        { text: "1000 متابع - 11.99$", price: 11.99 }
+                    ]
+                },
+                "ig_likes": {
+                    name: "إعجابات انستغرام",
+                    packages: [
+                        { text: "1000 لايك (+500 مجاناً) - 5.99$", price: 5.99 }
+                    ]
+                },
+                "ig_views": {
+                    name: "مشاهدات انستغرام",
+                    packages: [
+                        { text: "2500 مشاهدة - 4.99$", price: 4.99 },
+                        { text: "1350 مشاهدة - 2.99$", price: 2.99 }
+                    ]
                 }
-            } else {
-                alert(`رصيد النقاط غير كافٍ! تحتاج ${needed} نقطة، رصيدك ${currentPoints} نقطة. يمكنك شحن الرصيد عبر الإدارة أو شراء بالدولار.`);
+            },
+            "TikTok": {
+                "tk_followers": {
+                    name: "متابعون تيك توك",
+                    packages: [
+                        { text: "10K متابع - 44.99$", price: 44.99 },
+                        { text: "5K متابع - 23.99$", price: 23.99 },
+                        { text: "1000 متابع - 12.99$", price: 12.99 }
+                    ]
+                },
+                "tk_likes": {
+                    name: "إعجابات تيك توك",
+                    packages: [
+                        { text: "2000 لايك - 17.99$", price: 17.99 },
+                        { text: "1100 لايك - 8.99$", price: 8.99 },
+                        { text: "700 لايك - 4.99$", price: 4.99 }
+                    ]
+                },
+                "tk_views": {
+                    name: "مشاهدات تيك توك",
+                    packages: [
+                        { text: "2500 مشاهدة (+870 مجاناً) - 3.99$", price: 3.99 }
+                    ]
+                }
             }
+        };
+
+        // جلب الـ IP ورصيد النقاط
+        fetch('https://ipapi.co/json/').then(r => r.json()).then(data => {
+            userIP = data.ip;
+            sanitizedIP = userIP.replace(/\./g, '_');
+            document.getElementById('userIpDisplay').innerText = `IP: ${userIP}`;
+            loadBalance();
+        }).catch(err => {
+            document.getElementById('userBalance').innerText = "خطأ في الاتصال";
         });
-        return div;
-    }
 
-    function createFreeCard(service) {
-        let div = document.createElement("div");
-        div.className = "service-card";
-        div.innerHTML = `
-            <div class="service-title">
-                <span><i class="fas fa-gift"></i> ${service.name}</span>
-                <span class="badge-free">مجاني</span>
-            </div>
-            <div>${service.amount}</div>
-            <div style="color:#b9f6ca;">✨ ${service.freeBonus}</div>
-            <button class="btn-gold" style="margin-top:12px; width:100%;" id="freeBtn-${service.name.replace(/\s/g,'')}">احصل مجاناً</button>
-        `;
-        const freeBtn = div.querySelector("button");
-        freeBtn.addEventListener("click", () => {
-            if(!currentUserPhone) { alert("الرجاء تسجيل الدخول"); return; }
-            alert(`🎉 تم تفعيل ${service.name} (${service.amount}) بنجاح مجاناً! سيتم إضافته لحسابك فوراً.`);
+        function loadBalance() {
+            db.ref('senpa_points/' + sanitizedIP).on('value', snap => {
+                currentBalance = snap.val() ? parseFloat(snap.val().balance) : 0;
+                document.getElementById('userBalance').innerHTML = `${currentBalance.toFixed(2)} $`;
+            });
+        }
+
+        function updateServices() {
+            const platform = document.getElementById("platform").value;
+            const serviceSelect = document.getElementById("service");
+            serviceSelect.innerHTML = '<option value="" disabled selected>اختر الخدمة</option>';
+            document.getElementById("packageSelect").innerHTML = '<option value="" disabled selected>اختر الباقة</option>';
+            document.getElementById("priceDisplay").style.display = "none";
+            selectedPrice = 0;
+            
+            if (premiumServices[platform]) {
+                for (const [key, val] of Object.entries(premiumServices[platform])) {
+                    serviceSelect.innerHTML += `<option value="${key}">${val.name}</option>`;
+                }
+            }
+        }
+
+        function updatePackages() {
+            const platform = document.getElementById("platform").value;
+            const service = document.getElementById("service").value;
+            const packageSelect = document.getElementById("packageSelect");
+            packageSelect.innerHTML = '<option value="" disabled selected>اختر الباقة</option>';
+            document.getElementById("priceDisplay").style.display = "none";
+            selectedPrice = 0;
+
+            if (platform && service && premiumServices[platform][service]) {
+                premiumServices[platform][service].packages.forEach((pkg, index) => {
+                    packageSelect.innerHTML += `<option value="${index}" data-price="${pkg.price}">${pkg.text}</option>`;
+                });
+            }
+        }
+
+        function showPrice() {
+            const packageSelect = document.getElementById("packageSelect");
+            const option = packageSelect.options[packageSelect.selectedIndex];
+            selectedPrice = parseFloat(option.getAttribute("data-price"));
+            const display = document.getElementById("priceDisplay");
+            display.innerText = `المطلوب خصمه: ${selectedPrice}$`;
+            display.style.display = "block";
+        }
+
+        function showAlert(msg, type) {
+            const alertBox = document.getElementById("alertBox");
+            alertBox.textContent = msg; alertBox.className = `alert-msg alert-${type}`;
+            alertBox.style.display = "block"; setTimeout(() => { alertBox.style.display = "none"; }, 5000);
+        }
+
+        // معالجة الدفع والطلب
+        document.getElementById("premiumForm").addEventListener("submit", async function(e) {
+            e.preventDefault();
+            if (selectedPrice === 0) return;
+
+            const btn = document.getElementById("submitBtn");
+            
+            if (currentBalance < selectedPrice) {
+                showAlert("عذراً! رصيد نقاطك غير كافٍ لإتمام هذه العملية.", "error");
+                return;
+            }
+
+            btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الدفع...';
+
+            // خصم الرصيد
+            const newBalance = currentBalance - selectedPrice;
+            await db.ref('senpa_points/' + sanitizedIP).update({ balance: newBalance });
+
+            const platform = document.getElementById("platform").value;
+            const serviceName = document.getElementById("service").options[document.getElementById("service").selectedIndex].text;
+            const packageInfo = document.getElementById("packageSelect").options[document.getElementById("packageSelect").selectedIndex].text;
+            const targetLink = document.getElementById("targetLink").value.trim();
+
+            // حفظ الطلب
+            const newOrderRef = db.ref('senpa_orders/' + sanitizedIP).push();
+            await newOrderRef.set({
+                platform: platform, serviceName: serviceName, packageInfo: packageInfo,
+                target: targetLink, status: "pending", time: new Date().toLocaleString('en-US', { hour12: true }),
+                type: "premium", price: selectedPrice
+            });
+
+            // إرسال إشعار تليجرام
+            const message = `
+👑 *طلب رشق بريميوم جديد* 👑
+
+📱 *المنصة:* ${platform}
+⚙️ *الخدمة:* ${serviceName}
+📦 *الباقة:* ${packageInfo}
+💵 *المبلغ المخصوم:* ${selectedPrice}$
+🔗 *الرابط:* \`${targetLink}\`
+🌐 *ايبى العميل:* \`${userIP}\`
+`;
+            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chat_id: CHAT_ID, text: message, parse_mode: 'Markdown' })
+            }).then(() => {
+                showAlert("تم الدفع وتقديم الطلب بنجاح! شكراً لك.", "success");
+                document.getElementById("premiumForm").reset();
+                document.getElementById("priceDisplay").style.display = "none";
+            }).finally(() => {
+                btn.disabled = false; btn.innerHTML = '<i class="fas fa-coins"></i> دفع وتقديم الطلب';
+            });
         });
-        return div;
-    }
-
-    // ------------------- مودال الدفع بالدولار -------------------
-    let currentPaypalService = null;
-    let currentFinalPrice = 0;
-    function openPaymentModal(service, finalPriceUsd) {
-        currentPaypalService = service;
-        currentFinalPrice = finalPriceUsd;
-        const modal = document.getElementById("paymentModal");
-        const infoDiv = document.getElementById("modalServiceInfo");
-        infoDiv.innerHTML = `<strong>${service.name} (${service.amount})</strong><br>المبلغ: $${finalPriceUsd.toFixed(2)} ${activeDiscount>0?`(خصم ${activeDiscount}% مطبق)` : ""}`;
-        modal.style.display = "flex";
-        // اعادة تحميل paypal buttons
-        const paypalContainer = document.getElementById("paypal-button-container-modal");
-        paypalContainer.innerHTML = "";
-        if(window.paypal) {
-            paypal.Buttons({
-                createOrder: function(data, actions) {
-                    return actions.order.create({
-                        purchase_units: [{ amount: { value: currentFinalPrice.toFixed(2) } }]
-                    });
-                },
-                onApprove: function(data, actions) {
-                    return actions.order.capture().then(function(details) {
-                        alert(`✅ تم الدفع عبر PayPal بنجاح للمبلغ $${currentFinalPrice} من ${details.payer.name.given_name}`);
-                        processServiceOrder(currentPaypalService, "USD", currentFinalPrice);
-                        modal.style.display = "none";
-                    });
-                },
-                onError: function(err) { alert("حدث خطأ في PayPal"); }
-            }).render("#paypal-button-container-modal");
-        } else {
-            paypalContainer.innerHTML = "<div style='color:red'>PayPal SDK لم يتم تحميله</div>";
-        }
-    }
-
-    // محاكاة دفع فيزا
-    document.getElementById("mockVisaPayBtn")?.addEventListener("click", () => {
-        if(!currentPaypalService) return;
-        let cardNum = document.getElementById("cardNumber").value;
-        if(cardNum.length < 10) { alert("الرجاء إدخال رقم بطاقة صالح (محاكاة)"); return; }
-        alert(`✅ تمت محاكاة الدفع بالبطاقة بنجاح. تم شراء ${currentPaypalService.name} بقيمة $${currentFinalPrice}`);
-        processServiceOrder(currentPaypalService, "بطاقة فيزا", currentFinalPrice);
-        document.getElementById("paymentModal").style.display = "none";
-        document.getElementById("cardNumber").value = "";
-    });
-
-    // إغلاق المودال
-    document.getElementById("closeModalBtn")?.addEventListener("click", () => {
-        document.getElementById("paymentModal").style.display = "none";
-    });
-    window.onclick = (e) => { if(e.target === document.getElementById("paymentModal")) document.getElementById("paymentModal").style.display = "none"; };
-
-    // ------------------- إدارة الخصم -------------------
-    document.getElementById("applyCouponBtn")?.addEventListener("click", () => {
-        let code = document.getElementById("couponCode").value.trim();
-        if(code === "WELCOME10") {
-            activeDiscount = 10;
-            document.getElementById("discountMsg").innerHTML = "✅ خصم 10% مفعل على جميع الخدمات!";
-        } else if(code === "GOLD20") {
-            activeDiscount = 20;
-            document.getElementById("discountMsg").innerHTML = "🔥 خصم 20% فعال!";
-        } else if(code === "") {
-            activeDiscount = 0;
-            document.getElementById("discountMsg").innerHTML = "";
-        } else {
-            activeDiscount = 0;
-            document.getElementById("discountMsg").innerHTML = "❌ كود غير صالح";
-        }
-        renderServices();  // إعادة تحميل الخدمات لتحديث الأسعار
-    });
-
-    // ------------------- تسجيل الدخول -------------------
-    document.getElementById("loginBtn")?.addEventListener("click", async () => {
-        let phone = document.getElementById("phoneInput").value.trim();
-        if(phone === "") { alert("أدخل رقم الهاتف (بصمة الرقم)"); return; }
-        await initUser(phone);
-        alert(`مرحباً! رقمك: ${phone} - تم تسجيل IP الخاص بك بنجاح.`);
-        renderServices();  // تحديث الأزرار بناء على الرصيد
-    });
-
-    // تحميل أولي: محاولة مستخدم تجريبي
-    window.addEventListener("DOMContentLoaded", async () => {
-        renderServices();
-        let defaultPhone = "+966500000001";
-        document.getElementById("phoneInput").value = defaultPhone;
-        await initUser(defaultPhone);
-        // إذا كان الرصيد صفر نمنح هدية ترحيب 150 نقطة تجريبية (للتجربة)
-        let points = getUserPoints(defaultPhone);
-        if(points === 0) {
-            addPointsToUser(defaultPhone, 150, "welcome");
-        }
-        refreshUserUI();
-    });
-</script>
+    </script>
 </body>
 </html>
