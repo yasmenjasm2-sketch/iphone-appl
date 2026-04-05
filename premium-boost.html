@@ -45,11 +45,12 @@
         .wallet-box h3 { color: var(--primary); margin: 10px 0; font-size: 28px; text-shadow: var(--neon-glow); }
         
         .user-id-box {
-            font-size: 13px; color: #ccc; margin-top: 15px; background: rgba(0,0,0,0.5); 
-            padding: 8px 12px; border-radius: 8px; display: inline-flex; align-items: center; gap: 10px; border: 1px solid rgba(255,255,255,0.1);
+            font-size: 14px; color: #ccc; margin-top: 15px; background: rgba(0,0,0,0.5); 
+            padding: 10px 15px; border-radius: 8px; display: inline-flex; align-items: center; gap: 10px; border: 1px solid rgba(255,215,0,0.2);
+            font-family: 'Courier New', Courier, monospace; letter-spacing: 2px;
         }
-        .user-id-box strong { color: #fff; letter-spacing: 1px; }
-        .copy-btn { cursor: pointer; color: var(--primary); font-size: 16px; }
+        .user-id-box strong { color: #ffd700; text-shadow: 0 0 5px rgba(255,215,0,0.5); }
+        .copy-btn { cursor: pointer; color: var(--primary); font-size: 18px; }
         .copy-btn:hover { transform: scale(1.2); text-shadow: var(--neon-glow); }
 
         .btn-buy-balance {
@@ -104,8 +105,9 @@
             <h3 id="userBalance"><i class="fas fa-spinner fa-spin"></i></h3>
             
             <div class="user-id-box">
-                <span>معرف حسابك: <strong id="accountIdDisplay">جاري...</strong></span>
-                <i class="fas fa-copy copy-btn" onclick="copyId()" title="نسخ المعرف"></i>
+                <i class="fas fa-credit-card"></i>
+                <span id="accountIdDisplay">جاري إنشاء البطاقة...</span>
+                <i class="fas fa-copy copy-btn" onclick="copyId()" title="نسخ رقم البطاقة"></i>
             </div>
 
             <a href="https://www.instagram.com/6i99n?igsh=OHk4aDhtNDlyanA0" target="_blank" class="btn-buy-balance">
@@ -170,57 +172,52 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        let combinedID = "";
+        let userCardNumber = "";
         let currentBalance = 0;
         let selectedPrice = 0;
 
-        // توليد بصمة فريدة للجهاز لمنع التلاعب
-        function generateDeviceFingerprint() {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            ctx.textBaseline = "top"; ctx.font = "14px 'Arial'"; ctx.textBaseline = "alphabetic";
-            ctx.fillStyle = "#f60"; ctx.fillRect(125,1,62,20);
-            ctx.fillStyle = "#069"; ctx.fillText("Remas Premium VIP", 2, 15);
-            ctx.fillStyle = "rgba(102, 204, 0, 0.7)"; ctx.fillText("Remas Premium VIP", 4, 17);
-            const dataURL = canvas.toDataURL();
-            let hash = 0;
-            for (let i = 0; i < dataURL.length; i++) {
-                const char = dataURL.charCodeAt(i);
-                hash = ((hash << 5) - hash) + char;
-                hash = hash & hash;
+        // خوارزمية احترافية لتوليد بطاقة بنكية فريدة (16 رقم)
+        function generateUniqueBankCard() {
+            let card = "4"; // تبدأ بـ 4 مثل فيزا
+            for(let i=0; i<15; i++) {
+                card += Math.floor(Math.random() * 10).toString();
             }
-            return Math.abs(hash).toString(16).toUpperCase();
+            return card.match(/.{1,4}/g).join('-'); // تقسيمها لـ 4 أجزاء
         }
 
-        const devicePrint = generateDeviceFingerprint();
+        // تهيئة حساب المستخدم وبطاقته
+        function initUserCard() {
+            let savedCard = localStorage.getItem('remas_bank_card');
+            
+            if (!savedCard) {
+                savedCard = generateUniqueBankCard();
+                localStorage.setItem('remas_bank_card', savedCard);
+                // تسجيل البطاقة في قاعدة البيانات برصيد 0 افتراضي
+                db.ref('senpa_points/' + savedCard).set({ balance: 0, createdAt: new Date().toISOString() });
+            }
+            
+            userCardNumber = savedCard;
+            document.getElementById('accountIdDisplay').innerHTML = `<strong>${userCardNumber}</strong>`;
+            loadBalance(userCardNumber);
+        }
 
-        // جلب الـ IP ودمجه مع البصمة لإنشاء المعرف
-        fetch('https://ipapi.co/json/').then(r => r.json()).then(data => {
-            const sanitizedIP = data.ip.replace(/\./g, '_');
-            combinedID = sanitizedIP + "_" + devicePrint;
-            document.getElementById('accountIdDisplay').innerText = combinedID;
-            loadBalance(combinedID);
-        }).catch(err => {
-            combinedID = "UnknownIP_" + devicePrint;
-            document.getElementById('accountIdDisplay').innerText = combinedID;
-            loadBalance(combinedID);
-        });
+        // تشغيل نظام البطاقة فوراً
+        initUserCard();
 
-        function loadBalance(id) {
-            db.ref('senpa_points/' + id).on('value', snap => {
-                currentBalance = snap.val() ? parseFloat(snap.val().balance) : 0;
+        function loadBalance(cardId) {
+            db.ref('senpa_points/' + cardId).on('value', snap => {
+                currentBalance = snap.val() && snap.val().balance ? parseFloat(snap.val().balance) : 0;
                 document.getElementById('userBalance').innerHTML = `${currentBalance.toFixed(2)} $`;
             });
         }
 
         function copyId() {
-            if(!combinedID || combinedID.includes("جاري")) return;
-            navigator.clipboard.writeText(combinedID).then(() => {
-                showAlert("تم نسخ معرف حسابك بنجاح! أرسله للإدارة عند طلب الرصيد.", "success");
+            if(!userCardNumber) return;
+            navigator.clipboard.writeText(userCardNumber).then(() => {
+                showAlert("تم نسخ رقم بطاقتك بنجاح! أرسله للإدارة عند طلب تعبئة الرصيد.", "success");
             });
         }
 
-        // المنتجات المطلوبة فقط
         const premiumServices = {
             "Instagram": {
                 "ig_followers": { name: "متابعين انستغرام", packages: [{ text: "10K متابع - 39.99$", price: 39.99 }, { text: "5K متابع - 25.99$", price: 25.99 }, { text: "1000 متابع - 11.99$", price: 11.99 }] },
@@ -277,38 +274,30 @@
             alertBox.style.display = "block"; setTimeout(() => { alertBox.style.display = "none"; }, 6000);
         }
 
-        // دالة فحص الروابط الذكية
         function isValidUrlForPlatform(url, platform) {
             try {
                 const urlObj = new URL(url);
                 const host = urlObj.hostname.toLowerCase();
-                if (platform === "Instagram") {
-                    return host.includes("instagram.com");
-                } else if (platform === "TikTok") {
-                    return host.includes("tiktok.com");
-                }
+                if (platform === "Instagram") return host.includes("instagram.com");
+                else if (platform === "TikTok") return host.includes("tiktok.com");
                 return false;
-            } catch (e) {
-                return false; // إذا لم يكن رابطاً حقيقياً
-            }
+            } catch (e) { return false; }
         }
 
-        // معالجة الدفع والطلب
         document.getElementById("premiumForm").addEventListener("submit", async function(e) {
             e.preventDefault();
-            if (selectedPrice === 0 || !combinedID) return;
+            if (selectedPrice === 0 || !userCardNumber) return;
 
             const platform = document.getElementById("platform").value;
             const targetLink = document.getElementById("targetLink").value.trim();
 
-            // فحص الرابط قبل أي شيء
             if (!isValidUrlForPlatform(targetLink, platform)) {
                 showAlert(`عذراً! الرابط المدخل غير صالح. يرجى إدخال رابط ${platform} صحيح.`, "error");
                 return;
             }
 
             if (currentBalance < selectedPrice) {
-                showAlert("رصيدك الحالي غير كافٍ لإتمام هذه العملية! تواصل معنا لشحن رصيدك.", "error");
+                showAlert("رصيدك الحالي غير كافٍ! يرجى التواصل مع الإدارة لتعبئة بطاقتك.", "error");
                 return;
             }
 
@@ -320,17 +309,17 @@
 
             // خصم الرصيد
             const newBalance = currentBalance - selectedPrice;
-            await db.ref('senpa_points/' + combinedID).update({ balance: newBalance });
+            await db.ref('senpa_points/' + userCardNumber).update({ balance: newBalance });
 
-            // حفظ الطلب
-            const newOrderRef = db.ref('senpa_orders/' + combinedID).push();
+            // حفظ الطلب باستخدام رقم البطاقة
+            const newOrderRef = db.ref('senpa_orders/' + userCardNumber).push();
             await newOrderRef.set({
                 platform: platform, serviceName: serviceName, packageInfo: packageInfo,
                 target: targetLink, status: "pending", time: new Date().toLocaleString('en-US', { hour12: true }),
                 type: "premium", price: selectedPrice
             });
 
-            // إرسال إشعار تليجرام للإدارة
+            // إرسال إشعار تليجرام
             const message = `
 👑 *طلب رشق بريميوم جديد* 👑
 
@@ -339,7 +328,7 @@
 📦 *الباقة:* ${packageInfo}
 💵 *المبلغ المخصوم:* ${selectedPrice}$
 🔗 *الرابط:* \`${targetLink}\`
-🆔 *معرف العميل:* \`${combinedID}\`
+💳 *بطاقة العميل:* \`${userCardNumber}\`
 `;
             fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
