@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الرشق بريميوم - طرق الدفع</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- مكتبة باي بال (للتجربة - استبدل كود الـ client-id الخاص بك هنا) -->
+    <script src="https://www.paypal.com/sdk/js?client-id=test&currency=USD"></script>
+
+    <style>
+        :root {
+            --primary: #ffd700; /* اللون الذهبي للبريميوم */
+            --bg-main: #050b14;
+            --bg-grad-1: #1a1025;
+            --bg-grad-2: #090a0f;
+            --card-bg: rgba(20, 25, 40, 0.8);
+            --glass-border: rgba(255, 215, 0, 0.3);
+            --text-main: #f8fafc;
+            --neon-glow: 0 0 15px rgba(255, 215, 0, 0.4);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
+
+        body {
+            background: radial-gradient(circle at top right, var(--bg-grad-1), var(--bg-grad-2), var(--bg-main));
+            color: var(--text-main);
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh;
+        }
+
+        .payment-container {
+            width: 100%; max-width: 500px; padding: 30px;
+            background: var(--card-bg); backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border); border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8), var(--neon-glow);
+            text-align: center;
+        }
+
+        .header-title { font-size: 24px; font-weight: bold; color: var(--primary); margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .description { font-size: 14px; color: #aaa; margin-bottom: 30px; }
+
+        .payment-methods { display: flex; flex-direction: column; gap: 20px; }
+
+        .method-card {
+            background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 15px; padding: 20px; transition: 0.3s;
+        }
+        .method-card:hover { border-color: var(--primary); }
+
+        .method-title { font-size: 18px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+
+        /* نموذج الفيزا */
+        .visa-form input {
+            width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.2); background: transparent; color: white; text-align: center;
+        }
+        .visa-form input:focus { outline: none; border-color: var(--primary); }
+        .visa-row { display: flex; gap: 10px; }
+        .btn-pay {
+            width: 100%; padding: 12px; border-radius: 8px; border: none; font-weight: bold; font-size: 16px;
+            background: linear-gradient(45deg, #ffd700, #ff8c00); color: black; cursor: pointer; transition: 0.3s;
+        }
+        .btn-pay:hover { box-shadow: var(--neon-glow); transform: translateY(-2px); }
+
+        .back-btn {
+            display: inline-block; margin-top: 25px; color: white; text-decoration: none;
+            font-size: 14px; transition: 0.3s; border-bottom: 1px solid transparent;
+        }
+        .back-btn:hover { color: var(--primary); border-color: var(--primary); }
+    </style>
+</head>
+<body>
+
+    <div class="payment-container">
+        <div class="header-title">
+            <i class="fas fa-crown"></i> الرشق بريميوم
+        </div>
+        <div class="description">اختر وسيلة الدفع المناسبة لك للترقية والحصول على المميزات الحصرية.</div>
+
+        <div class="payment-methods">
+            
+            <!-- قسم باي بال -->
+            <div class="method-card">
+                <div class="method-title"><i class="fab fa-paypal" style="color:#003087;"></i> الدفع عبر PayPal</div>
+                <div id="paypal-button-container"></div>
+            </div>
+
+            <!-- قسم البطاقة الائتمانية (Visa / Mastercard) -->
+            <div class="method-card">
+                <div class="method-title"><i class="fas fa-credit-card" style="color:#1a1f71;"></i> الدفع عبر البطاقة (Visa)</div>
+                <div class="visa-form">
+                    <input type="text" placeholder="الاسم على البطاقة" required>
+                    <input type="text" placeholder="رقم البطاقة" maxlength="16" required>
+                    <div class="visa-row">
+                        <input type="text" placeholder="MM/YY" maxlength="5" required>
+                        <input type="text" placeholder="CVC" maxlength="3" required>
+                    </div>
+                    <button class="btn-pay" onclick="alert('سيتم ربط بوابة الدفع هنا لاحقاً.')">تأكيد الدفع</button>
+                </div>
+            </div>
+
+        </div>
+
+        <a href="index.html" class="back-btn"><i class="fas fa-arrow-right"></i> العودة للرئيسية</a>
+    </div>
+
+    <script>
+        // إعداد أزرار الدفع الخاصة بـ PayPal
+        paypal.Buttons({
+            createOrder: function(data, actions) {
+                return actions.order.create({
+                    purchase_units: [{
+                        amount: {
+                            value: '9.99' // ضع سعر الباقة هنا
+                        }
+                    }]
+                });
+            },
+            onApprove: function(data, actions) {
+                return actions.order.capture().then(function(details) {
+                    alert('تم الدفع بنجاح بواسطة ' + details.payer.name.given_name + '! سيتم تفعيل حسابك.');
+                    // يمكنك هنا توجيه المستخدم لصفحة النجاح أو تحديث قاعدة البيانات
+                });
+            }
+        }).render('#paypal-button-container');
+    </script>
+</body>
+</html>
