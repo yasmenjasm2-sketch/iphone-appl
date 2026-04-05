@@ -175,6 +175,33 @@
         let userCardNumber = "";
         let currentBalance = 0;
         let selectedPrice = 0;
+        let isVPNDetected = false;
+
+        // جلب الـ IP وفحص الـ VPN المخادع
+        fetch('https://ipapi.co/json/').then(r => r.json()).then(data => {
+            // خوارزمية كشف الـ VPN البسيطة
+            const browserTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            const isp = (data.org || "").toLowerCase();
+            const suspiciousWords = ['hosting', 'cloud', 'datacenter', 'vpn', 'proxy', 'tor', 'digitalocean', 'aws', 'amazon', 'google', 'linode', 'ovh'];
+            
+            // الفحص الأول: اختلاف الوقت بين المتصفح وسيرفر الـ IP
+            if (data.timezone && browserTz !== data.timezone) {
+                isVPNDetected = true;
+            }
+            // الفحص الثاني: مزود الخدمة ينتمي لسيرفرات سحابية
+            if (suspiciousWords.some(word => isp.includes(word))) {
+                isVPNDetected = true;
+            }
+
+            if(isVPNDetected) {
+                showAlert("⚠️ تم اكتشاف استخدام (VPN/Proxy). يُرجى إيقافه وإعادة تحميل الصفحة لتتمكن من الطلب.", "error");
+                const btn = document.getElementById("submitBtn");
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-ban"></i> غير مسموح بالـ VPN';
+            }
+        }).catch(err => {
+            console.error("فشل في جلب البيانات.");
+        });
 
         // خوارزمية احترافية لتوليد بطاقة بنكية فريدة (16 رقم)
         function generateUniqueBankCard() {
@@ -286,6 +313,13 @@
 
         document.getElementById("premiumForm").addEventListener("submit", async function(e) {
             e.preventDefault();
+
+            // تحقق نهائي من الـ VPN 
+            if (isVPNDetected) {
+                showAlert("لا يمكنك الطلب أثناء استخدام VPN.", "error");
+                return;
+            }
+
             if (selectedPrice === 0 || !userCardNumber) return;
 
             const platform = document.getElementById("platform").value;
