@@ -63,6 +63,9 @@
         }
         input:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 5px rgba(242, 0, 255, 0.3); }
         textarea { height: 150px; direction: ltr; text-align: left; font-family: monospace; }
+        
+        /* تنسيق خاص لحقل البطاقة */
+        .card-input { font-family: 'Courier New', Courier, monospace; letter-spacing: 2px; text-align: center; font-size: 16px; color: #ffd700; }
 
         .btn {
             background: var(--primary); color: white; border: none; padding: 12px 20px;
@@ -104,21 +107,21 @@
     <div id="main-container">
 
         <div class="card" style="border-color: #ffd700;">
-            <h2 style="color: #ffd700; text-shadow: 0 0 15px rgba(255, 215, 0, 0.4);"><i class="fas fa-coins"></i> إدارة رصيد النقاط للعملاء (الرشق بريميوم)</h2>
+            <h2 style="color: #ffd700; text-shadow: 0 0 15px rgba(255, 215, 0, 0.4);"><i class="fas fa-coins"></i> إدارة أرصدة بطاقات العملاء</h2>
             <p style="color: #aaa; font-size: 13px; margin-bottom: 15px;">
-                قم بإدخال IP العميل لإضافة أو سحب نقاط (دولارات) من حسابه.
+                قم بإدخال رقم بطاقة العميل لإضافة أو سحب الرصيد (موجب للتعبئة، سالب للسحب).
             </p>
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <div class="form-group" style="flex: 1; min-width: 200px;">
-                    <label>IP العميل المستهدف</label>
-                    <input type="text" id="wallet-ip" placeholder="مثال: 192.168.1.1">
+                <div class="form-group" style="flex: 1; min-width: 250px;">
+                    <label><i class="fas fa-credit-card"></i> رقم بطاقة العميل المستهدف</label>
+                    <input type="text" id="wallet-card" class="card-input" placeholder="مثال: 4563-1234-5678-9012">
                 </div>
-                <div class="form-group" style="flex: 1; min-width: 200px;">
-                    <label>المبلغ المراد إضافته ($)</label>
-                    <input type="number" id="wallet-amount" placeholder="مثال: 10 أو -5 للسحب" step="0.01">
+                <div class="form-group" style="flex: 1; min-width: 150px;">
+                    <label>المبلغ ($)</label>
+                    <input type="number" id="wallet-amount" placeholder="مثال: 10 أو -5" step="0.01">
                 </div>
             </div>
-            <button class="btn btn-warning" onclick="chargeWallet()" id="btn-wallet"><i class="fas fa-wallet"></i> تنفيذ العملية لشحن الرصيد</button>
+            <button class="btn btn-warning" onclick="chargeWallet()" id="btn-wallet"><i class="fas fa-wallet"></i> تنفيذ العملية (تعبئة/سحب)</button>
         </div>
 
         <div class="card">
@@ -127,7 +130,7 @@
                 <table id="orders-table">
                     <thead>
                         <tr>
-                            <th>العميل / الوقت</th>
+                            <th>رقم البطاقة / الوقت</th>
                             <th>المنصة والخدمة</th>
                             <th>الباقة</th>
                             <th>الرابط / المعرف</th>
@@ -248,32 +251,32 @@
             loadOrders(); 
         }
 
-        // ---------- نظام شحن محفظة النقاط ----------
+        // ---------- نظام شحن محفظة البطاقات ----------
         function chargeWallet() {
             if (!isAuthenticated) return;
-            const ipInput = document.getElementById('wallet-ip').value.trim();
+            const cardInput = document.getElementById('wallet-card').value.trim();
             const amountInput = parseFloat(document.getElementById('wallet-amount').value);
             const btn = document.getElementById('btn-wallet');
 
-            if (!ipInput || isNaN(amountInput)) return alert("الرجاء إدخال IP صحيح ومبلغ الشحن!");
+            if (!cardInput || isNaN(amountInput)) return alert("الرجاء إدخال رقم بطاقة صحيح ومبلغ!");
 
-            const sanitizedIP = ipInput.replace(/\./g, '_');
             btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> جاري التنفيذ...";
             
-            const ref = db.ref('senpa_points/' + sanitizedIP);
+            const ref = db.ref('senpa_points/' + cardInput);
             ref.once('value', snap => {
-                let currentBalance = snap.val() ? parseFloat(snap.val().balance) : 0;
+                let currentBalance = snap.val() && snap.val().balance ? parseFloat(snap.val().balance) : 0;
                 let newBalance = currentBalance + amountInput;
                 
                 ref.update({ balance: newBalance }).then(() => {
-                    alert(`تمت العملية بنجاح! الرصيد الجديد لـ ${ipInput} هو: ${newBalance.toFixed(2)}$`);
+                    const actionType = amountInput >= 0 ? "تعبئة" : "سحب";
+                    alert(`تمت عملية الـ ${actionType} بنجاح! الرصيد الجديد للبطاقة ${cardInput} هو: ${newBalance.toFixed(2)}$`);
                     document.getElementById('wallet-amount').value = '';
-                    btn.innerHTML = "<i class='fas fa-wallet'></i> تنفيذ العملية لشحن الرصيد";
+                    btn.innerHTML = "<i class='fas fa-wallet'></i> تنفيذ العملية (تعبئة/سحب)";
                 });
             });
         }
 
-        // ---------- قسم إدارة الطلبات ----------
+        // ---------- قسم إدارة الطلبات بالاعتماد على البطاقة ----------
         function loadOrders() {
             if (!isAuthenticated) return;
             db.ref('senpa_orders').on('value', snap => {
@@ -282,11 +285,11 @@
                 
                 let allOrders = [];
                 snap.forEach(userNode => {
-                    const ip = userNode.key;
+                    const userCard = userNode.key; // مفتاح المستخدم الآن هو رقم البطاقة
                     userNode.forEach(orderNode => {
                         const order = orderNode.val();
                         order.id = orderNode.key;
-                        order.sanitizedIP = ip;
+                        order.cardId = userCard;
                         allOrders.push(order);
                     });
                 });
@@ -300,16 +303,18 @@
 
                 allOrders.forEach(data => {
                     let statusBadge = '';
-                    if (data.status === 'completed') statusBadge = '<span class="status-badge bg-completed"><i class="fas fa-check-circle"></i> مكتمل</span>';
-                    else if (data.status === 'rejected') statusBadge = '<span class="status-badge bg-rejected"><i class="fas fa-times-circle"></i> مرفوض</span>';
+                    if (data.status === 'completed') statusBadge = '<span class="status-badge bg-completed"><i class="fas fa-check-circle"></i> تم التنفيذ</span>';
+                    else if (data.status === 'rejected') statusBadge = '<span class="status-badge bg-rejected"><i class="fas fa-times-circle"></i> طلب مرفوض</span>';
                     else statusBadge = '<span class="status-badge bg-pending"><i class="fas fa-clock"></i> قيد الانتظار</span>';
 
-                    const typeTag = data.type === "premium" ? '<br><span style="color: gold; font-size: 11px;"><i class="fas fa-crown"></i> مدفوع بالنقط</span>' : '<br><span style="color: #00f2fe; font-size: 11px;">عادي</span>';
+                    const typeTag = data.type === "premium" ? '<br><span style="color: gold; font-size: 11px;"><i class="fas fa-crown"></i> مدفوع بالبطاقة</span>' : '<br><span style="color: #00f2fe; font-size: 11px;">عادي</span>';
 
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
                         <td>
-                            <div style="color: #fff; font-weight: bold;">${escapeHTML(data.ip || data.sanitizedIP.replace(/_/g, '.'))}</div>
+                            <div style="color: #ffd700; font-family: 'Courier New', monospace; font-weight: bold; font-size: 13px;">
+                                <i class="fas fa-credit-card"></i> ${escapeHTML(data.cardId)}
+                            </div>
                             <div style="font-size: 11px; color: #888; margin-top: 5px;">${escapeHTML(data.time || '')}</div>
                             ${typeTag}
                         </td>
@@ -321,10 +326,10 @@
                         <td><a href="${escapeHTML(data.target || '#')}" target="_blank"><i class="fas fa-external-link-alt"></i> فتح</a></td>
                         <td>${statusBadge}</td>
                         <td>
-                            <button class="btn btn-sm btn-success" onclick="updateOrderStatus('${data.sanitizedIP}', '${data.id}', 'completed')" title="مكتمل"><i class="fas fa-check"></i></button>
-                            <button class="btn btn-sm btn-danger" onclick="updateOrderStatus('${data.sanitizedIP}', '${data.id}', 'rejected')" title="مرفوض"><i class="fas fa-times"></i></button>
-                            <button class="btn btn-sm btn-warning" onclick="updateOrderStatus('${data.sanitizedIP}', '${data.id}', 'pending')" title="قيد الانتظار"><i class="fas fa-clock"></i></button>
-                            <button class="btn btn-sm btn-dark" onclick="deleteOrder('${data.sanitizedIP}', '${data.id}')" title="حذف نهائي"><i class="fas fa-trash"></i></button>
+                            <button class="btn btn-sm btn-success" onclick="updateOrderStatus('${data.cardId}', '${data.id}', 'completed')" title="تنفيذ الطلب"><i class="fas fa-check"></i></button>
+                            <button class="btn btn-sm btn-danger" onclick="updateOrderStatus('${data.cardId}', '${data.id}', 'rejected')" title="رفض الطلب"><i class="fas fa-times"></i></button>
+                            <button class="btn btn-sm btn-warning" onclick="updateOrderStatus('${data.cardId}', '${data.id}', 'pending')" title="قيد الانتظار"><i class="fas fa-clock"></i></button>
+                            <button class="btn btn-sm btn-dark" onclick="deleteOrder('${data.cardId}', '${data.id}')" title="إزالة نهائية"><i class="fas fa-trash"></i></button>
                         </td>
                     `;
                     list.appendChild(tr);
@@ -332,14 +337,14 @@
             });
         }
 
-        function updateOrderStatus(ip, orderId, status) {
+        function updateOrderStatus(cardId, orderId, status) {
             if(!isAuthenticated) return;
-            db.ref(`senpa_orders/${ip}/${orderId}`).update({ status: status });
+            db.ref(`senpa_orders/${cardId}/${orderId}`).update({ status: status });
         }
 
-        function deleteOrder(ip, orderId) {
+        function deleteOrder(cardId, orderId) {
             if(!isAuthenticated) return;
-            if(confirm('هل أنت متأكد من الحذف النهائي للطلب؟')) db.ref(`senpa_orders/${ip}/${orderId}`).remove();
+            if(confirm('هل أنت متأكد من الحذف النهائي للطلب؟')) db.ref(`senpa_orders/${cardId}/${orderId}`).remove();
         }
 
         function refreshScriptsList() {
