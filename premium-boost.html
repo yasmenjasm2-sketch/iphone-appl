@@ -39,21 +39,37 @@
         .header-title p { color: #aaa; font-size: 14px; margin-top: 5px; }
 
         .wallet-box {
-            background: rgba(255, 215, 0, 0.1); border: 1px solid var(--primary); border-radius: 12px;
-            padding: 15px; text-align: center; margin-bottom: 20px;
+            background: rgba(255, 215, 0, 0.05); border: 1px solid var(--primary); border-radius: 12px;
+            padding: 20px; text-align: center; margin-bottom: 20px; position: relative;
         }
-        .wallet-box h3 { color: var(--primary); margin: 0; font-size: 22px; }
-        .wallet-box p { margin: 5px 0 0; font-size: 12px; color: #ccc; }
+        .wallet-box h3 { color: var(--primary); margin: 10px 0; font-size: 28px; text-shadow: var(--neon-glow); }
+        
+        .user-id-box {
+            font-size: 13px; color: #ccc; margin-top: 15px; background: rgba(0,0,0,0.5); 
+            padding: 8px 12px; border-radius: 8px; display: inline-flex; align-items: center; gap: 10px; border: 1px solid rgba(255,255,255,0.1);
+        }
+        .user-id-box strong { color: #fff; letter-spacing: 1px; }
+        .copy-btn { cursor: pointer; color: var(--primary); font-size: 16px; }
+        .copy-btn:hover { transform: scale(1.2); text-shadow: var(--neon-glow); }
+
+        .btn-buy-balance {
+            display: inline-flex; justify-content: center; align-items: center; gap: 8px;
+            margin-top: 15px; padding: 10px 20px; width: 100%;
+            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+            color: white; text-decoration: none; border-radius: 10px; font-size: 15px; font-weight: bold;
+        }
+        .btn-buy-balance:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(220, 39, 67, 0.4); }
 
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; margin-bottom: 8px; font-weight: bold; font-size: 14px; color: var(--primary); }
         
         select, input {
             width: 100%; padding: 12px 15px; border-radius: 10px; border: 1px solid var(--glass-border);
-            background: var(--input-bg); color: var(--text-main); font-size: 15px; outline: none;
+            background: var(--input-bg); color: var(--text-main); font-size: 15px; outline: none; direction: ltr; text-align: right;
         }
         select:focus, input:focus { border-color: var(--primary); box-shadow: var(--neon-glow); }
         select option { background: var(--bg-main); color: var(--text-main); }
+        input::placeholder { text-align: right; }
 
         .price-display {
             text-align: center; font-size: 20px; font-weight: bold; color: #10b981; margin: 15px 0; display: none;
@@ -84,10 +100,17 @@
         </div>
 
         <div class="wallet-box">
-            <p>رصيدك الحالي (النقاط)</p>
+            <p>الرصيد المتاح</p>
             <h3 id="userBalance"><i class="fas fa-spinner fa-spin"></i></h3>
-            <p style="font-size: 10px;">(يتم شحن الرصيد من قبل الإدارة عبر الـ IP الخاص بك)</p>
-            <p style="font-size: 11px; color: #888;" id="userIpDisplay"></p>
+            
+            <div class="user-id-box">
+                <span>معرف حسابك: <strong id="accountIdDisplay">جاري...</strong></span>
+                <i class="fas fa-copy copy-btn" onclick="copyId()" title="نسخ المعرف"></i>
+            </div>
+
+            <a href="https://www.instagram.com/6i99n?igsh=OHk4aDhtNDlyanA0" target="_blank" class="btn-buy-balance">
+                <i class="fab fa-instagram"></i> تواصل لشراء رصيد
+            </a>
         </div>
 
         <div id="alertBox" class="alert-msg"></div>
@@ -118,13 +141,13 @@
 
             <div class="form-group">
                 <label><i class="fas fa-link"></i> الرابط أو المعرف</label>
-                <input type="text" id="targetLink" required placeholder="ضع الرابط هنا">
+                <input type="url" id="targetLink" required placeholder="ضع الرابط الصحيح هنا">
             </div>
 
             <div class="price-display" id="priceDisplay">الإجمالي: 0.00$</div>
 
             <button type="submit" class="btn-pay" id="submitBtn">
-                <i class="fas fa-coins"></i> دفع وتقديم الطلب
+                <i class="fas fa-coins"></i> تقديم الطلب وخصم الرصيد
             </button>
         </form>
 
@@ -147,78 +170,69 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        let userIP = "";
-        let sanitizedIP = "";
+        let combinedID = "";
         let currentBalance = 0;
         let selectedPrice = 0;
 
-        // المنتجات المطلوبة فقط
-        const premiumServices = {
-            "Instagram": {
-                "ig_followers": {
-                    name: "متابعين انستغرام",
-                    packages: [
-                        { text: "10K متابع - 39.99$", price: 39.99 },
-                        { text: "5K متابع - 25.99$", price: 25.99 },
-                        { text: "1000 متابع - 11.99$", price: 11.99 }
-                    ]
-                },
-                "ig_likes": {
-                    name: "إعجابات انستغرام",
-                    packages: [
-                        { text: "1000 لايك (+500 مجاناً) - 5.99$", price: 5.99 }
-                    ]
-                },
-                "ig_views": {
-                    name: "مشاهدات انستغرام",
-                    packages: [
-                        { text: "2500 مشاهدة - 4.99$", price: 4.99 },
-                        { text: "1350 مشاهدة - 2.99$", price: 2.99 }
-                    ]
-                }
-            },
-            "TikTok": {
-                "tk_followers": {
-                    name: "متابعون تيك توك",
-                    packages: [
-                        { text: "10K متابع - 44.99$", price: 44.99 },
-                        { text: "5K متابع - 23.99$", price: 23.99 },
-                        { text: "1000 متابع - 12.99$", price: 12.99 }
-                    ]
-                },
-                "tk_likes": {
-                    name: "إعجابات تيك توك",
-                    packages: [
-                        { text: "2000 لايك - 17.99$", price: 17.99 },
-                        { text: "1100 لايك - 8.99$", price: 8.99 },
-                        { text: "700 لايك - 4.99$", price: 4.99 }
-                    ]
-                },
-                "tk_views": {
-                    name: "مشاهدات تيك توك",
-                    packages: [
-                        { text: "2500 مشاهدة (+870 مجاناً) - 3.99$", price: 3.99 }
-                    ]
-                }
+        // توليد بصمة فريدة للجهاز لمنع التلاعب
+        function generateDeviceFingerprint() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.textBaseline = "top"; ctx.font = "14px 'Arial'"; ctx.textBaseline = "alphabetic";
+            ctx.fillStyle = "#f60"; ctx.fillRect(125,1,62,20);
+            ctx.fillStyle = "#069"; ctx.fillText("Remas Premium VIP", 2, 15);
+            ctx.fillStyle = "rgba(102, 204, 0, 0.7)"; ctx.fillText("Remas Premium VIP", 4, 17);
+            const dataURL = canvas.toDataURL();
+            let hash = 0;
+            for (let i = 0; i < dataURL.length; i++) {
+                const char = dataURL.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash;
             }
-        };
+            return Math.abs(hash).toString(16).toUpperCase();
+        }
 
-        // جلب الـ IP ورصيد النقاط
+        const devicePrint = generateDeviceFingerprint();
+
+        // جلب الـ IP ودمجه مع البصمة لإنشاء المعرف
         fetch('https://ipapi.co/json/').then(r => r.json()).then(data => {
-            userIP = data.ip;
-            sanitizedIP = userIP.replace(/\./g, '_');
-            document.getElementById('userIpDisplay').innerText = `IP: ${userIP}`;
-            loadBalance();
+            const sanitizedIP = data.ip.replace(/\./g, '_');
+            combinedID = sanitizedIP + "_" + devicePrint;
+            document.getElementById('accountIdDisplay').innerText = combinedID;
+            loadBalance(combinedID);
         }).catch(err => {
-            document.getElementById('userBalance').innerText = "خطأ في الاتصال";
+            combinedID = "UnknownIP_" + devicePrint;
+            document.getElementById('accountIdDisplay').innerText = combinedID;
+            loadBalance(combinedID);
         });
 
-        function loadBalance() {
-            db.ref('senpa_points/' + sanitizedIP).on('value', snap => {
+        function loadBalance(id) {
+            db.ref('senpa_points/' + id).on('value', snap => {
                 currentBalance = snap.val() ? parseFloat(snap.val().balance) : 0;
                 document.getElementById('userBalance').innerHTML = `${currentBalance.toFixed(2)} $`;
             });
         }
+
+        function copyId() {
+            if(!combinedID || combinedID.includes("جاري")) return;
+            navigator.clipboard.writeText(combinedID).then(() => {
+                showAlert("تم نسخ معرف حسابك بنجاح! أرسله للإدارة عند طلب الرصيد.", "success");
+            });
+        }
+
+        // المنتجات المطلوبة فقط
+        const premiumServices = {
+            "Instagram": {
+                "ig_followers": { name: "متابعين انستغرام", packages: [{ text: "10K متابع - 39.99$", price: 39.99 }, { text: "5K متابع - 25.99$", price: 25.99 }, { text: "1000 متابع - 11.99$", price: 11.99 }] },
+                "ig_likes": { name: "إعجابات انستغرام", packages: [{ text: "1000 لايك (+500 مجاناً) - 5.99$", price: 5.99 }] },
+                "ig_views": { name: "مشاهدات انستغرام", packages: [{ text: "2500 مشاهدة - 4.99$", price: 4.99 }, { text: "1350 مشاهدة - 2.99$", price: 2.99 }] }
+            },
+            "TikTok": {
+                "tk_followers": { name: "متابعون تيك توك", packages: [{ text: "10K متابع - 44.99$", price: 44.99 }, { text: "5K متابع - 23.99$", price: 23.99 }, { text: "1000 متابع - 12.99$", price: 12.99 }] },
+                "tk_likes": { name: "إعجابات تيك توك", packages: [{ text: "2000 لايك - 17.99$", price: 17.99 }, { text: "1100 لايك - 8.99$", price: 8.99 }, { text: "700 لايك - 4.99$", price: 4.99 }] },
+                "tk_views": { name: "مشاهدات تيك توك", packages: [{ text: "2500 مشاهدة (+870 مجاناً) - 3.99$", price: 3.99 }] }
+            }
+        };
 
         function updateServices() {
             const platform = document.getElementById("platform").value;
@@ -227,7 +241,6 @@
             document.getElementById("packageSelect").innerHTML = '<option value="" disabled selected>اختر الباقة</option>';
             document.getElementById("priceDisplay").style.display = "none";
             selectedPrice = 0;
-            
             if (premiumServices[platform]) {
                 for (const [key, val] of Object.entries(premiumServices[platform])) {
                     serviceSelect.innerHTML += `<option value="${key}">${val.name}</option>`;
@@ -242,7 +255,6 @@
             packageSelect.innerHTML = '<option value="" disabled selected>اختر الباقة</option>';
             document.getElementById("priceDisplay").style.display = "none";
             selectedPrice = 0;
-
             if (platform && service && premiumServices[platform][service]) {
                 premiumServices[platform][service].packages.forEach((pkg, index) => {
                     packageSelect.innerHTML += `<option value="${index}" data-price="${pkg.price}">${pkg.text}</option>`;
@@ -262,41 +274,63 @@
         function showAlert(msg, type) {
             const alertBox = document.getElementById("alertBox");
             alertBox.textContent = msg; alertBox.className = `alert-msg alert-${type}`;
-            alertBox.style.display = "block"; setTimeout(() => { alertBox.style.display = "none"; }, 5000);
+            alertBox.style.display = "block"; setTimeout(() => { alertBox.style.display = "none"; }, 6000);
+        }
+
+        // دالة فحص الروابط الذكية
+        function isValidUrlForPlatform(url, platform) {
+            try {
+                const urlObj = new URL(url);
+                const host = urlObj.hostname.toLowerCase();
+                if (platform === "Instagram") {
+                    return host.includes("instagram.com");
+                } else if (platform === "TikTok") {
+                    return host.includes("tiktok.com");
+                }
+                return false;
+            } catch (e) {
+                return false; // إذا لم يكن رابطاً حقيقياً
+            }
         }
 
         // معالجة الدفع والطلب
         document.getElementById("premiumForm").addEventListener("submit", async function(e) {
             e.preventDefault();
-            if (selectedPrice === 0) return;
+            if (selectedPrice === 0 || !combinedID) return;
 
-            const btn = document.getElementById("submitBtn");
-            
-            if (currentBalance < selectedPrice) {
-                showAlert("عذراً! رصيد نقاطك غير كافٍ لإتمام هذه العملية.", "error");
+            const platform = document.getElementById("platform").value;
+            const targetLink = document.getElementById("targetLink").value.trim();
+
+            // فحص الرابط قبل أي شيء
+            if (!isValidUrlForPlatform(targetLink, platform)) {
+                showAlert(`عذراً! الرابط المدخل غير صالح. يرجى إدخال رابط ${platform} صحيح.`, "error");
                 return;
             }
 
-            btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الدفع...';
+            if (currentBalance < selectedPrice) {
+                showAlert("رصيدك الحالي غير كافٍ لإتمام هذه العملية! تواصل معنا لشحن رصيدك.", "error");
+                return;
+            }
+
+            const btn = document.getElementById("submitBtn");
+            btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الخصم والتنفيذ...';
+
+            const serviceName = document.getElementById("service").options[document.getElementById("service").selectedIndex].text;
+            const packageInfo = document.getElementById("packageSelect").options[document.getElementById("packageSelect").selectedIndex].text;
 
             // خصم الرصيد
             const newBalance = currentBalance - selectedPrice;
-            await db.ref('senpa_points/' + sanitizedIP).update({ balance: newBalance });
-
-            const platform = document.getElementById("platform").value;
-            const serviceName = document.getElementById("service").options[document.getElementById("service").selectedIndex].text;
-            const packageInfo = document.getElementById("packageSelect").options[document.getElementById("packageSelect").selectedIndex].text;
-            const targetLink = document.getElementById("targetLink").value.trim();
+            await db.ref('senpa_points/' + combinedID).update({ balance: newBalance });
 
             // حفظ الطلب
-            const newOrderRef = db.ref('senpa_orders/' + sanitizedIP).push();
+            const newOrderRef = db.ref('senpa_orders/' + combinedID).push();
             await newOrderRef.set({
                 platform: platform, serviceName: serviceName, packageInfo: packageInfo,
                 target: targetLink, status: "pending", time: new Date().toLocaleString('en-US', { hour12: true }),
                 type: "premium", price: selectedPrice
             });
 
-            // إرسال إشعار تليجرام
+            // إرسال إشعار تليجرام للإدارة
             const message = `
 👑 *طلب رشق بريميوم جديد* 👑
 
@@ -305,17 +339,17 @@
 📦 *الباقة:* ${packageInfo}
 💵 *المبلغ المخصوم:* ${selectedPrice}$
 🔗 *الرابط:* \`${targetLink}\`
-🌐 *ايبى العميل:* \`${userIP}\`
+🆔 *معرف العميل:* \`${combinedID}\`
 `;
             fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ chat_id: CHAT_ID, text: message, parse_mode: 'Markdown' })
             }).then(() => {
-                showAlert("تم الدفع وتقديم الطلب بنجاح! شكراً لك.", "success");
+                showAlert("تم استلام طلبك وخصم الرصيد بنجاح! جاري التنفيذ.", "success");
                 document.getElementById("premiumForm").reset();
                 document.getElementById("priceDisplay").style.display = "none";
             }).finally(() => {
-                btn.disabled = false; btn.innerHTML = '<i class="fas fa-coins"></i> دفع وتقديم الطلب';
+                btn.disabled = false; btn.innerHTML = '<i class="fas fa-coins"></i> تقديم الطلب وخصم الرصيد';
             });
         });
     </script>
