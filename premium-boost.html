@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الرشق بريميوم - طرق الدفع</title>
+    <title>الرشق بريميوم - الخدمات وطرق الدفع</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <!-- مكتبة باي بال (للتجربة - استبدل كود الـ client-id الخاص بك هنا) -->
     <script src="https://www.paypal.com/sdk/js?client-id=test&currency=USD"></script>
 
     <style>
@@ -18,6 +17,8 @@
             --glass-border: rgba(255, 215, 0, 0.3);
             --text-main: #f8fafc;
             --neon-glow: 0 0 15px rgba(255, 215, 0, 0.4);
+            --success: #10b981;
+            --danger: #ef4444;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
@@ -25,105 +26,332 @@
         body {
             background: radial-gradient(circle at top right, var(--bg-grad-1), var(--bg-grad-2), var(--bg-main));
             color: var(--text-main);
-            display: flex; justify-content: center; align-items: center;
             min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
         }
 
+        /* شريط النقاط العلوي */
+        .top-bar {
+            width: 100%; max-width: 1200px; padding: 15px 30px;
+            background: var(--card-bg); border: 1px solid var(--glass-border);
+            border-radius: 15px; box-shadow: var(--neon-glow);
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 30px; backdrop-filter: blur(10px);
+        }
+        .brand { font-size: 24px; font-weight: bold; color: var(--primary); display: flex; align-items: center; gap: 10px; }
+        .points-wallet { background: rgba(0,0,0,0.5); padding: 8px 15px; border-radius: 10px; border: 1px solid var(--primary); font-weight: bold; display: flex; align-items: center; gap: 8px; }
+
+        /* شبكة الخدمات */
+        .category-title { width: 100%; max-width: 1200px; margin: 20px 0 10px; font-size: 22px; color: white; border-bottom: 2px solid var(--primary); padding-bottom: 10px; }
+        .services-grid {
+            width: 100%; max-width: 1200px; display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 40px;
+        }
+
+        .service-card {
+            background: var(--card-bg); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 15px; padding: 25px; transition: 0.3s; position: relative;
+            display: flex; flex-direction: column; justify-content: space-between;
+        }
+        .service-card:hover { border-color: var(--primary); box-shadow: var(--neon-glow); transform: translateY(-5px); }
+        .service-icon { font-size: 40px; margin-bottom: 15px; }
+        .ig-icon { color: #E1306C; }
+        .tt-icon { color: #00f2fe; text-shadow: 2px 2px #ff0050; }
+        .yt-icon { color: #ff0000; }
+        .sp-icon { color: #1DB954; }
+
+        .service-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; }
+        
+        .bonus-badge {
+            background: linear-gradient(45deg, #ff0050, #ff8c00); color: white;
+            font-size: 12px; padding: 4px 8px; border-radius: 8px; position: absolute; top: -10px; left: -10px; font-weight: bold; box-shadow: 0 5px 10px rgba(255,0,80,0.4);
+        }
+        .free-badge { background: var(--success); color: white; font-size: 12px; padding: 4px 8px; border-radius: 8px; position: absolute; top: 15px; left: 15px; font-weight: bold; }
+
+        select.package-select {
+            width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 8px;
+            background: rgba(0,0,0,0.6); color: white; border: 1px solid rgba(255,255,255,0.2); outline: none; font-size: 14px;
+        }
+        select.package-select:focus { border-color: var(--primary); }
+
+        .btn-buy {
+            width: 100%; padding: 12px; border-radius: 8px; border: none; font-weight: bold; font-size: 16px;
+            background: linear-gradient(45deg, var(--primary), #ff8c00); color: black; cursor: pointer; transition: 0.3s;
+        }
+        .btn-buy:hover { box-shadow: var(--neon-glow); opacity: 0.9; }
+        .btn-free { background: var(--success); color: white; }
+
+        /* نافذة الدفع (Modal) */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 1000;
+            justify-content: center; align-items: center;
+        }
         .payment-container {
             width: 100%; max-width: 500px; padding: 30px;
-            background: var(--card-bg); backdrop-filter: blur(15px);
-            border: 1px solid var(--glass-border); border-radius: 20px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8), var(--neon-glow);
-            text-align: center;
+            background: var(--card-bg); border: 1px solid var(--primary); border-radius: 20px;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.2); position: relative; max-height: 90vh; overflow-y: auto;
         }
+        .close-btn { position: absolute; top: 15px; left: 15px; background: none; border: none; color: white; font-size: 20px; cursor: pointer; }
+        .close-btn:hover { color: var(--danger); }
+        
+        .order-summary { background: rgba(0,0,0,0.5); padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center; border: 1px dashed var(--primary); }
+        .order-price { font-size: 24px; color: var(--primary); font-weight: bold; margin-top: 10px; }
 
-        .header-title { font-size: 24px; font-weight: bold; color: var(--primary); margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .description { font-size: 14px; color: #aaa; margin-bottom: 30px; }
-
-        .payment-methods { display: flex; flex-direction: column; gap: 20px; }
-
-        .method-card {
-            background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 15px; padding: 20px; transition: 0.3s;
-        }
+        .method-card { background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; padding: 20px; margin-bottom: 15px; transition: 0.3s; }
         .method-card:hover { border-color: var(--primary); }
+        .method-title { font-size: 18px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; justify-content: center; }
 
-        .method-title { font-size: 18px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; gap: 10px; }
-
-        /* نموذج الفيزا */
-        .visa-form input {
-            width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.2); background: transparent; color: white; text-align: center;
-        }
-        .visa-form input:focus { outline: none; border-color: var(--primary); }
+        .visa-form input { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: white; text-align: center; }
+        .visa-form input:focus { border-color: var(--primary); outline: none; }
         .visa-row { display: flex; gap: 10px; }
-        .btn-pay {
-            width: 100%; padding: 12px; border-radius: 8px; border: none; font-weight: bold; font-size: 16px;
-            background: linear-gradient(45deg, #ffd700, #ff8c00); color: black; cursor: pointer; transition: 0.3s;
-        }
-        .btn-pay:hover { box-shadow: var(--neon-glow); transform: translateY(-2px); }
 
-        .back-btn {
-            display: inline-block; margin-top: 25px; color: white; text-decoration: none;
-            font-size: 14px; transition: 0.3s; border-bottom: 1px solid transparent;
+        .btn-points {
+            width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--primary); font-weight: bold; font-size: 16px;
+            background: rgba(255, 215, 0, 0.1); color: var(--primary); cursor: pointer; transition: 0.3s; display: flex; justify-content: center; align-items: center; gap: 10px;
         }
-        .back-btn:hover { color: var(--primary); border-color: var(--primary); }
+        .btn-points:hover { background: var(--primary); color: black; box-shadow: var(--neon-glow); }
+
     </style>
 </head>
 <body>
 
-    <div class="payment-container">
-        <div class="header-title">
-            <i class="fas fa-crown"></i> الرشق بريميوم
+    <div class="top-bar">
+        <div class="brand"><i class="fas fa-crown"></i> الرشق بريميوم</div>
+        <div class="points-wallet">
+            <i class="fas fa-coins" style="color: var(--primary);"></i> 
+            النقاط: <span id="user-points">0.00</span> $
         </div>
-        <div class="description">اختر وسيلة الدفع المناسبة لك للترقية والحصول على المميزات الحصرية.</div>
+    </div>
 
-        <div class="payment-methods">
-            
-            <!-- قسم باي بال -->
+    <div class="category-title"><i class="fab fa-instagram ig-icon"></i> خدمات انستغرام (Instagram)</div>
+    <div class="services-grid">
+        <div class="service-card">
+            <i class="fab fa-instagram service-icon ig-icon"></i>
+            <div class="service-title">متابعين انستغرام</div>
+            <select class="package-select" id="ig-followers">
+                <option value="39.99">10,000 متابع - 39.99$</option>
+                <option value="25.99">5,000 متابع - 25.99$</option>
+                <option value="11.99">1,000 متابع - 11.99$</option>
+            </select>
+            <button class="btn-buy" onclick="openCheckout('متابعين انستغرام', 'ig-followers')">شراء الآن</button>
+        </div>
+
+        <div class="service-card">
+            <div class="bonus-badge">🎁 +500 لايك مجاناً</div>
+            <i class="fas fa-heart service-icon ig-icon"></i>
+            <div class="service-title">إعجابات انستغرام</div>
+            <select class="package-select" id="ig-likes">
+                <option value="5.99">1,000 لايك (+500 مجاناً) - 5.99$</option>
+            </select>
+            <button class="btn-buy" onclick="openCheckout('إعجابات انستغرام', 'ig-likes')">شراء الآن</button>
+        </div>
+
+        <div class="service-card">
+            <i class="fas fa-eye service-icon ig-icon"></i>
+            <div class="service-title">مشاهدات انستغرام</div>
+            <select class="package-select" id="ig-views">
+                <option value="4.99">2,500 مشاهدة - 4.99$</option>
+                <option value="2.99">1,350 مشاهدة - 2.99$</option>
+            </select>
+            <button class="btn-buy" onclick="openCheckout('مشاهدات انستغرام', 'ig-views')">شراء الآن</button>
+        </div>
+    </div>
+
+    <div class="category-title"><i class="fab fa-tiktok tt-icon"></i> خدمات تيك توك (TikTok)</div>
+    <div class="services-grid">
+        <div class="service-card">
+            <i class="fab fa-tiktok service-icon tt-icon"></i>
+            <div class="service-title">متابعين تيك توك</div>
+            <select class="package-select" id="tt-followers">
+                <option value="44.99">10,000 متابع - 44.99$</option>
+                <option value="23.99">5,000 متابع - 23.99$</option>
+                <option value="12.99">1,000 متابع - 12.99$</option>
+            </select>
+            <button class="btn-buy" onclick="openCheckout('متابعين تيك توك', 'tt-followers')">شراء الآن</button>
+        </div>
+
+        <div class="service-card">
+            <i class="fas fa-heart service-icon tt-icon"></i>
+            <div class="service-title">إعجابات تيك توك</div>
+            <select class="package-select" id="tt-likes">
+                <option value="17.99">2,000 لايك - 17.99$</option>
+                <option value="8.99">1,100 لايك - 8.99$</option>
+                <option value="4.99">700 لايك - 4.99$</option>
+            </select>
+            <button class="btn-buy" onclick="openCheckout('إعجابات تيك توك', 'tt-likes')">شراء الآن</button>
+        </div>
+
+        <div class="service-card">
+            <div class="bonus-badge">🎁 +870 مشاهدة مجاناً</div>
+            <i class="fas fa-eye service-icon tt-icon"></i>
+            <div class="service-title">مشاهدات تيك توك</div>
+            <select class="package-select" id="tt-views">
+                <option value="3.99">2,500 مشاهدة (+870 مجاناً) - 3.99$</option>
+            </select>
+            <button class="btn-buy" onclick="openCheckout('مشاهدات تيك توك', 'tt-views')">شراء الآن</button>
+        </div>
+    </div>
+
+    <div class="category-title"><i class="fas fa-gift" style="color: var(--success);"></i> الخدمات المجانية (100% Free)</div>
+    <div class="services-grid">
+        
+        <div class="service-card" style="border-color: var(--success);">
+            <div class="free-badge">مجاني</div>
+            <i class="fab fa-instagram service-icon ig-icon"></i>
+            <div class="service-title">خدمات انستا المجانية</div>
+            <select class="package-select" id="free-ig">
+                <option value="0">Instagram Saves</option>
+                <option value="0">Instagram Shares</option>
+                <option value="0">Instagram Story Views</option>
+            </select>
+            <button class="btn-buy btn-free" onclick="claimFree('free-ig')">احصل عليها الآن</button>
+        </div>
+
+        <div class="service-card" style="border-color: var(--success);">
+            <div class="free-badge">مجاني</div>
+            <i class="fab fa-youtube service-icon yt-icon"></i>
+            <div class="service-title">خدمات يوتيوب المجانية</div>
+            <select class="package-select" id="free-yt">
+                <option value="0">YouTube Likes</option>
+            </select>
+            <button class="btn-buy btn-free" onclick="claimFree('free-yt')">احصل عليها الآن</button>
+        </div>
+
+        <div class="service-card" style="border-color: var(--success);">
+            <div class="free-badge">مجاني</div>
+            <i class="fab fa-spotify service-icon sp-icon"></i>
+            <div class="service-title">خدمات سبوتيفاي المجانية</div>
+            <select class="package-select" id="free-sp">
+                <option value="0">Spotify Followers</option>
+                <option value="0">Spotify Plays</option>
+                <option value="0">Spotify Saves</option>
+            </select>
+            <button class="btn-buy btn-free" onclick="claimFree('free-sp')">احصل عليها الآن</button>
+        </div>
+
+    </div>
+
+    <div class="modal-overlay" id="checkout-modal">
+        <div class="payment-container">
+            <button class="close-btn" onclick="closeCheckout()"><i class="fas fa-times"></i></button>
+            <div style="font-size: 20px; font-weight: bold; color: var(--primary); text-align: center; margin-bottom: 20px;">
+                <i class="fas fa-shopping-cart"></i> إتمام الطلب
+            </div>
+
+            <div class="order-summary">
+                <div id="checkout-service-name">اسم الخدمة</div>
+                <div class="order-price" id="checkout-price">0.00$</div>
+            </div>
+
+            <div class="method-card">
+                <div class="method-title"><i class="fas fa-coins" style="color:var(--primary);"></i> الدفع عبر النقاط (الرصيد)</div>
+                <button class="btn-points" onclick="payWithPoints()">
+                    خصم من الرصيد الحالي
+                </button>
+            </div>
+
             <div class="method-card">
                 <div class="method-title"><i class="fab fa-paypal" style="color:#003087;"></i> الدفع عبر PayPal</div>
                 <div id="paypal-button-container"></div>
             </div>
 
-            <!-- قسم البطاقة الائتمانية (Visa / Mastercard) -->
             <div class="method-card">
                 <div class="method-title"><i class="fas fa-credit-card" style="color:#1a1f71;"></i> الدفع عبر البطاقة (Visa)</div>
                 <div class="visa-form">
-                    <input type="text" placeholder="الاسم على البطاقة" required>
-                    <input type="text" placeholder="رقم البطاقة" maxlength="16" required>
+                    <input type="text" placeholder="الاسم على البطاقة">
+                    <input type="text" placeholder="رقم البطاقة" maxlength="16">
                     <div class="visa-row">
-                        <input type="text" placeholder="MM/YY" maxlength="5" required>
-                        <input type="text" placeholder="CVC" maxlength="3" required>
+                        <input type="text" placeholder="MM/YY" maxlength="5">
+                        <input type="text" placeholder="CVC" maxlength="3">
                     </div>
-                    <button class="btn-pay" onclick="alert('سيتم ربط بوابة الدفع هنا لاحقاً.')">تأكيد الدفع</button>
+                    <button class="btn-buy" onclick="alert('سيتم ربط بوابة الدفع هنا لاحقاً.')">تأكيد الدفع</button>
                 </div>
             </div>
 
         </div>
-
-        <a href="index.html" class="back-btn"><i class="fas fa-arrow-right"></i> العودة للرئيسية</a>
     </div>
 
     <script>
-        // إعداد أزرار الدفع الخاصة بـ PayPal
-        paypal.Buttons({
-            createOrder: function(data, actions) {
-                return actions.order.create({
-                    purchase_units: [{
-                        amount: {
-                            value: '9.99' // ضع سعر الباقة هنا
-                        }
-                    }]
-                });
-            },
-            onApprove: function(data, actions) {
-                return actions.order.capture().then(function(details) {
-                    alert('تم الدفع بنجاح بواسطة ' + details.payer.name.given_name + '! سيتم تفعيل حسابك.');
-                    // يمكنك هنا توجيه المستخدم لصفحة النجاح أو تحديث قاعدة البيانات
-                });
+        // --- نظام النقاط والمحفظة (محاكاة قاعدة البيانات عبر localStorage) ---
+        // في الواقع يتم تعيين هذه القيمة من ملف admin.html بناءً على IP الزائر.
+        // قمت بوضع 50 نقطة افتراضية للتجربة. يمكنك تغييرها إلى 0.
+        if(!localStorage.getItem('premium_points')) {
+            localStorage.setItem('premium_points', '50.00'); 
+        }
+        
+        let currentPoints = parseFloat(localStorage.getItem('premium_points'));
+        let currentPrice = 0;
+        let currentServiceName = "";
+
+        // تحديث واجهة الرصيد
+        function updatePointsDisplay() {
+            document.getElementById('user-points').innerText = currentPoints.toFixed(2);
+        }
+        updatePointsDisplay();
+
+        // --- نظام فتح نافذة الدفع ---
+        function openCheckout(serviceTitle, selectId) {
+            const selectElement = document.getElementById(selectId);
+            const selectedOption = selectElement.options[selectElement.selectedIndex].text;
+            currentPrice = parseFloat(selectElement.value);
+            currentServiceName = `${serviceTitle} - ${selectedOption}`;
+
+            document.getElementById('checkout-service-name').innerText = currentServiceName;
+            document.getElementById('checkout-price').innerText = currentPrice + '$';
+            document.getElementById('checkout-modal').style.display = 'flex';
+
+            // إعادة تهيئة زر البايبال بالسعر الجديد
+            renderPayPalButton(currentPrice);
+        }
+
+        function closeCheckout() {
+            document.getElementById('checkout-modal').style.display = 'none';
+            document.getElementById('paypal-button-container').innerHTML = ''; // تنظيف الأزرار السابقة
+        }
+
+        // --- الدفع بالنقاط ---
+        function payWithPoints() {
+            if (currentPoints >= currentPrice) {
+                currentPoints -= currentPrice;
+                localStorage.setItem('premium_points', currentPoints.toFixed(2));
+                updatePointsDisplay();
+                alert('✅ تم الدفع بنجاح عبر نقاطك! جاري تنفيذ الطلب...');
+                closeCheckout();
+            } else {
+                alert('❌ عذراً، رصيد النقاط الخاص بك غير كافٍ. يرجى الشحن أو استخدام وسيلة دفع أخرى.');
             }
-        }).render('#paypal-button-container');
+        }
+
+        // --- الحصول على الخدمات المجانية ---
+        function claimFree(selectId) {
+            const selectElement = document.getElementById(selectId);
+            const selectedOption = selectElement.options[selectElement.selectedIndex].text;
+            alert(`🎉 تم تفعيل خدمة (${selectedOption}) بنجاح! ستصلك خلال دقائق.`);
+        }
+
+        // --- نظام الدفع عبر PayPal ---
+        function renderPayPalButton(price) {
+            document.getElementById('paypal-button-container').innerHTML = '';
+            paypal.Buttons({
+                createOrder: function(data, actions) {
+                    return actions.order.create({
+                        purchase_units: [{
+                            amount: { value: price.toString() }
+                        }]
+                    });
+                },
+                onApprove: function(data, actions) {
+                    return actions.order.capture().then(function(details) {
+                        alert('✅ تم الدفع بنجاح بواسطة ' + details.payer.name.given_name + '! سيتم تنفيذ طلبك فوراً.');
+                        closeCheckout();
+                    });
+                }
+            }).render('#paypal-button-container');
+        }
     </script>
 </body>
 </html>
