@@ -23,6 +23,7 @@
             --input-bg: rgba(0, 0, 0, 0.5);
             --pending: #f59e0b;
             --success: #10b981;
+            --rejected: #ef4444;
         }
 
         body.light-mode {
@@ -47,7 +48,7 @@
             min-height: 100vh; background-attachment: fixed; padding: 20px; gap: 20px;
         }
 
-        .boost-container, .orders-container, .admin-container {
+        .boost-container, .orders-container {
             width: 100%; max-width: 600px; background: var(--card-bg); backdrop-filter: blur(15px);
             border: 1px solid var(--glass-border); border-radius: 20px;
             box-shadow: 0 20px 50px rgba(0,0,0,0.8), var(--neon-glow); padding: 30px; position: relative;
@@ -72,12 +73,12 @@
             color: #fff; font-size: 18px; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px;
         }
         .submit-btn:hover { transform: translateY(-3px); box-shadow: var(--neon-glow); }
-        .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .submit-btn:disabled { background: #334155; opacity: 0.7; cursor: not-allowed; transform: none; box-shadow: none; }
 
         .back-btn { position: absolute; top: 20px; left: 20px; background: none; border: none; color: var(--text-main); font-size: 20px; cursor: pointer; }
         .back-btn:hover { color: var(--primary); }
 
-        .alert-msg { display: none; padding: 15px; border-radius: 10px; margin-bottom: 20px; font-weight: bold; text-align: center; }
+        .alert-msg { display: none; padding: 15px; border-radius: 10px; margin-bottom: 20px; font-weight: bold; text-align: center; line-height: 1.5; }
         .alert-success { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; }
         .alert-error { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; }
 
@@ -91,26 +92,14 @@
         .status-badge { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; display: flex; align-items: center; gap: 5px; }
         .status-pending { background: rgba(245, 158, 11, 0.2); color: var(--pending); border: 1px solid var(--pending); }
         .status-success { background: rgba(16, 185, 129, 0.2); color: var(--success); border: 1px solid var(--success); }
+        .status-rejected { background: rgba(239, 68, 68, 0.2); color: var(--rejected); border: 1px solid var(--rejected); }
         .order-details { display: none; margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--glass-border); font-size: 14px; color: var(--text-muted); }
         .order-card.open .order-details { display: block; }
-
-        /* لوحة الإدارة */
-        .admin-container { display: none; border: 2px dashed #ef4444; }
-        .admin-title { color: #ef4444; margin-bottom: 15px; text-align: center; }
 
         [dir="ltr"] .back-btn { left: auto; right: 20px; }
     </style>
 </head>
 <body>
-
-    <div class="admin-container" id="adminPanel">
-        <h3 class="admin-title"><i class="fas fa-user-shield"></i> لوحة الإدارة السريعة</h3>
-        <div class="form-group">
-            <label>رقم IP العميل (من تليجرام)</label>
-            <input type="text" id="adminIP" placeholder="مثال: 192.168.1.1">
-        </div>
-        <button class="submit-btn" onclick="markOrdersCompleted()" style="background: #ef4444;">تحويل الطلبات إلى "تم التنفيذ"</button>
-    </div>
 
     <div class="boost-container">
         <button class="back-btn" onclick="window.location.href='index.html'" title="رجوع / Back"><i class="fas fa-arrow-left"></i></button>
@@ -186,24 +175,42 @@
 
         let userIP = "";
         let sanitizedIP = "";
-        let isVPN = false;
+        let isVPNDetected = false;
+        let hasGlobalOrder = false; // للتحقق من الحد الأقصى للطلبات
 
-        // جلب الـ IP وفحص الـ VPN/Proxy باستخدام ipwho.is
-        fetch('https://ipwho.is/').then(r => r.json()).then(data => {
+        if (localStorage.getItem('remas_theme') === 'light') document.body.classList.add('light-mode');
+
+        // جلب الـ IP وفحص الـ VPN المخادع
+        fetch('https://ipapi.co/json/').then(r => r.json()).then(data => {
             userIP = data.ip;
-            sanitizedIP = userIP.replace(/\./g, '_'); // Firebase لا يقبل النقاط في المفاتيح
+            sanitizedIP = userIP.replace(/\./g, '_');
             
-            // كشف إذا كان المتصل يستخدم VPN أو Proxy
-            if (data.security && (data.security.vpn || data.security.proxy || data.security.tor || data.security.hosting)) {
-                isVPN = true;
+            // خوارزمية كشف الـ VPN البسيطة
+            const browserTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            const isp = (data.org || "").toLowerCase();
+            const suspiciousWords = ['hosting', 'cloud', 'datacenter', 'vpn', 'proxy', 'tor', 'digitalocean', 'aws', 'amazon', 'google', 'linode', 'ovh'];
+            
+            // الفحص الأول: اختلاف الوقت بين المتصفح وسيرفر الـ IP
+            if (data.timezone && browserTz !== data.timezone) {
+                isVPNDetected = true;
             }
-            
+            // الفحص الثاني: مزود الخدمة ينتمي لسيرفرات سحابية بدلاً من شركات إنترنت حقيقية
+            if (suspiciousWords.some(word => isp.includes(word))) {
+                isVPNDetected = true;
+            }
+
+            if(isVPNDetected) {
+                showAlert("⚠️ تم اكتشاف استخدام (VPN/Proxy). يُرجى إيقافه وإعادة تحميل الصفحة لتتمكن من الطلب.", "error");
+                const btn = document.getElementById("submitBtn");
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-ban"></i> غير مسموح بالـ VPN';
+            }
+
             loadMyOrders();
         }).catch(err => {
             document.getElementById('ordersList').innerHTML = "<p style='text-align:center;'>فشل في جلب البيانات.</p>";
         });
 
-        // تعريف الخدمات والباقات بدقة
         const services = {
             "Instagram": {
                 "ig_followers": { name: "متابعين / Followers", packages: ["مجانًا (حد أقصى 20) | Free (Max 20)"] },
@@ -226,13 +233,6 @@
                 "tk_views": { name: "مشاهدات / Views", packages: ["مجانًا (حد أقصى 400) | Free (Max 400)"] }
             }
         };
-
-        if (localStorage.getItem('remas_theme') === 'light') document.body.classList.add('light-mode');
-
-        // إظهار لوحة الإدارة إذا كان الرابط يحتوي على ?admin=1
-        if (window.location.search.includes("admin=1")) {
-            document.getElementById("adminPanel").style.display = "block";
-        }
 
         function updateServices() {
             const platform = document.getElementById("platform").value;
@@ -263,10 +263,10 @@
         function showAlert(msg, type) {
             const alertBox = document.getElementById("alertBox");
             alertBox.textContent = msg; alertBox.className = `alert-msg alert-${type}`;
-            alertBox.style.display = "block"; setTimeout(() => { alertBox.style.display = "none"; }, 5000);
+            alertBox.style.display = "block"; setTimeout(() => { alertBox.style.display = "none"; }, 8000);
         }
 
-        // جلب طلبات المستخدم من Firebase وعرضها
+        // جلب طلبات المستخدم وفحص الحد الأقصى
         function loadMyOrders() {
             if(!sanitizedIP) return;
             db.ref('senpa_orders/' + sanitizedIP).on('value', snap => {
@@ -276,18 +276,33 @@
                 
                 if (!data) {
                     ordersList.innerHTML = "<p style='text-align:center; color: var(--text-muted);'>لا توجد طلبات سابقة.</p>";
+                    hasGlobalOrder = false;
                     return;
                 }
 
-                // عكس الترتيب ليظهر الأحدث أولاً
-                const orderKeys = Object.keys(data).reverse();
+                // بما أن لديه بيانات في القاعدة، إذن هو طلب مسبقاً!
+                hasGlobalOrder = true;
+                const btn = document.getElementById("submitBtn");
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-lock"></i> لقد استهلكت حد الطلبات المسموح لك';
                 
+                // عرض الطلبات
+                const orderKeys = Object.keys(data).reverse();
                 orderKeys.forEach(key => {
                     const order = data[key];
-                    const isCompleted = order.status === "completed";
-                    const statusHtml = isCompleted 
-                        ? `<span class="status-badge status-success"><i class="fas fa-check-circle"></i> تم التنفيذ</span>`
-                        : `<span class="status-badge status-pending"><i class="fas fa-clock"></i> قيد الانتظار</span>`;
+                    let statusHtml = '';
+                    let detailsMsg = '';
+
+                    if(order.status === "completed") {
+                        statusHtml = `<span class="status-badge status-success"><i class="fas fa-check-circle"></i> تم التنفيذ</span>`;
+                        detailsMsg = '<p style="color:var(--success); margin-top:10px;"><i class="fas fa-bullhorn"></i> تم إيصال طلبك بنجاح!</p>';
+                    } else if(order.status === "rejected") {
+                        statusHtml = `<span class="status-badge status-rejected"><i class="fas fa-times-circle"></i> مرفوض</span>`;
+                        detailsMsg = '<p style="color:var(--rejected); margin-top:10px;"><i class="fas fa-exclamation-triangle"></i> تم رفض الطلب من قبل الإدارة.</p>';
+                    } else {
+                        statusHtml = `<span class="status-badge status-pending"><i class="fas fa-clock"></i> قيد الانتظار</span>`;
+                        detailsMsg = '<p style="color:var(--pending); margin-top:10px;"><i class="fas fa-hourglass-half"></i> طلبك قيد المراجعة والتنفيذ...</p>';
+                    }
 
                     const card = document.createElement('div');
                     card.className = "order-card";
@@ -301,7 +316,7 @@
                             <p><strong>📦 الباقة:</strong> ${order.packageInfo}</p>
                             <p><strong>🔗 الرابط:</strong> ${order.target}</p>
                             <p><strong>🕒 الوقت:</strong> ${order.time}</p>
-                            ${isCompleted ? '<p style="color:var(--success); margin-top:10px;"><i class="fas fa-bullhorn"></i> تم إيصال طلبك بنجاح!</p>' : '<p style="color:var(--pending); margin-top:10px;"><i class="fas fa-hourglass-half"></i> طلبك قيد المراجعة والتنفيذ...</p>'}
+                            ${detailsMsg}
                         </div>
                     `;
                     ordersList.appendChild(card);
@@ -312,53 +327,42 @@
         // إرسال الطلب
         document.getElementById("boostForm").addEventListener("submit", async function(e) {
             e.preventDefault();
+
+            // تحقق نهائي من الـ VPN والحد الأقصى قبل الإرسال
+            if (isVPNDetected) {
+                showAlert("لا يمكنك الطلب أثناء استخدام VPN.", "error");
+                return;
+            }
+
+            if (hasGlobalOrder || localStorage.getItem("remas_has_ordered")) {
+                showAlert("عذراً! الحد الأقصى هو (طلب واحد فقط) لكل مستخدم. لا يمكنك تقديم طلبات أخرى.", "error");
+                return;
+            }
+
             const btn = document.getElementById("submitBtn");
             btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإرسال...';
 
-            // 1. فحص الـ VPN المخادع
-            if (isVPN) {
-                showAlert("🚫 تم اكتشاف اتصال VPN أو Proxy! يرجى إيقافه وإعادة تحميل الصفحة لتقديم الطلب.", "error");
-                btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> إرسال الطلب / Submit Request';
-                return;
-            }
-
-            // 2. فحص حد الـ 24 ساعة لجميع الطلبات على جميع المنصات باستخدام Firebase
-            const limitRef = db.ref('senpa_limits/' + sanitizedIP);
-            const limitSnap = await limitRef.once('value');
-            const lastOrderTime = limitSnap.val() ? limitSnap.val().timestamp : 0;
-            const now = Date.now();
-            const twentyFourHours = 24 * 60 * 60 * 1000;
-
-            if (now - lastOrderTime < twentyFourHours) {
-                const remainingHours = Math.ceil((twentyFourHours - (now - lastOrderTime)) / (1000 * 60 * 60));
-                showAlert(`⏳ عذراً! يُسمح بطلب واحد فقط كل 24 ساعة على جميع المنصات. يرجى المحاولة بعد ${remainingHours} ساعة.`, "error");
-                btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> إرسال الطلب / Submit Request';
-                return;
-            }
-
             const platform = document.getElementById("platform").value;
+            const serviceKey = document.getElementById("service").value;
             const serviceName = document.getElementById("service").options[document.getElementById("service").selectedIndex].text;
             const packageInfo = document.getElementById("packageSelect").value;
             const targetLink = document.getElementById("targetLink").value.trim();
             const isPaid = packageInfo.includes("مدفوع") || packageInfo.includes("Paid");
 
-            // حفظ الطلب في Firebase لكي يظهر في "طلباتي"
+            // حفظ الطلب في Firebase
             const newOrderRef = db.ref('senpa_orders/' + sanitizedIP).push();
             const orderData = {
                 platform: platform,
                 serviceName: serviceName,
                 packageInfo: packageInfo,
                 target: targetLink,
-                status: "pending", // قيد الانتظار الافتراضي
+                status: "pending", // قيد الانتظار
                 time: new Date().toLocaleString('en-US', { hour12: true })
             };
 
             await newOrderRef.set(orderData);
 
-            // تحديث وقت آخر طلب لضمان تطبيق حد الـ 24 ساعة
-            await limitRef.set({ timestamp: now });
-
-            // إرسال رسالة تليجرام لك
+            // إرسال إشعار تليجرام للأدمن
             const message = `
 🚀 *طلب رشق جديد* 🚀
 
@@ -369,38 +373,23 @@
 🌐 *ايبى العميل:* \`${userIP}\`
 
 ${isPaid ? '💰 **طلب مدفوع! تواصل مع العميل**' : '🎁 **طلب مجاني**'}
-💡 *لتغيير حالة الطلب إلى "تم التنفيذ"، انسخ الـ IP وضعه في لوحة الإدارة بالموقع.*
+💡 *توجّه إلى لوحة الإدارة (Admin Panel) لتغيير حالة الطلب!*
             `;
 
             fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ chat_id: CHAT_ID, text: message, parse_mode: 'Markdown' })
             }).then(() => {
-                showAlert("تم إرسال طلبك بنجاح! تابعه من الأسفل ✅", "success");
+                // حفظ بصمة في المتصفح كطبقة حماية إضافية
+                localStorage.setItem("remas_has_ordered", "true");
+                hasGlobalOrder = true;
+
+                showAlert("تم إرسال طلبك بنجاح! תابعه في الأسفل ✅. (لا يمكنك إرسال طلبات أخرى)", "success");
                 document.getElementById("targetLink").value = "";
-            }).finally(() => {
-                btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> إرسال الطلب / Submit Request';
+            }).catch(() => {
+                btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> إرسال الطلب';
             });
         });
-
-        // وظيفة الإدارة السريعة لتحويل الطلبات إلى تم التنفيذ
-        function markOrdersCompleted() {
-            const adminInput = document.getElementById("adminIP").value.trim();
-            if(!adminInput) return alert("أدخل الـ IP أولاً");
-            const targetIP = adminInput.replace(/\./g, '_');
-            
-            db.ref('senpa_orders/' + targetIP).once('value', snap => {
-                if(snap.exists()) {
-                    snap.forEach(child => {
-                        child.ref.update({ status: "completed" });
-                    });
-                    alert("تم تحويل جميع طلبات هذا الـ IP إلى 'تم التنفيذ' بنجاح ✅");
-                    document.getElementById("adminIP").value = "";
-                } else {
-                    alert("لا يوجد طلبات لهذا الـ IP.");
-                }
-            });
-        }
     </script>
 </body>
 </html>
