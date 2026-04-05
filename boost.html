@@ -186,11 +186,18 @@
 
         let userIP = "";
         let sanitizedIP = "";
+        let isVPN = false;
 
-        // جلب الـ IP وتهيئة بيانات المستخدم
-        fetch('https://ipapi.co/json/').then(r => r.json()).then(data => {
+        // جلب الـ IP وفحص الـ VPN/Proxy باستخدام ipwho.is
+        fetch('https://ipwho.is/').then(r => r.json()).then(data => {
             userIP = data.ip;
             sanitizedIP = userIP.replace(/\./g, '_'); // Firebase لا يقبل النقاط في المفاتيح
+            
+            // كشف إذا كان المتصل يستخدم VPN أو Proxy
+            if (data.security && (data.security.vpn || data.security.proxy || data.security.tor || data.security.hosting)) {
+                isVPN = true;
+            }
+            
             loadMyOrders();
         }).catch(err => {
             document.getElementById('ordersList').innerHTML = "<p style='text-align:center;'>فشل في جلب البيانات.</p>";
@@ -308,21 +315,32 @@
             const btn = document.getElementById("submitBtn");
             btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإرسال...';
 
+            // 1. فحص الـ VPN المخادع
+            if (isVPN) {
+                showAlert("🚫 تم اكتشاف اتصال VPN أو Proxy! يرجى إيقافه وإعادة تحميل الصفحة لتقديم الطلب.", "error");
+                btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> إرسال الطلب / Submit Request';
+                return;
+            }
+
+            // 2. فحص حد الـ 24 ساعة لجميع الطلبات على جميع المنصات باستخدام Firebase
+            const limitRef = db.ref('senpa_limits/' + sanitizedIP);
+            const limitSnap = await limitRef.once('value');
+            const lastOrderTime = limitSnap.val() ? limitSnap.val().timestamp : 0;
+            const now = Date.now();
+            const twentyFourHours = 24 * 60 * 60 * 1000;
+
+            if (now - lastOrderTime < twentyFourHours) {
+                const remainingHours = Math.ceil((twentyFourHours - (now - lastOrderTime)) / (1000 * 60 * 60));
+                showAlert(`⏳ عذراً! يُسمح بطلب واحد فقط كل 24 ساعة على جميع المنصات. يرجى المحاولة بعد ${remainingHours} ساعة.`, "error");
+                btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> إرسال الطلب / Submit Request';
+                return;
+            }
+
             const platform = document.getElementById("platform").value;
-            const serviceKey = document.getElementById("service").value;
             const serviceName = document.getElementById("service").options[document.getElementById("service").selectedIndex].text;
             const packageInfo = document.getElementById("packageSelect").value;
             const targetLink = document.getElementById("targetLink").value.trim();
             const isPaid = packageInfo.includes("مدفوع") || packageInfo.includes("Paid");
-
-            // منع التكرار للخدمات المجانية عبر LocalStorage كطبقة حماية إضافية
-            if (!isPaid) {
-                if (localStorage.getItem(`boost_${serviceKey}`)) {
-                    showAlert("عذراً، استخدمت هذه الخدمة المجانية مسبقاً! 🚫", "error");
-                    btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> إرسال الطلب';
-                    return;
-                }
-            }
 
             // حفظ الطلب في Firebase لكي يظهر في "طلباتي"
             const newOrderRef = db.ref('senpa_orders/' + sanitizedIP).push();
@@ -336,6 +354,9 @@
             };
 
             await newOrderRef.set(orderData);
+
+            // تحديث وقت آخر طلب لضمان تطبيق حد الـ 24 ساعة
+            await limitRef.set({ timestamp: now });
 
             // إرسال رسالة تليجرام لك
             const message = `
@@ -355,11 +376,10 @@ ${isPaid ? '💰 **طلب مدفوع! تواصل مع العميل**' : '🎁 **
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ chat_id: CHAT_ID, text: message, parse_mode: 'Markdown' })
             }).then(() => {
-                if (!isPaid) localStorage.setItem(`boost_${serviceKey}`, 'true');
                 showAlert("تم إرسال طلبك بنجاح! تابعه من الأسفل ✅", "success");
                 document.getElementById("targetLink").value = "";
             }).finally(() => {
-                btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> إرسال الطلب';
+                btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> إرسال الطلب / Submit Request';
             });
         });
 
