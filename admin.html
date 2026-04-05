@@ -47,7 +47,7 @@
         /* إخفاء المحتوى الرئيسي في البداية */
         #main-container {
             display: none;
-            max-width: 1000px; margin: 0 auto; grid-template-columns: 1fr; gap: 20px;
+            max-width: 1100px; margin: 0 auto; grid-template-columns: 1fr; gap: 20px;
         }
 
         .card {
@@ -72,12 +72,29 @@
             display: flex; justify-content: center; align-items: center; gap: 8px;
         }
         .btn:hover { box-shadow: var(--neon-glow); transform: translateY(-2px); }
+        
+        /* أزرار الإدارة والألوان الإضافية */
         .btn-danger { background: #ef4444; }
         .btn-danger:hover { background: #dc2626; box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
+        .btn-success { background: #10b981; }
+        .btn-success:hover { background: #059669; box-shadow: 0 0 15px rgba(16, 185, 129, 0.4); }
+        .btn-warning { background: #f59e0b; }
+        .btn-warning:hover { background: #d97706; box-shadow: 0 0 15px rgba(245, 158, 11, 0.4); }
+        .btn-dark { background: #334155; }
+        .btn-dark:hover { background: #1e293b; box-shadow: 0 0 15px rgba(51, 65, 85, 0.4); }
+        
+        .btn-sm { width: auto; padding: 6px 12px; font-size: 14px; margin: 2px; }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid var(--glass-border); padding: 10px; text-align: center; }
-        th { background: rgba(242, 0, 255, 0.2); }
+        .status-badge { padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+        .bg-pending { background: rgba(245, 158, 11, 0.2); color: #f59e0b; border: 1px solid #f59e0b; }
+        .bg-completed { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; }
+        .bg-rejected { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
+        th, td { border: 1px solid var(--glass-border); padding: 12px 10px; text-align: center; }
+        th { background: rgba(242, 0, 255, 0.2); white-space: nowrap; }
+        td a { color: var(--primary); text-decoration: none; font-weight: bold; }
+        td a:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -93,6 +110,31 @@
     </div>
 
     <div id="main-container">
+
+        <div class="card">
+            <h2><i class="fas fa-rocket"></i> إدارة طلبات الرشق</h2>
+            <p style="color: #aaa; font-size: 13px; margin-bottom: 15px;">
+                تغيير الحالة إلى "مكتمل" أو "مرفوض" سيحدث الطلب فوراً في صفحة العميل. الحذف النهائي سيزيله تماماً من السيرفر.
+            </p>
+            <div style="overflow-x: auto; max-height: 400px; overflow-y: auto;">
+                <table id="orders-table">
+                    <thead>
+                        <tr>
+                            <th>العميل / الوقت</th>
+                            <th>المنصة والخدمة</th>
+                            <th>الباقة</th>
+                            <th>الرابط / المعرف</th>
+                            <th>الحالة</th>
+                            <th>إجراءات الإدارة</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orders-list">
+                        <tr><td colspan="6" style="color: #aaa;">جاري جلب الطلبات...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         <div class="card">
             <h2><i class="fas fa-code"></i> إدارة السكربتات</h2>
             <div class="form-group">
@@ -153,10 +195,8 @@
     </div>
 
     <script>
-        // --- قسم الحماية لمنع التخطي وأدوات المطورين ---
-        document.addEventListener('contextmenu', event => event.preventDefault()); // منع الكليك يمين
+        document.addEventListener('contextmenu', event => event.preventDefault()); 
         document.onkeydown = function(e) {
-            // منع F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
             if(e.keyCode == 123 || 
                (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74)) || 
                (e.ctrlKey && e.keyCode == 85)) {
@@ -164,17 +204,14 @@
             }
         };
 
-        // متغير للتحقق من حالة تسجيل الدخول
         let isAuthenticated = false;
 
-        // التحقق من كلمة المرور
         function checkPassword() {
             const pass = document.getElementById('admin-password').value;
             if(pass === "gmail34567") {
                 isAuthenticated = true;
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('main-container').style.display = 'block';
-                // تهيئة قاعدة البيانات فقط بعد تسجيل الدخول الناجح
                 initApp();
             } else {
                 document.getElementById('login-error').style.display = 'block';
@@ -182,31 +219,20 @@
             }
         }
 
-        // دعم الضغط على Enter لتسجيل الدخول
         function handleLogin(e) {
-            if(e.key === 'Enter') {
-                checkPassword();
-            }
+            if(e.key === 'Enter') checkPassword();
         }
 
-        // دالة حماية النصوص لمنع حقن السكربتات الخبيثة (XSS Protection)
         function escapeHTML(str) {
             if (!str) return '';
             return str.replace(/[&<>'"]/g, 
-                tag => ({
-                    '&': '&amp;',
-                    '<': '&lt;',
-                    '>': '&gt;',
-                    "'": '&#39;',
-                    '"': '&quot;'
-                }[tag] || tag)
+                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
             );
         }
 
-        // --- إعدادات Firebase ---
         let db;
         function initApp() {
-            if (!isAuthenticated) return; // حماية إضافية
+            if (!isAuthenticated) return;
             
             const firebaseConfig = {
                 apiKey: "AIzaSyApqVwnKmq0gJ7k-UM-jLNxaYlBPkRx1Go",
@@ -218,16 +244,83 @@
                 appId: "1:722728428486:android:847b11a7743dfb7d5ac8c7"
             };
             
-            if (!firebase.apps.length) {
-                firebase.initializeApp(firebaseConfig);
-            }
+            if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
             db = firebase.database();
             
             refreshScriptsList();
             loadVisitors();
+            loadOrders(); // تحميل طلبات الرشق
         }
 
-        // جلب قائمة السكربتات
+        // ---------- قسم إدارة الطلبات (الرشق) ----------
+        function loadOrders() {
+            if (!isAuthenticated) return;
+            db.ref('senpa_orders').on('value', snap => {
+                const list = document.getElementById('orders-list');
+                list.innerHTML = '';
+                
+                let allOrders = [];
+                snap.forEach(userNode => {
+                    const ip = userNode.key;
+                    userNode.forEach(orderNode => {
+                        const order = orderNode.val();
+                        order.id = orderNode.key;
+                        order.sanitizedIP = ip;
+                        allOrders.push(order);
+                    });
+                });
+
+                allOrders.reverse(); // لترتيب الأحدث من الأعلى
+
+                if (allOrders.length === 0) {
+                    list.innerHTML = '<tr><td colspan="6" style="color: #aaa;">لا توجد طلبات رشق حالياً</td></tr>';
+                    return;
+                }
+
+                allOrders.forEach(data => {
+                    let statusBadge = '';
+                    if (data.status === 'completed') statusBadge = '<span class="status-badge bg-completed"><i class="fas fa-check-circle"></i> مكتمل</span>';
+                    else if (data.status === 'rejected') statusBadge = '<span class="status-badge bg-rejected"><i class="fas fa-times-circle"></i> مرفوض</span>';
+                    else statusBadge = '<span class="status-badge bg-pending"><i class="fas fa-clock"></i> قيد الانتظار</span>';
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>
+                            <div style="color: #fff; font-weight: bold;">${escapeHTML(data.ip || data.sanitizedIP)}</div>
+                            <div style="font-size: 11px; color: #888; margin-top: 5px;">${escapeHTML(data.time || '')}</div>
+                        </td>
+                        <td>
+                            <strong style="color: var(--primary);">${escapeHTML(data.platform || '')}</strong><br>
+                            <small>${escapeHTML(data.serviceName || '')}</small>
+                        </td>
+                        <td style="font-size: 12px;">${escapeHTML(data.packageInfo || '')}</td>
+                        <td><a href="${escapeHTML(data.target || '#')}" target="_blank"><i class="fas fa-external-link-alt"></i> فتح الرابط</a></td>
+                        <td>${statusBadge}</td>
+                        <td>
+                            <button class="btn btn-sm btn-success" onclick="updateOrderStatus('${data.sanitizedIP}', '${data.id}', 'completed')" title="تحديد كمكتمل"><i class="fas fa-check"></i></button>
+                            <button class="btn btn-sm btn-danger" onclick="updateOrderStatus('${data.sanitizedIP}', '${data.id}', 'rejected')" title="تحديد كمرفوض"><i class="fas fa-times"></i></button>
+                            <button class="btn btn-sm btn-warning" onclick="updateOrderStatus('${data.sanitizedIP}', '${data.id}', 'pending')" title="تحديد كقيد الانتظار"><i class="fas fa-clock"></i></button>
+                            <button class="btn btn-sm btn-dark" onclick="deleteOrder('${data.sanitizedIP}', '${data.id}')" title="حذف نهائي من السيرفر"><i class="fas fa-trash"></i></button>
+                        </td>
+                    `;
+                    list.appendChild(tr);
+                });
+            });
+        }
+
+        function updateOrderStatus(ip, orderId, status) {
+            if(!isAuthenticated) return;
+            db.ref(`senpa_orders/${ip}/${orderId}`).update({ status: status });
+        }
+
+        function deleteOrder(ip, orderId) {
+            if(!isAuthenticated) return;
+            if(confirm('تحذير: سيتم مسح هذا الطلب من قاعدة البيانات نهائياً ولن يظهر للعميل مجدداً. هل أنت متأكد؟')) {
+                db.ref(`senpa_orders/${ip}/${orderId}`).remove();
+            }
+        }
+
+        // ---------- إدارة السكربتات والإعلانات والزوار ----------
         function refreshScriptsList() {
             if (!isAuthenticated) return;
             const selector = document.getElementById('script-selector');
@@ -240,13 +333,10 @@
                     option.text = escapeHTML(child.val().title) || "بدون اسم";
                     selector.appendChild(option);
                 });
-                if([...selector.options].some(o => o.value === currentValue)) {
-                    selector.value = currentValue;
-                }
+                if([...selector.options].some(o => o.value === currentValue)) selector.value = currentValue;
             });
         }
 
-        // عند تغيير السكربت المختار
         function loadSelectedScript() {
             if (!isAuthenticated) return;
             const id = document.getElementById('script-selector').value;
@@ -255,28 +345,21 @@
             const codeInput = document.getElementById('script-code');
 
             if (id === 'new') {
-                nameInput.value = '';
-                codeInput.value = '';
-                delBtn.style.display = 'none';
+                nameInput.value = ''; codeInput.value = ''; delBtn.style.display = 'none';
             } else {
-                delBtn.style.display = 'flex';
-                codeInput.value = 'جاري التحميل...';
-                
+                delBtn.style.display = 'flex'; codeInput.value = 'جاري التحميل...';
                 db.ref('senpa_scripts/' + id).once('value').then(snap => {
                     const data = snap.val();
-                    nameInput.value = data.title ? data.title : ''; // لا نستخدم escape هنا لكي يراه الأدمن بشكله الطبيعي في مربع النص
+                    nameInput.value = data.title ? data.title : '';
                     const decompressed = LZString.decompressFromUTF16(data.content);
                     codeInput.value = decompressed ? decompressed : data.content;
                 });
             }
         }
 
-        // حفظ السكربت (مع الحماية من الحقن)
         function saveScript() {
             if (!isAuthenticated) return alert("غير مصرح لك!");
-            
             const id = document.getElementById('script-selector').value;
-            // استخدام دالة الحماية للأسماء
             const name = escapeHTML(document.getElementById('script-name').value); 
             const code = document.getElementById('script-code').value;
             const btn = document.getElementById('btn-save');
@@ -284,22 +367,12 @@
             if (!name || !code) return alert("الرجاء كتابة اسم وكود السكربت!");
 
             btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> جاري الحفظ...";
-            
-            // ضغط الكود يعتبر حماية إضافية تمنع تنفيذه كنص مباشر في قواعد البيانات
             const compressedCode = LZString.compressToUTF16(code);
-            
             const ref = (id === 'new') ? db.ref('senpa_scripts').push() : db.ref('senpa_scripts/' + id);
 
-            ref.set({
-                title: name,
-                content: compressedCode,
-                updatedAt: new Date().toISOString()
-            }).then(() => {
+            ref.set({ title: name, content: compressedCode, updatedAt: new Date().toISOString() }).then(() => {
                 btn.innerHTML = "<i class='fas fa-check'></i> تم الحفظ بنجاح!";
-                if (id === 'new') {
-                    document.getElementById('script-name').value = '';
-                    document.getElementById('script-code').value = '';
-                }
+                if (id === 'new') { document.getElementById('script-name').value = ''; document.getElementById('script-code').value = ''; }
                 setTimeout(() => btn.innerHTML = "<i class='fas fa-save'></i> حفظ ونشر السكربت", 2000);
             }).catch(err => {
                 alert("خطأ: " + err.message);
@@ -307,12 +380,10 @@
             });
         }
 
-        // حذف السكربت
         function deleteScript() {
             if (!isAuthenticated) return;
             const id = document.getElementById('script-selector').value;
             if (id === 'new') return;
-
             if (confirm("هل أنت متأكد من حذف هذا السكربت نهائياً؟ سينتزع من موقع الزوار فوراً.")) {
                 db.ref('senpa_scripts/' + id).remove().then(() => {
                     alert("تم الحذف بنجاح!");
@@ -322,27 +393,19 @@
             }
         }
 
-        // إطلاق إعلان (مع الحماية من الحقن)
         function publishAd() {
             if (!isAuthenticated) return;
             const fileInput = document.getElementById('ad-image');
-            // استخدام دالة الحماية للنصوص والروابط
             const text = escapeHTML(document.getElementById('ad-text').value);
             let link = document.getElementById('ad-link').value;
             
-            // فلترة مبدئية للرابط لضمان أنه يبدأ ب http
-            if(link && !link.startsWith('http')) {
-                link = 'https://' + escapeHTML(link);
-            } else {
-                link = escapeHTML(link);
-            }
+            if(link && !link.startsWith('http')) link = 'https://' + escapeHTML(link);
+            else link = escapeHTML(link);
 
             const btn = document.getElementById('btn-ad');
-
             if(!fileInput.files[0]) return alert("الرجاء اختيار صورة للإعلان!");
 
-            btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> جاري تجهيز وإرسال الإعلان...";
-
+            btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> جاري التجهيز...";
             const file = fileInput.files[0];
             const reader = new FileReader();
             
@@ -351,26 +414,16 @@
                 img.onload = function() {
                     const canvas = document.createElement('canvas');
                     const MAX_WIDTH = 600; 
-                    let width = img.width;
-                    let height = img.height;
-
-                    if (width > MAX_WIDTH) {
-                        height *= MAX_WIDTH / width;
-                        width = MAX_WIDTH;
-                    }
-
-                    canvas.width = width;
-                    canvas.height = height;
+                    let width = img.width; let height = img.height;
+                    if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                    canvas.width = width; canvas.height = height;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
 
                     const compressedBase64 = canvas.toDataURL('image/jpeg', 0.6);
 
                     db.ref('senpa_ads/current').set({
-                        image: compressedBase64,
-                        text: text,
-                        link: link,
-                        timestamp: Date.now()
+                        image: compressedBase64, text: text, link: link, timestamp: Date.now()
                     }).then(() => {
                         btn.innerHTML = "<i class='fas fa-check'></i> تم إطلاق الإعلان!";
                         setTimeout(() => btn.innerHTML = "<i class='fas fa-broadcast-tower'></i> إطلاق الإعلان الآن", 2000);
@@ -381,7 +434,6 @@
             reader.readAsDataURL(file);
         }
 
-        // سجل الزوار
         function loadVisitors() {
             if (!isAuthenticated) return;
             db.ref('senpa_visitors').limitToLast(50).on('value', snap => {
@@ -390,7 +442,6 @@
                 snap.forEach(child => {
                     const data = child.val();
                     const tr = document.createElement('tr');
-                    // حماية بيانات الزوار عند العرض
                     tr.innerHTML = `
                         <td>${escapeHTML(data.ip) || '-'}</td>
                         <td>${escapeHTML(data.country) || '-'}</td>
