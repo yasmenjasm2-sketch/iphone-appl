@@ -13,12 +13,24 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
     <style>
+        /* إضافات مخصصة لمنع التحديد ونسخ الشاشة والمكبر في أجهزة أبل */
+        * {
+            -webkit-touch-callout: none !important;
+            -webkit-user-select: none !important;
+            user-select: none !important;
+            -webkit-user-drag: none !important;
+        }
+
+        /* استثناء واجهة الاشتراك ليتمكن اللاعب من نسخ رقم جهازه */
+        .allow-select {
+            -webkit-user-select: text !important;
+            user-select: text !important;
+        }
+
         html, body {
             margin: 0; padding: 0; width: 100vw; height: 100vh;
             overflow: hidden; background-color: #000;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            -webkit-user-select: none; user-select: none;
-            -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent;
             touch-action: none; overscroll-behavior-y: none;
             overscroll-behavior-x: none; position: fixed;
         }
@@ -93,7 +105,27 @@
         @keyframes pulse { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.7); } 70% { transform: scale(1.02); box-shadow: 0 0 0 10px rgba(255, 71, 87, 0); } 100% { transform: scale(1); } }
 
         #btn-beta { position: fixed; right: 20px; top: 50%; transform: translateY(-50%); background: #222; border: 1px solid #444; padding: 12px 18px; color: #fff; border-radius: 8px; cursor: pointer; z-index: 999999; font-size: 16px; font-weight: bold; display: none; }
-        #btn-switch { position: fixed; left: 20px; top: 20px; background: rgba(0, 123, 255, 0.8); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); border: 2px solid rgba(255,255,255,0.2); color: white; border-radius: 50%; width: 55px; height: 55px; display: none; font-size: 24px; font-weight: bold; align-items: center; justify-content: center; z-index: 999999; cursor: pointer; }
+        
+        /* تعديلات زر التبديل لدعم الحركة وفك القفل */
+        #btn-switch { 
+            position: fixed; left: 20px; top: 20px; 
+            background: rgba(0, 123, 255, 0.8); backdrop-filter: blur(4px); 
+            -webkit-backdrop-filter: blur(4px); border: 2px solid rgba(255,255,255,0.2); 
+            color: white; border-radius: 50%; width: 55px; height: 55px; 
+            display: none; font-size: 24px; font-weight: bold; 
+            align-items: center; justify-content: center; z-index: 999999; 
+            cursor: pointer; touch-action: none; /* مهم لمنع سحب المتصفح مع الزر */
+            transition: background 0.3s, box-shadow 0.3s, border 0.3s;
+        }
+        
+        /* ستايل الزر عند فتح القفل والسحب */
+        #btn-switch.dragging {
+            border: 2px dashed #ff4757;
+            transform: scale(1.1);
+            opacity: 0.9;
+            box-shadow: 0 0 20px rgba(255, 71, 87, 0.8);
+        }
+
         #loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.95); color: white; display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 9999999; text-align: center; }
         .spinner { border: 4px solid rgba(255, 255, 255, 0.1); border-top: 4px solid #007bff; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 20px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -113,9 +145,9 @@
             <div class="wallet-section" id="wallet-section-container" style="display: none;">
                 <h3 style="margin-top:0; color:#2ed573;"><i class="fas fa-lock"></i> نظام الحماية والاشتراك</h3>
                 
-                <div style="background: #000; border: 1px dashed #007bff; padding: 15px; border-radius: 10px; margin-bottom: 15px; user-select: text;">
+                <div style="background: #000; border: 1px dashed #007bff; padding: 15px; border-radius: 10px; margin-bottom: 15px;" class="allow-select">
                     <span style="font-size: 13px; color: #007bff; display: block; margin-bottom: 5px;">رقم جهازك الثابت (انسخه للتعبئة):</span>
-                    <span id="display-device-id" style="font-family: monospace; color: #2ed573; font-size: 22px; font-weight: bold; letter-spacing: 2px;"></span>
+                    <span id="display-device-id" style="font-family: monospace; color: #2ed573; font-size: 22px; font-weight: bold; letter-spacing: 2px;" class="allow-select"></span>
                 </div>
                 
                 <button class="btn-check" onclick="manualCheck()"><i class="fas fa-sync-alt"></i> تحديث الرصيد والاشتراك</button>
@@ -149,7 +181,42 @@
     <iframe id="fans-frame" src="https://delt.io/" allowfullscreen="true" scrolling="no"></iframe>
 
     <script>
-        // --- إعدادات Firebase ---
+        // =======================================================
+        // 1. دوال مساعدة خاصة بأجهزة أبل والآيفون (حماية الشاشة)
+        // =======================================================
+
+        // إخفاء شريط البحث في السفاري بشكل تلقائي
+        function hideSafariSearchBar() {
+            setTimeout(function() {
+                window.scrollTo(0, 1);
+            }, 100);
+        }
+        window.addEventListener("orientationchange", hideSafariSearchBar);
+        window.addEventListener("load", hideSafariSearchBar);
+
+        // منع القوائم المنبثقة، نسخ الشاشة، والمكبر عند اللعب بالجويستيك
+        document.addEventListener('contextmenu', function(e) {
+            // السماح في واجهة الدخول فقط
+            if(!document.getElementById('welcome-screen').style.display || document.getElementById('welcome-screen').style.display !== 'none') return;
+            e.preventDefault();
+        });
+        document.addEventListener('selectstart', function(e) {
+            if(e.target.classList && e.target.classList.contains('allow-select')) return;
+            e.preventDefault();
+        });
+        document.addEventListener('dragstart', function(e) { e.preventDefault(); });
+        
+        // منع التكبير المزدوج في الآيفون (Double Tap Zoom)
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function (event) {
+            let now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) { event.preventDefault(); }
+            lastTouchEnd = now;
+        }, false);
+
+        // =======================================================
+        // 2. إعدادات Firebase ونظام الحماية
+        // =======================================================
         const firebaseConfig = {
             apiKey: "AIzaSyApqVwnKmq0gJ7k-UM-jLNxaYlBPkRx1Go",
             authDomain: "chatlive-4387e.firebaseapp.com",
@@ -162,12 +229,10 @@
         if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const db = firebase.database();
 
-        // متغيرات النظام
         let userBalance = 0;
         let deviceIP = "";
         let deviceFingerprint = btoa(navigator.userAgent + screen.width + "x" + screen.height);
 
-        // توليد رقم جهاز ثابت للمستخدم وحفظه
         function getDeviceID() {
             let id = localStorage.getItem('remas_fixed_vip_id');
             if (!id) {
@@ -180,13 +245,11 @@
         const currentCard = getDeviceID();
         document.getElementById("display-device-id").innerText = currentCard;
 
-        // جلب الـ IP الخاص باللاعب ثم بدء التحقق التلقائي
         fetch('https://api.ipify.org?format=json').then(r => r.json()).then(data => { 
             deviceIP = data.ip; 
             autoCheckSystem();
-        }).catch(e => { autoCheckSystem(); }); // يتحقق حتى لو فشل جلب الـ IP
+        }).catch(e => { autoCheckSystem(); });
 
-        // دالة التحقق التلقائية والمخفية
         function autoCheckSystem() {
             db.ref('senpa_points/' + currentCard).once('value', snap => {
                 document.getElementById("auth-loading").style.display = "none";
@@ -198,16 +261,10 @@
                 const walletSection = document.getElementById("wallet-section-container");
 
                 if (data && data.sub_expiry && data.sub_expiry > now) {
-                    // اللاعب مشترك حالياً!
                     if (data.sub_fp === deviceFingerprint || data.sub_ip === deviceIP || !data.sub_fp) {
-                        // إخفاء كل شيء يخص الدفع والاشتراك
                         walletSection.style.display = "none";
-                        
-                        // فتح زر الدخول مباشرة
                         btnStart.classList.add("unlocked");
                         btnStart.innerHTML = "<i class='fas fa-play'></i> دخول للعبة الآن";
-                        
-                        // ربط البصمة في حال كان أول دخول
                         if (!data.sub_fp) {
                             db.ref('senpa_points/' + currentCard).update({ sub_fp: deviceFingerprint, sub_ip: deviceIP });
                         }
@@ -215,13 +272,11 @@
                         showSubscriptionUI(data, "⚠️ عذراً، هذا الاشتراك مرتبط بجهاز آخر!");
                     }
                 } else {
-                    // غير مشترك أو الرصيد منتهي (نظهر له شاشة المحفظة)
                     showSubscriptionUI(data, "حالة الاشتراك: غير فعال 🔴");
                 }
             });
         }
 
-        // إظهار واجهة الاشتراك وتفاصيل الرصيد لغير المشتركين
         function showSubscriptionUI(data, msg) {
             document.getElementById("wallet-section-container").style.display = "block";
             document.getElementById("balance-display").innerText = userBalance.toFixed(2) + "$";
@@ -244,14 +299,12 @@
             }
         }
 
-        // التحديث اليدوي في حال اللاعب شحن وهو داخل الصفحة
         function manualCheck() {
             document.getElementById("wallet-section-container").style.display = "none";
             document.getElementById("auth-loading").style.display = "block";
             autoCheckSystem();
         }
 
-        // شراء الاشتراك
         function buySubscription() {
             if (userBalance < 7.99) { alert("رصيدك غير كافٍ!"); return; }
 
@@ -265,13 +318,15 @@
                 sub_fp: deviceFingerprint 
             }).then(() => {
                 alert("تم تفعيل اشتراكك بنجاح لمدة شهر!");
-                manualCheck(); // تحديث الواجهة للدخول مباشرة
+                manualCheck(); 
             }).catch(err => {
                 alert("حدث خطأ أثناء التفعيل.");
             });
         }
 
-        // --- أكواد تشغيل اللعبة الأساسية ---
+        // =======================================================
+        // 3. أكواد تشغيل اللعبة الأساسية
+        // =======================================================
         const welcomeScreen = document.getElementById("welcome-screen");
         const btnStart = document.getElementById("btn-start");
         const btnBeta = document.getElementById("btn-beta");
@@ -312,6 +367,7 @@
                         }
                     }).catch(e => console.log(e));
                 }
+                hideSafariSearchBar(); // محاولة إخفاء الشريط مرة أخرى
             } catch (e) { console.log(e); }
 
             loadingScreen.style.display = "flex";
@@ -323,7 +379,24 @@
             }, 3000);
         });
 
-        btnSwitch.addEventListener("click", () => {
+        // =======================================================
+        // 4. نظام تحريك زر T (Drag and Drop) والتبديل
+        // =======================================================
+        let dragTimeout;
+        let isDragging = false;
+        let initialX, initialY;
+        
+        // استعادة مكان الزر المحفوظ من الجلسة السابقة
+        const savedLeft = localStorage.getItem("btnSwitch_left");
+        const savedTop = localStorage.getItem("btnSwitch_top");
+        if (savedLeft && savedTop) {
+            btnSwitch.style.left = savedLeft;
+            btnSwitch.style.top = savedTop;
+            btnSwitch.style.right = 'auto'; // تجاوز الإعدادات الافتراضية
+        }
+
+        // دالة تبديل اللعبة (تعمل فقط إذا لم يكن اللاعب يقوم بسحب الزر)
+        function toggleGameFrames() {
             keepPageAwake(); 
             isSecondVersion = !isSecondVersion; 
             if (isSecondVersion) {
@@ -337,11 +410,61 @@
                 btnSwitch.style.background = "rgba(0, 123, 255, 0.8)"; 
                 btnSwitch.style.boxShadow = "0 4px 15px rgba(0, 0, 0, 0.5)";
             }
+        }
+
+        // أحداث اللمس (Touch) للزر
+        btnSwitch.addEventListener('touchstart', (e) => {
+            if (e.touches.length > 1) return;
+            const touch = e.touches[0];
+            const rect = btnSwitch.getBoundingClientRect();
+            initialX = touch.clientX - rect.left;
+            initialY = touch.clientY - rect.top;
+
+            // إذا ضغط لمدة 350 ملي ثانية يتم فتح القفل
+            dragTimeout = setTimeout(() => {
+                isDragging = true;
+                btnSwitch.classList.add("dragging");
+                // اهتزاز خفيف للأجهزة المدعومة كتنبيه بفتح القفل
+                if (navigator.vibrate) { navigator.vibrate(50); } 
+            }, 350);
+        }, { passive: false });
+
+        btnSwitch.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            e.preventDefault(); // إيقاف تمرير الشاشة في الخلفية
+            const touch = e.touches[0];
+            
+            // حساب الموضع الجديد ومنع خروج الزر خارج حواف الشاشة
+            let newX = touch.clientX - initialX;
+            let newY = touch.clientY - initialY;
+            
+            newX = Math.max(0, Math.min(newX, window.innerWidth - btnSwitch.offsetWidth));
+            newY = Math.max(0, Math.min(newY, window.innerHeight - btnSwitch.offsetHeight));
+
+            btnSwitch.style.left = newX + 'px';
+            btnSwitch.style.top = newY + 'px';
+            btnSwitch.style.right = 'auto'; 
+        }, { passive: false });
+
+        btnSwitch.addEventListener('touchend', (e) => {
+            clearTimeout(dragTimeout);
+            if (isDragging) {
+                // إقفال الزر في مكانه الجديد
+                isDragging = false;
+                btnSwitch.classList.remove("dragging");
+                // حفظ المكان الجديد في المتصفح
+                localStorage.setItem("btnSwitch_left", btnSwitch.style.left);
+                localStorage.setItem("btnSwitch_top", btnSwitch.style.top);
+            } else {
+                // إذا لم يتم السحب (مجرد ضغطة سريعة)، قم بالتبديل
+                toggleGameFrames();
+            }
         });
 
+        // تبديل باستخدام لوحة المفاتيح
         document.addEventListener("keydown", (e) => {
             if (e.code === "Tab" && btnSwitch.style.display !== "none") {
-                e.preventDefault(); btnSwitch.click(); 
+                e.preventDefault(); toggleGameFrames(); 
             }
         });
     </script>
