@@ -64,7 +64,6 @@
         input:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 5px rgba(242, 0, 255, 0.3); }
         textarea { height: 150px; direction: ltr; text-align: left; font-family: monospace; }
         
-        /* تنسيق خاص لحقل البطاقة */
         .card-input { font-family: 'Courier New', Courier, monospace; letter-spacing: 2px; text-align: center; font-size: 16px; color: #ffd700; }
 
         .btn {
@@ -107,9 +106,9 @@
     <div id="main-container">
 
         <div class="card" style="border-color: #ffd700;">
-            <h2 style="color: #ffd700; text-shadow: 0 0 15px rgba(255, 215, 0, 0.4);"><i class="fas fa-coins"></i> إدارة أرصدة بطاقات العملاء</h2>
+            <h2 style="color: #ffd700; text-shadow: 0 0 15px rgba(255, 215, 0, 0.4);"><i class="fas fa-coins"></i> إدارة أرصدة بطاقات العملاء للاشتراكات</h2>
             <p style="color: #aaa; font-size: 13px; margin-bottom: 15px;">
-                قم بإدخال رقم بطاقة العميل لإضافة أو سحب الرصيد (موجب للتعبئة، سالب للسحب).
+                قم بإدخال رقم بطاقة العميل لإضافة أو سحب الرصيد (موجب للتعبئة، سالب للسحب). هذا الرصيد سيستخدمه العميل لتفعيل اشتراكه (7.99$).
             </p>
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                 <div class="form-group" style="flex: 1; min-width: 250px;">
@@ -285,7 +284,7 @@
                 
                 let allOrders = [];
                 snap.forEach(userNode => {
-                    const userCard = userNode.key; // مفتاح المستخدم الآن هو رقم البطاقة
+                    const userCard = userNode.key; 
                     userNode.forEach(orderNode => {
                         const order = orderNode.val();
                         order.id = orderNode.key;
