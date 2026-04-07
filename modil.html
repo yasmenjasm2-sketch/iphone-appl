@@ -39,11 +39,10 @@
             overflow-y: auto; padding: 20px; box-sizing: border-box;
         }
 
-        /* تم تكبير الشاشة هنا */
         .welcome-box {
             background: linear-gradient(145deg, #1e1e1e, #141414);
             border: 1px solid #ff4757; border-radius: 16px;
-            padding: 30px; width: 95%; max-width: 550px; /* تكبير العرض */
+            padding: 30px; width: 95%; max-width: 550px;
             text-align: center; color: #fff;
             box-shadow: 0 10px 40px rgba(255, 71, 87, 0.3);
             animation: fadeIn 0.5s ease-out;
@@ -54,19 +53,12 @@
         .credits { color: #a4b0be; font-size: 14px; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; }
         .credits span { color: #007bff; font-weight: bold; }
 
-        /* قسم المحفظة والاشتراك */
         .wallet-section {
             background: rgba(0,0,0,0.5); border: 1px solid #444; border-radius: 12px;
             padding: 20px; margin-bottom: 25px; text-align: center;
         }
 
-        .wallet-section input {
-            width: 80%; padding: 12px; margin-bottom: 15px; background: #111;
-            border: 1px solid #007bff; color: gold; border-radius: 8px;
-            text-align: center; font-size: 16px; font-family: monospace; letter-spacing: 2px; outline: none;
-        }
-
-        .wallet-info { margin-top: 15px; font-size: 16px; display: none; }
+        .wallet-info { margin-top: 15px; font-size: 16px; display: block; }
         .balance-text { color: gold; font-weight: bold; font-size: 20px; }
         
         .btn-check {
@@ -88,10 +80,9 @@
         .btn-start {
             background: #444; color: #888; border: none; padding: 15px 25px;
             font-size: 18px; border-radius: 8px; width: 100%; font-weight: bold;
-            transition: all 0.3s; pointer-events: none; /* مقفل افتراضياً */
+            transition: all 0.3s; pointer-events: none;
         }
         
-        /* كلاس لتفعيل زر الدخول */
         .btn-start.unlocked {
             background: #007bff; color: white; cursor: pointer; pointer-events: auto;
             box-shadow: 0 4px 15px rgba(0, 123, 255, 0.4);
@@ -115,10 +106,19 @@
             <h1>🔴 Multi Delt.io VIP</h1>
             <p class="credits">تطوير وبرمجة: <span>Remas</span> 🌷</p>
             
-            <div class="wallet-section">
+            <div id="auth-loading" style="color: #007bff; font-weight: bold; margin: 20px 0;">
+                <i class="fas fa-spinner fa-spin"></i> جاري التحقق من حالة الاشتراك...
+            </div>
+
+            <div class="wallet-section" id="wallet-section-container" style="display: none;">
                 <h3 style="margin-top:0; color:#2ed573;"><i class="fas fa-lock"></i> نظام الحماية والاشتراك</h3>
-                <input type="text" id="wallet-id" placeholder="أدخل رقم بطاقتك هنا...">
-                <button class="btn-check" onclick="checkCard()"><i class="fas fa-search"></i> تحقق من البطاقة</button>
+                
+                <div style="background: #000; border: 1px dashed #007bff; padding: 15px; border-radius: 10px; margin-bottom: 15px; user-select: text;">
+                    <span style="font-size: 13px; color: #007bff; display: block; margin-bottom: 5px;">رقم جهازك الثابت (انسخه للتعبئة):</span>
+                    <span id="display-device-id" style="font-family: monospace; color: #2ed573; font-size: 22px; font-weight: bold; letter-spacing: 2px;"></span>
+                </div>
+                
+                <button class="btn-check" onclick="manualCheck()"><i class="fas fa-sync-alt"></i> تحديث الرصيد والاشتراك</button>
                 
                 <div id="wallet-info" class="wallet-info">
                     <p>رصيدك الحالي: <span id="balance-display" class="balance-text">0.00$</span></p>
@@ -132,7 +132,7 @@
                 </a>
             </div>
 
-            <button id="btn-start" class="btn-start"><i class="fas fa-ban"></i> الدخول مقفل (يتطلب اشتراك)</button>
+            <button id="btn-start" class="btn-start"><i class="fas fa-ban"></i> الدخول مقفل</button>
         </div>
     </div>
 
@@ -146,7 +146,7 @@
     </div>
 
     <iframe id="game-frame" src="https://delt.io/" allowfullscreen="true" scrolling="no"></iframe>
-    <iframe id="fans-frame" src="https://yasmenjasm2-sketch.github.io/totoman/" allowfullscreen="true" scrolling="no"></iframe>
+    <iframe id="fans-frame" src="https://delt.io/" allowfullscreen="true" scrolling="no"></iframe>
 
     <script>
         // --- إعدادات Firebase ---
@@ -164,94 +164,112 @@
 
         // متغيرات النظام
         let userBalance = 0;
-        let currentCard = "";
         let deviceIP = "";
-        let deviceFingerprint = btoa(navigator.userAgent + screen.width + "x" + screen.height); // بصمة الجهاز
+        let deviceFingerprint = btoa(navigator.userAgent + screen.width + "x" + screen.height);
 
-        // جلب الـ IP الخاص باللاعب
-        fetch('https://api.ipify.org?format=json').then(r => r.json()).then(data => { deviceIP = data.ip; }).catch(e => console.log("IP Fetch Error"));
+        // توليد رقم جهاز ثابت للمستخدم وحفظه
+        function getDeviceID() {
+            let id = localStorage.getItem('remas_fixed_vip_id');
+            if (!id) {
+                id = 'RMS-' + Math.random().toString(36).substr(2, 8).toUpperCase();
+                localStorage.setItem('remas_fixed_vip_id', id);
+            }
+            return id;
+        }
+        
+        const currentCard = getDeviceID();
+        document.getElementById("display-device-id").innerText = currentCard;
 
-        // التحقق من البطاقة
-        function checkCard() {
-            const cardInput = document.getElementById("wallet-id").value.trim();
-            if (!cardInput) { alert("الرجاء إدخال رقم البطاقة!"); return; }
-            
-            currentCard = cardInput;
-            document.getElementById("wallet-info").style.display = "block";
-            document.getElementById("btn-buy").style.display = "none";
-            
-            // قراءة بيانات البطاقة من فايربيس (نفس مسار الأدمن)
+        // جلب الـ IP الخاص باللاعب ثم بدء التحقق التلقائي
+        fetch('https://api.ipify.org?format=json').then(r => r.json()).then(data => { 
+            deviceIP = data.ip; 
+            autoCheckSystem();
+        }).catch(e => { autoCheckSystem(); }); // يتحقق حتى لو فشل جلب الـ IP
+
+        // دالة التحقق التلقائية والمخفية
+        function autoCheckSystem() {
             db.ref('senpa_points/' + currentCard).once('value', snap => {
+                document.getElementById("auth-loading").style.display = "none";
                 const data = snap.val();
                 userBalance = data && data.balance ? parseFloat(data.balance) : 0;
-                document.getElementById("balance-display").innerText = userBalance.toFixed(2) + "$";
+                
+                const now = Date.now();
+                const btnStart = document.getElementById("btn-start");
+                const walletSection = document.getElementById("wallet-section-container");
 
-                checkSubscription(data);
+                if (data && data.sub_expiry && data.sub_expiry > now) {
+                    // اللاعب مشترك حالياً!
+                    if (data.sub_fp === deviceFingerprint || data.sub_ip === deviceIP || !data.sub_fp) {
+                        // إخفاء كل شيء يخص الدفع والاشتراك
+                        walletSection.style.display = "none";
+                        
+                        // فتح زر الدخول مباشرة
+                        btnStart.classList.add("unlocked");
+                        btnStart.innerHTML = "<i class='fas fa-play'></i> دخول للعبة الآن";
+                        
+                        // ربط البصمة في حال كان أول دخول
+                        if (!data.sub_fp) {
+                            db.ref('senpa_points/' + currentCard).update({ sub_fp: deviceFingerprint, sub_ip: deviceIP });
+                        }
+                    } else {
+                        showSubscriptionUI(data, "⚠️ عذراً، هذا الاشتراك مرتبط بجهاز آخر!");
+                    }
+                } else {
+                    // غير مشترك أو الرصيد منتهي (نظهر له شاشة المحفظة)
+                    showSubscriptionUI(data, "حالة الاشتراك: غير فعال 🔴");
+                }
             });
         }
 
-        // التحقق من حالة الاشتراك
-        function checkSubscription(data) {
+        // إظهار واجهة الاشتراك وتفاصيل الرصيد لغير المشتركين
+        function showSubscriptionUI(data, msg) {
+            document.getElementById("wallet-section-container").style.display = "block";
+            document.getElementById("balance-display").innerText = userBalance.toFixed(2) + "$";
+            
             const subStatusText = document.getElementById("sub-status");
             const btnBuy = document.getElementById("btn-buy");
             const btnStart = document.getElementById("btn-start");
-            
-            const now = Date.now();
 
-            if (data && data.sub_expiry && data.sub_expiry > now) {
-                // المشترك لديه اشتراك ساري، يجب التحقق من البصمة والـ IP
-                if (data.sub_ip === deviceIP || data.sub_fp === deviceFingerprint) {
-                    subStatusText.innerText = "حالة الاشتراك: فعال 🟢";
-                    subStatusText.style.color = "#2ed573";
-                    
-                    // فتح الزر
-                    btnStart.classList.add("unlocked");
-                    btnStart.innerHTML = "<i class='fas fa-play'></i> دخول للعبة الآن";
-                } else {
-                    subStatusText.innerText = "⚠️ عذراً، هذا الاشتراك مرتبط بجهاز آخر!";
-                    subStatusText.style.color = "#ff4757";
-                    btnStart.classList.remove("unlocked");
-                    btnStart.innerHTML = "<i class='fas fa-ban'></i> الدخول مقفل";
-                }
-            } else {
-                // غير مشترك أو منتهي
-                subStatusText.innerText = "حالة الاشتراك: غير فعال 🔴";
-                subStatusText.style.color = "#ff4757";
-                btnStart.classList.remove("unlocked");
-                btnStart.innerHTML = "<i class='fas fa-ban'></i> الدخول مقفل";
+            subStatusText.innerText = msg;
+            subStatusText.style.color = msg.includes("غير فعال") ? "#ff4757" : "#ff9f43";
+            btnStart.classList.remove("unlocked");
+            btnStart.innerHTML = "<i class='fas fa-ban'></i> الدخول مقفل";
 
-                // إظهار زر الشراء إذا كان الرصيد يكفي
-                if (userBalance >= 7.99) {
-                    btnBuy.style.display = "block";
-                } else {
-                    subStatusText.innerHTML += "<br><small style='color:#f09433;'>رصيدك لا يكفي للاشتراك، الرجاء التواصل لشحن النقاط.</small>";
-                }
+            if (userBalance >= 7.99 && msg.includes("غير فعال")) {
+                btnBuy.style.display = "block";
+                subStatusText.innerHTML += "<br><small style='color:#2ed573;'>رصيدك يكفي! اضغط على تفعيل بالأسفل.</small>";
+            } else if (msg.includes("غير فعال")) {
+                btnBuy.style.display = "none";
+                subStatusText.innerHTML += "<br><small style='color:#f09433;'>رصيدك لا يكفي للاشتراك، الرجاء التواصل لشحن النقاط.</small>";
             }
+        }
+
+        // التحديث اليدوي في حال اللاعب شحن وهو داخل الصفحة
+        function manualCheck() {
+            document.getElementById("wallet-section-container").style.display = "none";
+            document.getElementById("auth-loading").style.display = "block";
+            autoCheckSystem();
         }
 
         // شراء الاشتراك
         function buySubscription() {
-            if (userBalance < 7.99) {
-                alert("رصيدك غير كافٍ!"); return;
-            }
+            if (userBalance < 7.99) { alert("رصيدك غير كافٍ!"); return; }
 
             const newBalance = userBalance - 7.99;
-            const expiryDate = Date.now() + (30 * 24 * 60 * 60 * 1000); // 30 يوماً
+            const expiryDate = Date.now() + (30 * 24 * 60 * 60 * 1000); 
             
-            // تحديث قاعدة البيانات
             db.ref('senpa_points/' + currentCard).update({
                 balance: newBalance,
                 sub_expiry: expiryDate,
-                sub_ip: deviceIP,        // ربط الـ IP
-                sub_fp: deviceFingerprint // ربط بصمة الجهاز
+                sub_ip: deviceIP,
+                sub_fp: deviceFingerprint 
             }).then(() => {
                 alert("تم تفعيل اشتراكك بنجاح لمدة شهر!");
-                checkCard(); // تحديث الواجهة تلقائياً
+                manualCheck(); // تحديث الواجهة للدخول مباشرة
             }).catch(err => {
                 alert("حدث خطأ أثناء التفعيل.");
             });
         }
-
 
         // --- أكواد تشغيل اللعبة الأساسية ---
         const welcomeScreen = document.getElementById("welcome-screen");
@@ -277,7 +295,7 @@
         document.addEventListener("touchstart", keepPageAwake, { once: true });
 
         btnStart.addEventListener("click", () => {
-            if(!btnStart.classList.contains("unlocked")) return; // حماية إضافية
+            if(!btnStart.classList.contains("unlocked")) return; 
             keepPageAwake();
             welcomeScreen.style.display = "none";
             btnBeta.style.display = "block";
@@ -326,7 +344,6 @@
                 e.preventDefault(); btnSwitch.click(); 
             }
         });
-
     </script>
 </body>
 </html>
