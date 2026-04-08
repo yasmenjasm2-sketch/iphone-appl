@@ -145,9 +145,14 @@
             <div class="wallet-section" id="wallet-section-container" style="display: none;">
                 <h3 style="margin-top:0; color:#2ed573;"><i class="fas fa-lock"></i> نظام الحماية والاشتراك</h3>
                 
-                <div style="background: #000; border: 1px dashed #007bff; padding: 15px; border-radius: 10px; margin-bottom: 15px;" class="allow-select">
-                    <span style="font-size: 13px; color: #007bff; display: block; margin-bottom: 5px;">رقم جهازك الثابت (انسخه للتعبئة):</span>
-                    <span id="display-device-id" style="font-family: monospace; color: #2ed573; font-size: 22px; font-weight: bold; letter-spacing: 2px;" class="allow-select"></span>
+                <div style="background: #000; border: 1px dashed #007bff; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                    <span style="font-size: 13px; color: #007bff; display: block; margin-bottom: 10px;">رقم جهازك الثابت (انسخه للتعبئة):</span>
+                    <div style="display: flex; justify-content: center; align-items: center; background: #111; border-radius: 8px; padding: 8px; border: 1px solid #333;">
+                        <span id="display-device-id" style="font-family: monospace; color: #2ed573; font-size: 20px; font-weight: bold; letter-spacing: 1px; flex-grow: 1; text-align: left; padding-left: 10px;" class="allow-select"></span>
+                        <button onclick="copyDeviceID()" style="background: #007bff; color: white; border: none; border-radius: 6px; padding: 8px 15px; cursor: pointer; font-size: 14px; font-weight: bold; display: flex; align-items: center; gap: 6px; transition: 0.3s; margin-left: 10px; pointer-events: auto;">
+                            <i class="fas fa-copy" id="copy-icon"></i> <span id="copy-text">نسخ</span>
+                        </button>
+                    </div>
                 </div>
                 
                 <button class="btn-check" onclick="manualCheck()"><i class="fas fa-sync-alt"></i> تحديث الرصيد والاشتراك</button>
@@ -322,6 +327,32 @@
             }).catch(err => {
                 alert("حدث خطأ أثناء التفعيل.");
             });
+        }
+
+        // =======================================================
+        // دالة نسخ الآي دي الاحترافية (جديدة)
+        // =======================================================
+        function copyDeviceID() {
+            const idText = document.getElementById("display-device-id").innerText;
+            const tempInput = document.createElement("input");
+            tempInput.value = idText;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            tempInput.setSelectionRange(0, 99999); /* لضمان العمل على الموبايل */
+            try {
+                document.execCommand("copy");
+                const copyBtnText = document.getElementById("copy-text");
+                const copyIcon = document.getElementById("copy-icon");
+                copyBtnText.innerText = "تم!";
+                copyIcon.className = "fas fa-check";
+                setTimeout(() => { 
+                    copyBtnText.innerText = "نسخ"; 
+                    copyIcon.className = "fas fa-copy";
+                }, 2000);
+            } catch (err) {
+                alert("يرجى النسخ يدوياً، جهازك لا يدعم النسخ التلقائي.");
+            }
+            document.body.removeChild(tempInput);
         }
 
         // =======================================================
