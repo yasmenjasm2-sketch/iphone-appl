@@ -96,6 +96,30 @@
         .order-details { display: none; margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--glass-border); font-size: 14px; color: var(--text-muted); }
         .order-card.open .order-details { display: block; }
 
+        /* ستايل النافذة المنبثقة (Modal) */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px);
+            z-index: 1000; justify-content: center; align-items: center; padding: 20px;
+        }
+        .modal-content {
+            background: var(--card-bg); border: 1px solid var(--primary);
+            border-radius: 20px; padding: 30px; text-align: center; max-width: 400px; width: 100%;
+            box-shadow: var(--neon-glow);
+        }
+        .modal-content i { font-size: 40px; color: var(--pending); margin-bottom: 15px; }
+        .modal-content h3 { margin-bottom: 15px; color: var(--text-main); }
+        .modal-content p { color: var(--text-muted); line-height: 1.6; margin-bottom: 25px; font-size: 15px; }
+        .modal-content p strong { color: var(--primary); }
+        .modal-buttons { display: flex; gap: 15px; justify-content: center; }
+        .btn-confirm, .btn-cancel {
+            padding: 10px 20px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; flex: 1; font-size: 15px;
+        }
+        .btn-confirm { background: linear-gradient(45deg, var(--primary), var(--secondary)); color: #fff; }
+        .btn-cancel { background: transparent; border: 1px solid var(--text-muted); color: var(--text-main); }
+        .btn-confirm:hover { box-shadow: var(--neon-glow); }
+        .btn-cancel:hover { background: rgba(255,255,255,0.1); }
+
         [dir="ltr"] .back-btn { left: auto; right: 20px; }
     </style>
 </head>
@@ -106,7 +130,7 @@
         
         <div class="header-title">
             <h2><i class="fas fa-rocket"></i> قسم الرشق</h2>
-            <p>Free & Paid Boosting Services</p>
+            <p>Free Boosting Services</p>
         </div>
 
         <div id="alertBox" class="alert-msg"></div>
@@ -148,11 +172,24 @@
 
     <div class="orders-container">
         <div class="header-title" style="margin-bottom: 15px; padding-bottom: 10px;">
-            <h3 style="color: var(--primary);"><i class="fas fa-box-open"></i> طلباتي | يجب الحساب لايكون خاصMy Orders</h3>
+            <h3 style="color: var(--primary);"><i class="fas fa-box-open"></i> طلباتي | My Orders</h3>
             <p style="font-size: 12px;">اضغط على الطلب لعرض التفاصيل</p>
         </div>
         <div id="ordersList">
             <p style="text-align: center; color: var(--text-muted);">جاري التحميل...</p>
+        </div>
+    </div>
+
+    <div id="privacyModal" class="modal-overlay">
+        <div class="modal-content">
+            <i class="fas fa-user-lock"></i>
+            <h3>تنبيه هام جداً!</h3>
+            <p>لكي ينجح الرشق، يجب أن يكون حسابك (انستغرام أو تيك توك) في <strong>وضع عام (Public)</strong> وليس خاص (Private).</p>
+            <p>إذا كان حسابك خاصاً، سيتم رفض الطلب ولن يصلك شيء.</p>
+            <div class="modal-buttons">
+                <button id="confirmBtn" class="btn-confirm">نعم، حسابي عام</button>
+                <button id="cancelBtn" class="btn-cancel">إلغاء المراجعة</button>
+            </div>
         </div>
     </div>
 
@@ -186,16 +223,13 @@
             userIP = data.ip;
             sanitizedIP = userIP.replace(/\./g, '_');
             
-            // خوارزمية كشف الـ VPN البسيطة
             const browserTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
             const isp = (data.org || "").toLowerCase();
             const suspiciousWords = ['hosting', 'cloud', 'datacenter', 'vpn', 'proxy', 'tor', 'digitalocean', 'aws', 'amazon', 'google', 'linode', 'ovh'];
             
-            // الفحص الأول: اختلاف الوقت بين المتصفح وسيرفر الـ IP
             if (data.timezone && browserTz !== data.timezone) {
                 isVPNDetected = true;
             }
-            // الفحص الثاني: مزود الخدمة ينتمي لسيرفرات سحابية
             if (suspiciousWords.some(word => isp.includes(word))) {
                 isVPNDetected = true;
             }
@@ -212,18 +246,12 @@
             document.getElementById('ordersList').innerHTML = "<p style='text-align:center;'>فشل في جلب البيانات.</p>";
         });
 
+        // الخدمات كلها مجانية الآن
         const services = {
             "Instagram": {
                 "ig_followers": { name: "متابعين / Followers", packages: ["مجانًا (حد أقصى 20) | Free (Max 20)"] },
                 "ig_likes": { name: "إعجابات / Likes", packages: ["مجانًا (حد أقصى 100) | Free (Max 100)"] },
-                "ig_views": { 
-                    name: "مشاهدات / Views", 
-                    packages: [
-                        "مجانًا (حد أقصى 400) | Free (Max 400)",
-                        "مدفوع 5$ (1000 مشاهدة) | Paid 5$ (1000 Views)",
-                        "مدفوع 10$ (2500 مشاهدة) | Paid 10$ (2500 Views)"
-                    ] 
-                },
+                "ig_views": { name: "مشاهدات / Views", packages: ["مجانًا (حد أقصى 400) | Free (Max 400)"] },
                 "ig_saves": { name: "حفظ / Saves", packages: ["مجانًا | Free Saves"] },
                 "ig_shares": { name: "مشاركة / Shares", packages: ["مجانًا | Free Shares"] },
                 "ig_story": { name: "مشاهدات ستوري / Story Views", packages: ["مجانًا | Free Story Views"] }
@@ -267,12 +295,11 @@
             alertBox.style.display = "block"; setTimeout(() => { alertBox.style.display = "none"; }, 8000);
         }
 
-        // دالة التحكم بوقت الانتظار (6 ساعات)
         function startCooldown(lastOrderTimestamp) {
-            if (isVPNDetected) return; // لا تفعل شيء إذا كان VPN مفعل
+            if (isVPNDetected) return; 
 
             const btn = document.getElementById("submitBtn");
-            const sixHoursMs = 6 * 60 * 60 * 1000; // 6 ساعات بالملي ثانية
+            const sixHoursMs = 6 * 60 * 60 * 1000; 
             clearInterval(countdownTimer);
 
             countdownTimer = setInterval(() => {
@@ -290,7 +317,6 @@
 
                     btn.innerHTML = `<i class="fas fa-lock"></i> يفتح بعد: ${hours}س و ${minutes}د و ${seconds}ث`;
                 } else {
-                    // انقضت الـ 6 ساعات
                     hasGlobalOrder = false;
                     btn.disabled = false;
                     btn.innerHTML = '<i class="fas fa-paper-plane"></i> إرسال الطلب / Submit Request';
@@ -299,7 +325,6 @@
             }, 1000);
         }
 
-        // جلب طلبات المستخدم وفحص الوقت
         function loadMyOrders() {
             if(!sanitizedIP) return;
             db.ref('senpa_orders/' + sanitizedIP).on('value', snap => {
@@ -310,7 +335,6 @@
                 if (!data) {
                     ordersList.innerHTML = "<p style='text-align:center; color: var(--text-muted);'>لا توجد طلبات سابقة.</p>";
                     
-                    // التحقق من المتصفح في حال مسح قاعدة البيانات وبقى المتصفح
                     const localTimestamp = parseInt(localStorage.getItem("remas_last_order_time"));
                     if(localTimestamp) startCooldown(localTimestamp);
                     else hasGlobalOrder = false;
@@ -318,7 +342,6 @@
                     return;
                 }
 
-                // عرض الطلبات واستخراج أحدث وقت طلب
                 const orderKeys = Object.keys(data).reverse();
                 let latestTimestamp = parseInt(localStorage.getItem("remas_last_order_time")) || 0;
 
@@ -360,18 +383,16 @@
                     ordersList.appendChild(card);
                 });
 
-                // تفعيل عداد الـ 6 ساعات
                 if (latestTimestamp > 0) {
                     startCooldown(latestTimestamp);
                 }
             });
         }
 
-        // إرسال الطلب
-        document.getElementById("boostForm").addEventListener("submit", async function(e) {
+        // إيقاف الإرسال المباشر وإظهار النافذة المنبثقة
+        document.getElementById("boostForm").addEventListener("submit", function(e) {
             e.preventDefault();
 
-            // تحقق نهائي من الـ VPN 
             if (isVPNDetected) {
                 showAlert("لا يمكنك الطلب أثناء استخدام VPN.", "error");
                 return;
@@ -382,19 +403,30 @@
                 return;
             }
 
+            // إظهار نافذة التحذير الخاصة بالحساب العام
+            document.getElementById("privacyModal").style.display = "flex";
+        });
+
+        // زر إلغاء الطلب من النافذة المنبثقة
+        document.getElementById("cancelBtn").addEventListener("click", function() {
+            document.getElementById("privacyModal").style.display = "none";
+        });
+
+        // زر التأكيد وإرسال الطلب الفعلي
+        document.getElementById("confirmBtn").addEventListener("click", async function() {
+            // إخفاء النافذة المنبثقة
+            document.getElementById("privacyModal").style.display = "none";
+
             const btn = document.getElementById("submitBtn");
-            btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإرسال...';
+            btn.disabled = true; 
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإرسال...';
 
             const platform = document.getElementById("platform").value;
-            const serviceKey = document.getElementById("service").value;
             const serviceName = document.getElementById("service").options[document.getElementById("service").selectedIndex].text;
             const packageInfo = document.getElementById("packageSelect").value;
             const targetLink = document.getElementById("targetLink").value.trim();
-            const isPaid = packageInfo.includes("مدفوع") || packageInfo.includes("Paid");
-
             const currentTimestamp = Date.now();
 
-            // حفظ الطلب في Firebase
             const newOrderRef = db.ref('senpa_orders/' + sanitizedIP).push();
             const orderData = {
                 platform: platform,
@@ -403,22 +435,21 @@
                 target: targetLink,
                 status: "pending", 
                 time: new Date().toLocaleString('en-US', { hour12: true }),
-                timestamp: currentTimestamp // حفظ الوقت الدقيق بالملي ثانية
+                timestamp: currentTimestamp
             };
 
             await newOrderRef.set(orderData);
 
-            // إرسال إشعار تليجرام للأدمن
             const message = `
-🚀 *طلب رشق جديد* 🚀
+🚀 *طلب رشق جديد (مجاني)* 🚀
 
 📱 *المنصة:* ${platform}
 ⚙️ *الخدمة:* ${serviceName}
 📦 *الباقة:* ${packageInfo}
 🔗 *الرابط:* \`${targetLink}\`
 🌐 *ايبى العميل:* \`${userIP}\`
+✅ *العميل أكد أن حسابه عام*
 
-${isPaid ? '💰 **طلب مدفوع! تواصل مع العميل**' : '🎁 **طلب مجاني**'}
 💡 *توجّه إلى لوحة الإدارة (Admin Panel) لتغيير حالة الطلب!*
             `;
 
@@ -426,15 +457,10 @@ ${isPaid ? '💰 **طلب مدفوع! تواصل مع العميل**' : '🎁 **
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ chat_id: CHAT_ID, text: message, parse_mode: 'Markdown' })
             }).then(() => {
-                // حفظ بصمة الوقت في المتصفح
                 localStorage.setItem("remas_last_order_time", currentTimestamp);
-                
-                showAlert("تم إرسال طلبك بنجاح! תابعه في الأسفل ✅. (يمكنك الطلب مجدداً بعد 6 ساعات)", "success");
+                showAlert("تم إرسال طلبك بنجاح! تابعه في الأسفل ✅. (يمكنك الطلب مجدداً بعد 6 ساعات)", "success");
                 document.getElementById("targetLink").value = "";
-                
-                // تشغيل العد التنازلي فوراً بعد الإرسال
                 startCooldown(currentTimestamp);
-
             }).catch(() => {
                 btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> إرسال الطلب';
             });
