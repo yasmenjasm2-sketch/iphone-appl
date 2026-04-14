@@ -138,7 +138,7 @@
         <form id="boostForm">
             <div class="form-group">
                 <label><i class="fas fa-share-alt"></i> المنصة / Platform</label>
-                <select id="platform" required onchange="updateServices()">
+                <select id="platform" onchange="updateServices()">
                     <option value="" disabled selected>اختر المنصة / Choose Platform</option>
                     <option value="Instagram">Instagram - انستغرام</option>
                     <option value="TikTok">TikTok - تيك توك</option>
@@ -147,24 +147,24 @@
 
             <div class="form-group">
                 <label><i class="fas fa-list"></i> الخدمة المطلوبة / Required Service</label>
-                <select id="service" required onchange="updatePackages()">
+                <select id="service" onchange="updatePackages()">
                     <option value="" disabled selected>اختر الخدمة / Choose Service</option>
                 </select>
             </div>
 
             <div class="form-group">
                 <label><i class="fas fa-gem"></i> الباقة / Package</label>
-                <select id="packageSelect" required>
+                <select id="packageSelect">
                     <option value="" disabled selected>اختر الباقة / Choose Package</option>
                 </select>
             </div>
 
             <div class="form-group">
                 <label><i class="fas fa-link"></i> الرابط أو المعرف / Link or Username</label>
-                <input type="text" id="targetLink" required placeholder="ضع الرابط أو المعرف هنا / Paste link or username here">
+                <input type="text" id="targetLink" placeholder="ضع الرابط أو المعرف هنا / Paste link or username here">
             </div>
 
-            <button type="submit" class="submit-btn" id="submitBtn">
+            <button type="button" class="submit-btn" id="submitBtn" onclick="validateAndShowModal()">
                 <i class="fas fa-paper-plane"></i> إرسال الطلب / Submit Request
             </button>
         </form>
@@ -194,7 +194,7 @@
     </div>
 
     <script>
-        // إعدادات البوت والـ Firebase الخاصة بك
+        // إعدادات البوت والـ Firebase
         const BOT_TOKEN = "7894436976:AAFdg77dpzCgpeLnkwAQqP9POkwZMwWoikg";
         const CHAT_ID = "-1003783270855";
 
@@ -218,8 +218,10 @@
 
         if (localStorage.getItem('remas_theme') === 'light') document.body.classList.add('light-mode');
 
-        // جلب الـ IP وفحص الـ VPN المخادع
+        // جلب الـ IP مع حماية في حال فشل الجلب
         fetch('https://ipapi.co/json/').then(r => r.json()).then(data => {
+            if(data.error || !data.ip) throw new Error("API Limit");
+            
             userIP = data.ip;
             sanitizedIP = userIP.replace(/\./g, '_');
             
@@ -227,12 +229,8 @@
             const isp = (data.org || "").toLowerCase();
             const suspiciousWords = ['hosting', 'cloud', 'datacenter', 'vpn', 'proxy', 'tor', 'digitalocean', 'aws', 'amazon', 'google', 'linode', 'ovh'];
             
-            if (data.timezone && browserTz !== data.timezone) {
-                isVPNDetected = true;
-            }
-            if (suspiciousWords.some(word => isp.includes(word))) {
-                isVPNDetected = true;
-            }
+            if (data.timezone && browserTz !== data.timezone) isVPNDetected = true;
+            if (suspiciousWords.some(word => isp.includes(word))) isVPNDetected = true;
 
             if(isVPNDetected) {
                 showAlert("⚠️ تم اكتشاف استخدام (VPN/Proxy). يُرجى إيقافه وإعادة تحميل الصفحة لتتمكن من الطلب.", "error");
@@ -243,10 +241,12 @@
 
             loadMyOrders();
         }).catch(err => {
-            document.getElementById('ordersList').innerHTML = "<p style='text-align:center;'>فشل في جلب البيانات.</p>";
+            // في حال فشل جلب الأيبي (بسبب حظر الإعلانات مثلا) لا يتوقف الموقع
+            userIP = "Unknown_IP";
+            sanitizedIP = "guest_" + Math.floor(Math.random() * 1000000);
+            loadMyOrders();
         });
 
-        // الخدمات كلها مجانية الآن
         const services = {
             "Instagram": {
                 "ig_followers": { name: "متابعين / Followers", packages: ["مجانًا (حد أقصى 20) | Free (Max 20)"] },
@@ -326,7 +326,7 @@
         }
 
         function loadMyOrders() {
-            if(!sanitizedIP) return;
+            if(!sanitizedIP || sanitizedIP.startsWith("guest_")) return;
             db.ref('senpa_orders/' + sanitizedIP).on('value', snap => {
                 const ordersList = document.getElementById('ordersList');
                 ordersList.innerHTML = "";
@@ -389,9 +389,18 @@
             });
         }
 
-        // إيقاف الإرسال المباشر وإظهار النافذة المنبثقة
-        document.getElementById("boostForm").addEventListener("submit", function(e) {
-            e.preventDefault();
+        // دالة التحقق اليدوي وإظهار النافذة المنبثقة
+        function validateAndShowModal() {
+            const platform = document.getElementById("platform").value;
+            const service = document.getElementById("service").value;
+            const packageSelect = document.getElementById("packageSelect").value;
+            const targetLink = document.getElementById("targetLink").value.trim();
+
+            // التأكد من أن جميع الحقول ممتلئة
+            if(!platform || !service || !packageSelect || !targetLink) {
+                showAlert("⚠️ يرجى تعبئة جميع الحقول المطلوبة (المنصة، الخدمة، الباقة، والرابط) قبل الإرسال.", "error");
+                return;
+            }
 
             if (isVPNDetected) {
                 showAlert("لا يمكنك الطلب أثناء استخدام VPN.", "error");
@@ -403,16 +412,16 @@
                 return;
             }
 
-            // إظهار نافذة التحذير الخاصة بالحساب العام
+            // إذا كان كل شيء سليم، نعرض النافذة المنبثقة
             document.getElementById("privacyModal").style.display = "flex";
-        });
+        }
 
         // زر إلغاء الطلب من النافذة المنبثقة
         document.getElementById("cancelBtn").addEventListener("click", function() {
             document.getElementById("privacyModal").style.display = "none";
         });
 
-        // زر التأكيد وإرسال الطلب الفعلي
+        // زر التأكيد وإرسال الطلب الفعلي للمسؤول
         document.getElementById("confirmBtn").addEventListener("click", async function() {
             // إخفاء النافذة المنبثقة
             document.getElementById("privacyModal").style.display = "none";
