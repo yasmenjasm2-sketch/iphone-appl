@@ -6,7 +6,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="mobile-web-app-capable" content="yes">
-    <title>🔴 Delt.io - Remas (Multi)</title>
+    <title>🔴 Delt.io - Hamza Elhumada (Multi)</title>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
@@ -136,10 +136,14 @@
     <div id="welcome-screen">
         <div class="welcome-box">
             <h1>🔴 Multi Delt.io VIP</h1>
-            <p class="credits">تطوير وبرمجة: <span>Remas</span> 🌷</p>
+            <p class="credits">تطوير وبرمجة: <span>Hamza Elhumada</span> 🌷</p>
+            
+            <div style="background: rgba(255, 71, 87, 0.15); border: 1px solid #ff4757; color: #ff4757; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 15px; margin-bottom: 15px; line-height: 1.5;">
+                ⚠️ تنبيه: تم إيقاف الأداة من قبل المطور (عادة يعود لأسباب الصيانة).
+            </div>
             
             <div id="auth-loading" style="color: #007bff; font-weight: bold; margin: 20px 0;">
-                <i class="fas fa-spinner fa-spin"></i> جاري التحقق من حالة الاشتراك...
+                <i class="fas fa-spinner fa-spin"></i> جاري التحقق من النظام...
             </div>
 
             <div class="wallet-section" id="wallet-section-container" style="display: none;">
@@ -169,7 +173,7 @@
                 </a>
             </div>
 
-            <button id="btn-start" class="btn-start"><i class="fas fa-ban"></i> الدخول مقفل</button>
+            <button id="btn-start" class="btn-start"><i class="fas fa-ban"></i> الدخول مقفل للصيانة</button>
         </div>
     </div>
 
@@ -179,7 +183,7 @@
     <div id="loading-screen">
         <div class="spinner"></div>
         <h2>جاري تجهيز النسخ...</h2>
-        <p>للمعلومية ريماس قامت بتطويرها لكم 🌷</p>
+        <p>للمعلومية حمزة الحمادة قام بتطويرها لكم 🌷</p>
     </div>
 
     <iframe id="game-frame" src="https://delt.io/" allowfullscreen="true" scrolling="no"></iframe>
@@ -189,8 +193,6 @@
         // =======================================================
         // 1. دوال مساعدة خاصة بأجهزة أبل والآيفون (حماية الشاشة)
         // =======================================================
-
-        // إخفاء شريط البحث في السفاري بشكل تلقائي
         function hideSafariSearchBar() {
             setTimeout(function() {
                 window.scrollTo(0, 1);
@@ -199,9 +201,7 @@
         window.addEventListener("orientationchange", hideSafariSearchBar);
         window.addEventListener("load", hideSafariSearchBar);
 
-        // منع القوائم المنبثقة، نسخ الشاشة، والمكبر عند اللعب بالجويستيك
         document.addEventListener('contextmenu', function(e) {
-            // السماح في واجهة الدخول فقط
             if(!document.getElementById('welcome-screen').style.display || document.getElementById('welcome-screen').style.display !== 'none') return;
             e.preventDefault();
         });
@@ -211,7 +211,6 @@
         });
         document.addEventListener('dragstart', function(e) { e.preventDefault(); });
         
-        // منع التكبير المزدوج في الآيفون (Double Tap Zoom)
         let lastTouchEnd = 0;
         document.addEventListener('touchend', function (event) {
             let now = (new Date()).getTime();
@@ -220,7 +219,7 @@
         }, false);
 
         // =======================================================
-        // 2. إعدادات Firebase ونظام الحماية
+        // 2. إعدادات Firebase ونظام الحماية (معدل لوضع الصيانة)
         // =======================================================
         const firebaseConfig = {
             apiKey: "AIzaSyApqVwnKmq0gJ7k-UM-jLNxaYlBPkRx1Go",
@@ -255,6 +254,7 @@
             autoCheckSystem();
         }).catch(e => { autoCheckSystem(); });
 
+        // التعديل الجذري هنا للصيانة: يظهر البيانات لكن يبقي الزر مقفلاً
         function autoCheckSystem() {
             db.ref('senpa_points/' + currentCard).once('value', snap => {
                 document.getElementById("auth-loading").style.display = "none";
@@ -264,44 +264,49 @@
                 const now = Date.now();
                 const btnStart = document.getElementById("btn-start");
                 const walletSection = document.getElementById("wallet-section-container");
+                const subStatusText = document.getElementById("sub-status");
+                const btnBuy = document.getElementById("btn-buy");
 
+                // إظهار قسم المحفظة للجميع دائماً
+                walletSection.style.display = "block";
+                document.getElementById("balance-display").innerText = userBalance.toFixed(2) + "$";
+
+                // التحقق الوهمي للمشتركين لكي يطمئنوا أن اشتراكاتهم فعالة
                 if (data && data.sub_expiry && data.sub_expiry > now) {
                     if (data.sub_fp === deviceFingerprint || data.sub_ip === deviceIP || !data.sub_fp) {
-                        walletSection.style.display = "none";
-                        btnStart.classList.add("unlocked");
-                        btnStart.innerHTML = "<i class='fas fa-play'></i> دخول للعبة الآن";
+                        subStatusText.innerHTML = "حالة الاشتراك: فعال 🟢<br><small style='color:#f09433;'>* تم إيقاف الدخول مؤقتاً للصيانة، اشتراكك بأمان ولن يضيع.</small>";
+                        subStatusText.style.color = "#2ed573";
+                        btnBuy.style.display = "none";
+                        // الحفاظ على البصمة إذا كان أول تسجيل له
                         if (!data.sub_fp) {
                             db.ref('senpa_points/' + currentCard).update({ sub_fp: deviceFingerprint, sub_ip: deviceIP });
                         }
                     } else {
-                        showSubscriptionUI(data, "⚠️ عذراً، هذا الاشتراك مرتبط بجهاز آخر!");
+                        subStatusText.innerText = "⚠️ عذراً، هذا الاشتراك مرتبط بجهاز آخر!";
+                        subStatusText.style.color = "#ff4757";
+                        btnBuy.style.display = "none";
                     }
                 } else {
-                    showSubscriptionUI(data, "حالة الاشتراك: غير فعال 🔴");
+                    subStatusText.innerText = "حالة الاشتراك: غير فعال 🔴";
+                    subStatusText.style.color = "#ff4757";
+                    if (userBalance >= 7.99) {
+                        btnBuy.style.display = "block";
+                        subStatusText.innerHTML += "<br><small style='color:#2ed573;'>رصيدك يكفي! اضغط على تفعيل بالأسفل.</small>";
+                    } else {
+                        btnBuy.style.display = "none";
+                        subStatusText.innerHTML += "<br><small style='color:#f09433;'>رصيدك لا يكفي للاشتراك، الرجاء التواصل لشحن النقاط.</small>";
+                    }
                 }
+
+                // ==========================================
+                // التعديل الأهم: قفل زر الدخول للجميع إجبارياً
+                // ==========================================
+                btnStart.classList.remove("unlocked");
+                btnStart.innerHTML = "<i class='fas fa-ban'></i> الدخول مقفل للصيانة";
+                btnStart.style.pointerEvents = "none";
+                btnStart.style.background = "#444";
+                btnStart.style.color = "#888";
             });
-        }
-
-        function showSubscriptionUI(data, msg) {
-            document.getElementById("wallet-section-container").style.display = "block";
-            document.getElementById("balance-display").innerText = userBalance.toFixed(2) + "$";
-            
-            const subStatusText = document.getElementById("sub-status");
-            const btnBuy = document.getElementById("btn-buy");
-            const btnStart = document.getElementById("btn-start");
-
-            subStatusText.innerText = msg;
-            subStatusText.style.color = msg.includes("غير فعال") ? "#ff4757" : "#ff9f43";
-            btnStart.classList.remove("unlocked");
-            btnStart.innerHTML = "<i class='fas fa-ban'></i> الدخول مقفل";
-
-            if (userBalance >= 7.99 && msg.includes("غير فعال")) {
-                btnBuy.style.display = "block";
-                subStatusText.innerHTML += "<br><small style='color:#2ed573;'>رصيدك يكفي! اضغط على تفعيل بالأسفل.</small>";
-            } else if (msg.includes("غير فعال")) {
-                btnBuy.style.display = "none";
-                subStatusText.innerHTML += "<br><small style='color:#f09433;'>رصيدك لا يكفي للاشتراك، الرجاء التواصل لشحن النقاط.</small>";
-            }
         }
 
         function manualCheck() {
@@ -312,7 +317,6 @@
 
         function buySubscription() {
             if (userBalance < 7.99) { alert("رصيدك غير كافٍ!"); return; }
-
             const newBalance = userBalance - 7.99;
             const expiryDate = Date.now() + (30 * 24 * 60 * 60 * 1000); 
             
@@ -330,7 +334,7 @@
         }
 
         // =======================================================
-        // دالة نسخ الآي دي الاحترافية (جديدة)
+        // دالة نسخ الآي دي الاحترافية 
         // =======================================================
         function copyDeviceID() {
             const idText = document.getElementById("display-device-id").innerText;
@@ -338,7 +342,7 @@
             tempInput.value = idText;
             document.body.appendChild(tempInput);
             tempInput.select();
-            tempInput.setSelectionRange(0, 99999); /* لضمان العمل على الموبايل */
+            tempInput.setSelectionRange(0, 99999); 
             try {
                 document.execCommand("copy");
                 const copyBtnText = document.getElementById("copy-text");
@@ -398,7 +402,7 @@
                         }
                     }).catch(e => console.log(e));
                 }
-                hideSafariSearchBar(); // محاولة إخفاء الشريط مرة أخرى
+                hideSafariSearchBar();
             } catch (e) { console.log(e); }
 
             loadingScreen.style.display = "flex";
@@ -417,16 +421,14 @@
         let isDragging = false;
         let initialX, initialY;
         
-        // استعادة مكان الزر المحفوظ من الجلسة السابقة
         const savedLeft = localStorage.getItem("btnSwitch_left");
         const savedTop = localStorage.getItem("btnSwitch_top");
         if (savedLeft && savedTop) {
             btnSwitch.style.left = savedLeft;
             btnSwitch.style.top = savedTop;
-            btnSwitch.style.right = 'auto'; // تجاوز الإعدادات الافتراضية
+            btnSwitch.style.right = 'auto';
         }
 
-        // دالة تبديل اللعبة (تعمل فقط إذا لم يكن اللاعب يقوم بسحب الزر)
         function toggleGameFrames() {
             keepPageAwake(); 
             isSecondVersion = !isSecondVersion; 
@@ -443,7 +445,6 @@
             }
         }
 
-        // أحداث اللمس (Touch) للزر
         btnSwitch.addEventListener('touchstart', (e) => {
             if (e.touches.length > 1) return;
             const touch = e.touches[0];
@@ -451,21 +452,18 @@
             initialX = touch.clientX - rect.left;
             initialY = touch.clientY - rect.top;
 
-            // إذا ضغط لمدة 350 ملي ثانية يتم فتح القفل
             dragTimeout = setTimeout(() => {
                 isDragging = true;
                 btnSwitch.classList.add("dragging");
-                // اهتزاز خفيف للأجهزة المدعومة كتنبيه بفتح القفل
                 if (navigator.vibrate) { navigator.vibrate(50); } 
             }, 350);
         }, { passive: false });
 
         btnSwitch.addEventListener('touchmove', (e) => {
             if (!isDragging) return;
-            e.preventDefault(); // إيقاف تمرير الشاشة في الخلفية
+            e.preventDefault(); 
             const touch = e.touches[0];
             
-            // حساب الموضع الجديد ومنع خروج الزر خارج حواف الشاشة
             let newX = touch.clientX - initialX;
             let newY = touch.clientY - initialY;
             
@@ -480,19 +478,15 @@
         btnSwitch.addEventListener('touchend', (e) => {
             clearTimeout(dragTimeout);
             if (isDragging) {
-                // إقفال الزر في مكانه الجديد
                 isDragging = false;
                 btnSwitch.classList.remove("dragging");
-                // حفظ المكان الجديد في المتصفح
                 localStorage.setItem("btnSwitch_left", btnSwitch.style.left);
                 localStorage.setItem("btnSwitch_top", btnSwitch.style.top);
             } else {
-                // إذا لم يتم السحب (مجرد ضغطة سريعة)، قم بالتبديل
                 toggleGameFrames();
             }
         });
 
-        // تبديل باستخدام لوحة المفاتيح
         document.addEventListener("keydown", (e) => {
             if (e.code === "Tab" && btnSwitch.style.display !== "none") {
                 e.preventDefault(); toggleGameFrames(); 
