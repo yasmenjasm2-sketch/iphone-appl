@@ -34,6 +34,22 @@
             border: 1px solid var(--glass-border); border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.8), var(--neon-glow);
         }
 
+        /* ستايل الشعار */
+        .site-logo {
+            width: 110px;
+            height: auto;
+            margin: 0 auto 15px auto;
+            display: block;
+            border-radius: 25px;
+            box-shadow: var(--neon-glow);
+            border: 2px solid var(--primary);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .site-logo:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.6);
+        }
+
         .header-title { text-align: center; margin-bottom: 25px; border-bottom: 1px solid var(--glass-border); padding-bottom: 15px; }
         .header-title h2 { color: var(--primary); font-size: 24px; text-shadow: var(--neon-glow); }
         .header-title p { color: #aaa; font-size: 14px; margin-top: 5px; }
@@ -96,6 +112,7 @@
 
     <div class="container">
         <div class="header-title">
+            <img src="logo.jpg" alt="Remas Logo" class="site-logo">
             <h2><i class="fas fa-crown"></i> الرشق بريميوم</h2>
             <p>خدمات مدفوعة موثوقة وسريعة التنفيذ</p>
         </div>
