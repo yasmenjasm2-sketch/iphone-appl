@@ -1,9 +1,9 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Remas Scripts - senpa.io</title>
+    <title>Remas Scripts - خدمات رشق مجانأ</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
@@ -66,12 +66,39 @@
         }
 
         .header {
-            padding: 20px 30px; background: var(--card-bg); display: flex;
+            padding: 15px 30px; background: var(--card-bg); display: flex;
             justify-content: space-between; align-items: center; border-bottom: 1px solid var(--glass-border);
             backdrop-filter: blur(10px); z-index: 10;
         }
-        .brand { font-size: 22px; font-weight: bold; display: flex; align-items: center; gap: 10px; }
-        .brand i { color: var(--primary); text-shadow: var(--neon-glow); }
+        
+        /* --- تنسيقات الشعار الجديد --- */
+        .brand { 
+            font-size: 24px; 
+            font-weight: 800; 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+        }
+        .brand-logo-img {
+            height: 45px;
+            width: 45px;
+            border-radius: 10px;
+            object-fit: cover;
+            border: 2px solid var(--primary);
+            box-shadow: var(--neon-glow);
+            transition: 0.3s ease;
+        }
+        .brand:hover .brand-logo-img {
+            transform: scale(1.08) rotate(-3deg);
+            box-shadow: 0 0 25px var(--primary);
+        }
+        .brand-text {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0px 2px 10px rgba(0, 242, 254, 0.2);
+            letter-spacing: 1px;
+        }
         
         .menu-btn {
             background: none; border: none; color: var(--text-main); font-size: 24px;
@@ -211,18 +238,15 @@
                 قسم الرشق مجاني | Boost Section
             </a>
             <a href="modil.html" class="sidebar-btn" style="background: linear-gradient(45deg, #667eea, #764ba2); color: white !important; border: none; text-decoration: none; justify-content: center; margin-top: 10px; box-shadow: 0 0 15px rgba(102, 126, 234, 0.4);">
-    <i class="fas fa-mobile-screen-button" style="font-size: 24px;"></i>
-    ملتي للجوالات | Multi Mobile
-</a>
+                <i class="fas fa-mobile-screen-button" style="font-size: 24px;"></i>
+                ملتي للجوالات | Multi Mobile
+            </a>
 
-
-            <!-- زر الرشق بريميوم الجديد -->
             <a href="premium-boost.html" class="sidebar-btn" style="background: linear-gradient(45deg, #ffd700, #ff8c00); color: black !important; border: none; text-decoration: none; justify-content: center; margin-top: 10px; box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);">
                 <i class="fas fa-crown" style="font-size: 24px;"></i>
                 الرشق بريميوم | Premium
             </a>
         
-
             <div style="margin-top: auto; text-align: center; font-size: 12px; color: var(--text-muted);">
                 Powered by Remas Scripts © 2026
             </div>
@@ -232,8 +256,9 @@
     <div class="app-container">
         <div class="header">
             <div class="brand">
-                <i class="fas fa-code"></i> Remas Scripts 
-                <span id="files-count" style="font-size: 10px; background: var(--primary); color: #fff; padding: 2px 6px; border-radius: 4px; margin-right: 5px;">0 Files</span>
+                <img src="logo.jpg" alt="Remas Logo" class="brand-logo-img">
+                <span class="brand-text">Remas Scripts</span>
+                <span id="files-count" style="font-size: 10px; background: var(--primary); color: #000; font-weight: bold; padding: 3px 8px; border-radius: 6px; margin-right: 5px;">0 Files</span>
             </div>
             <button class="menu-btn" onclick="toggleSidebar()"><i class="fas fa-cog"></i></button>
         </div>
