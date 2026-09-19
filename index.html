@@ -3,41 +3,215 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>اختصار الروابط - FawakihAI</title>
+    <title>FawakihAI - اختصار الروابط الاحترافي</title>
+    <!-- خطوط جوجل العربية الاحترافية -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* إعدادات المظهر الأساسية */
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #1e1e2f; color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .container { background: #2a2a40; padding: 30px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 100%; max-width: 450px; text-align: center; }
-        h2 { margin-bottom: 5px; color: #4facfe; }
-        p { font-size: 14px; color: #a0a0b5; margin-bottom: 25px; }
-        input[type="url"], input[type="text"] { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #3f3f5a; border-radius: 8px; box-sizing: border-box; font-size: 16px; text-align: left; direction: ltr; background: #1e1e2f; color: #fff; outline: none; }
-        input:focus { border-color: #4facfe; }
-        button { background: linear-gradient(90deg, #00f2fe 0%, #4facfe 100%); color: white; border: none; padding: 14px 20px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%; transition: 0.3s; margin-top: 10px; }
-        button:hover { opacity: 0.9; transform: translateY(-2px); }
-        button:disabled { background: #555; cursor: not-allowed; transform: none; }
+        /* إعدادات المظهر الأساسية - تصميم احترافي داكن (Premium Dark Mode) */
+        body { 
+            font-family: 'Cairo', sans-serif; 
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); 
+            color: #fff; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            overflow: hidden;
+        }
         
-        .result-box { margin-top: 25px; display: none; background: #1e1e2f; padding: 20px; border-radius: 8px; border: 1px solid #4facfe; }
-        .result-box p { color: #fff; margin: 0 0 10px 0; font-weight: bold; }
-        .copy-btn { background: #28a745; margin-top: 15px; }
+        /* تأثيرات الخلفية المتحركة (للمظهر المدفوع) */
+        .bg-circle {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0,242,254,0.1) 0%, rgba(0,0,0,0) 70%);
+            z-index: 0;
+        }
+        .circle-1 { width: 600px; height: 600px; top: -200px; right: -150px; }
+        .circle-2 { width: 500px; height: 500px; bottom: -150px; left: -150px; }
+
+        /* صندوق الأداة (تأثير الزجاج - Glassmorphism) */
+        .container { 
+            position: relative;
+            z-index: 1;
+            background: rgba(255, 255, 255, 0.03); 
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 40px; 
+            border-radius: 20px; 
+            box-shadow: 0 25px 45px rgba(0,0,0,0.5); 
+            width: 100%; 
+            max-width: 480px; 
+            text-align: center; 
+            transition: all 0.3s ease;
+        }
+
+        h2 { 
+            margin: 0 0 10px; 
+            font-size: 28px;
+            background: linear-gradient(to right, #00f2fe, #4facfe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
         
-        #loading { display: none; color: #4facfe; margin-top: 15px; font-size: 14px; }
-        .redirect-msg { text-align: center; padding: 50px; }
-        .spinner { border: 4px solid rgba(255,255,255,0.1); border-left-color: #4facfe; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+        p { 
+            font-size: 15px; 
+            color: #b0b0c0; 
+            margin-bottom: 30px; 
+        }
+
+        /* حقول الإدخال */
+        .input-group {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        input[type="url"], input[type="text"] { 
+            width: 100%; 
+            padding: 16px 20px; 
+            border: 2px solid rgba(255, 255, 255, 0.05); 
+            border-radius: 12px; 
+            box-sizing: border-box; 
+            font-size: 16px; 
+            text-align: left; 
+            direction: ltr; 
+            background: rgba(0, 0, 0, 0.2); 
+            color: #fff; 
+            outline: none; 
+            transition: 0.3s;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+        
+        input:focus { 
+            border-color: #4facfe; 
+            box-shadow: 0 0 15px rgba(79, 172, 254, 0.3);
+        }
+
+        /* الأزرار الاحترافية */
+        button { 
+            background: linear-gradient(90deg, #00c6ff 0%, #0072ff 100%); 
+            color: white; 
+            border: none; 
+            padding: 16px 20px; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            font-size: 18px; 
+            font-weight: 700; 
+            width: 100%; 
+            transition: all 0.3s ease; 
+            font-family: 'Cairo', sans-serif;
+            box-shadow: 0 10px 20px rgba(0, 114, 255, 0.3);
+        }
+        
+        button:hover { 
+            transform: translateY(-3px); 
+            box-shadow: 0 15px 25px rgba(0, 114, 255, 0.5);
+        }
+        
+        button:active {
+            transform: translateY(1px);
+        }
+
+        button:disabled { 
+            background: #444; 
+            color: #888;
+            cursor: not-allowed; 
+            transform: none; 
+            box-shadow: none;
+        }
+        
+        /* صندوق النتيجة */
+        .result-box { 
+            margin-top: 30px; 
+            display: none; 
+            background: rgba(0, 0, 0, 0.3); 
+            padding: 25px 20px; 
+            border-radius: 15px; 
+            border: 1px solid rgba(79, 172, 254, 0.3); 
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-box p { 
+            color: #fff; 
+            margin: 0 0 15px 0; 
+            font-weight: 600; 
+            font-size: 16px;
+        }
+        
+        .copy-btn { 
+            background: linear-gradient(90deg, #11998e 0%, #38ef7d 100%); 
+            margin-top: 15px; 
+            box-shadow: 0 10px 20px rgba(56, 239, 125, 0.3);
+        }
+        .copy-btn:hover {
+            box-shadow: 0 15px 25px rgba(56, 239, 125, 0.5);
+        }
+        
+        /* شاشة التحميل والتوجيه */
+        #loading { 
+            display: none; 
+            color: #4facfe; 
+            margin-top: 20px; 
+            font-size: 15px; 
+            font-weight: 600;
+        }
+        
+        .redirect-msg { text-align: center; padding: 40px 10px; }
+        .redirect-msg h3 { font-size: 22px; color: #fff; margin-top: 20px; }
+        
+        .spinner { 
+            border: 4px solid rgba(255,255,255,0.05); 
+            border-left-color: #4facfe; 
+            border-radius: 50%; 
+            width: 60px; 
+            height: 60px; 
+            animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite; 
+            margin: 0 auto; 
+        }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* الشارة (Badge) لتبدو كخدمة مدفوعة */
+        .pro-badge {
+            background: linear-gradient(90deg, #f6d365 0%, #fda085 100%);
+            color: #000;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 800;
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            letter-spacing: 1px;
+        }
     </style>
 </head>
 <body>
 
+    <!-- مؤثرات الخلفية -->
+    <div class="bg-circle circle-1"></div>
+    <div class="bg-circle circle-2"></div>
+
     <div class="container" id="main-container">
-        <h2>أداة اختصار الروابط</h2>
-        <p>اصنع رابطاً قصيراً ونادراً لموقعك بضغطة زر</p>
+        <div class="pro-badge">PRO</div>
+        <h2>FawakihAI Links</h2>
+        <p>نظام اختصار الروابط الذكي والمتميز</p>
         
-        <input type="url" id="longUrl" placeholder="https://example.com/your-long-link..." required>
-        <button id="generateBtn">توليد الدومين القصير</button>
-        <div id="loading">جاري إنشاء الرابط...</div>
+        <div class="input-group">
+            <input type="url" id="longUrl" placeholder="https://example.com/your-long-url..." required autocomplete="off">
+        </div>
+        
+        <button id="generateBtn">إنشاء الرابط المختصر</button>
+        <div id="loading">جاري معالجة وتشفير الرابط...</div>
 
         <div class="result-box" id="resultBox">
-            <p>تم الإنشاء! رابطك القصير هو:</p>
+            <p>تم إنشاء الرابط بنجاح! 🎉</p>
             <input type="text" id="shortUrl" readonly>
             <button class="copy-btn" id="copyBtn">نسخ الرابط</button>
         </div>
@@ -48,7 +222,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
-        // إعدادات مشروعك في فايربيس
+        // إعدادات مشروعك في فايربيس (تم وضعها بناءً على ملفك)
         const firebaseConfig = {
             apiKey: "AIzaSyBnKsxfa-R-K_wlAF1xhnyhGTu1CFyOGe4",
             databaseURL: "https://fawakihai-default-rtdb.firebaseio.com",
@@ -58,16 +232,22 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
+        // ==========================================
+        // إعداد الدومين الاحترافي المدفوع (تعديلك هنا)
+        // ==========================================
+        const myCustomDomain = "http://fawakihai2.com"; 
+
         // 1. نظام التوجيه (Redirect System): فحص الرابط عند الفتح
         const urlParams = new URLSearchParams(window.location.search);
         const shortId = urlParams.get('id');
 
         if (shortId) {
-            // إخفاء واجهة الإنشاء وإظهار واجهة التحميل للتوجيه
+            // واجهة احترافية عند توجيه الزائر
             document.getElementById('main-container').innerHTML = `
                 <div class="redirect-msg">
                     <div class="spinner"></div>
-                    <h3>جاري توجيهك إلى الموقع المطلوب...</h3>
+                    <h3>جاري توجيهك بأمان...</h3>
+                    <p style="color: #4facfe; margin-top: 10px;">FawakihAI Secure Gateway</p>
                 </div>
             `;
             
@@ -75,13 +255,22 @@
             get(child(dbRef, `short_urls/${shortId}`)).then((snapshot) => {
                 if (snapshot.exists()) {
                     const data = snapshot.val();
-                    window.location.href = data.originalUrl; // التوجيه الفوري
+                    // التوجيه الفوري للرابط الأصلي
+                    window.location.replace(data.originalUrl); 
                 } else {
-                    document.getElementById('main-container').innerHTML = `<h3 style="color:#ff4d4d; padding:20px;">عذراً، هذا الرابط غير موجود أو منتهي الصلاحية!</h3>`;
+                    document.getElementById('main-container').innerHTML = `
+                        <div class="redirect-msg">
+                            <h3 style="color:#ff6b6b; font-size: 24px;">⚠️ الرابط غير صالح</h3>
+                            <p>عذراً، هذا الرابط غير موجود أو تم حذفه من قاعدة البيانات.</p>
+                            <button onclick="window.location.href='?'" style="margin-top: 20px;">العودة للصفحة الرئيسية</button>
+                        </div>
+                    `;
                 }
             }).catch((error) => {
                 console.error(error);
-                document.getElementById('main-container').innerHTML = `<h3 style="color:#ff4d4d; padding:20px;">حدث خطأ في قاعدة البيانات.</h3>`;
+                document.getElementById('main-container').innerHTML = `
+                    <h3 style="color:#ff6b6b; padding:20px;">حدث خطأ في الاتصال بالسيرفر.</h3>
+                `;
             });
         }
 
@@ -97,13 +286,15 @@
 
         // 3. برمجة زر الإنشاء
         document.getElementById('generateBtn')?.addEventListener('click', async () => {
-            const longUrl = document.getElementById('longUrl').value;
+            const longUrl = document.getElementById('longUrl').value.trim();
             
-            if (!longUrl || !longUrl.startsWith('http')) {
-                alert("يرجى إدخال رابط صحيح يبدأ بـ http أو https");
+            if (!longUrl || !longUrl.match(/^https?:\/\/.+/)) {
+                alert("يرجى إدخال رابط صحيح يبدأ بـ http:// أو https://");
                 return;
             }
 
+            // إخفاء النتيجة السابقة إن وجدت وتشغيل الأنيميشن
+            document.getElementById('resultBox').style.display = 'none';
             document.getElementById('loading').style.display = 'block';
             document.getElementById('generateBtn').disabled = true;
 
@@ -116,38 +307,47 @@
                     createdAt: new Date().toISOString()
                 });
 
-                // دمج رابط موقعك الحالي مع الكود القصير
-                const currentDomain = window.location.origin + window.location.pathname;
-                const finalShortUrl = `${currentDomain}?id=${newId}`;
+                // دمج الدومين المدفوع مع الكود القصير
+                const finalShortUrl = `${myCustomDomain}/?id=${newId}`;
 
+                // عرض النتيجة
                 document.getElementById('shortUrl').value = finalShortUrl;
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('resultBox').style.display = 'block';
-                document.getElementById('generateBtn').disabled = false;
+                
+                setTimeout(() => {
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('resultBox').style.display = 'block';
+                    document.getElementById('generateBtn').disabled = false;
+                    document.getElementById('longUrl').value = ''; // تفريغ الحقل
+                }, 800); // تأخير بسيط لمحاكاة المعالجة وإعطاء طابع احترافي
 
             } catch (error) {
                 console.error(error);
-                alert("حدث خطأ أثناء حفظ الرابط. يرجى التأكد من صلاحيات (Rules) في فايربيس.");
+                alert("حدث خطأ أثناء الاتصال بقاعدة البيانات. تأكد من إعدادات Rules في Firebase.");
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('generateBtn').disabled = false;
             }
         });
 
-        // 4. برمجة زر النسخ
+        // 4. برمجة زر النسخ مع تأثيرات حركية
         document.getElementById('copyBtn')?.addEventListener('click', () => {
             const shortUrlInput = document.getElementById('shortUrl');
             shortUrlInput.select();
-            shortUrlInput.setSelectionRange(0, 99999); // لدعم الهواتف
+            shortUrlInput.setSelectionRange(0, 99999); // لدعم الهواتف المحمولة
             
             navigator.clipboard.writeText(shortUrlInput.value).then(() => {
                 const btn = document.getElementById('copyBtn');
+                const originalText = btn.innerText;
+                const originalBg = btn.style.background;
+
                 btn.innerText = "تم النسخ بنجاح ✔";
-                btn.style.background = "#20c997";
+                btn.style.background = "linear-gradient(90deg, #f2994a 0%, #f2c94c 100%)";
+                btn.style.boxShadow = "0 10px 20px rgba(242, 201, 76, 0.4)";
                 
                 setTimeout(() => {
                     btn.innerText = "نسخ الرابط";
-                    btn.style.background = "#28a745";
-                }, 2000);
+                    btn.style.background = originalBg;
+                    btn.style.boxShadow = "0 10px 20px rgba(56, 239, 125, 0.3)";
+                }, 2500);
             });
         });
     </script>
