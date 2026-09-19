@@ -3,458 +3,153 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Remas Scripts - خدمات رشق مجانأ</title>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-
+    <title>اختصار الروابط - FawakihAI</title>
     <style>
-        /* المتغيرات الأساسية (الوضع الليلي - الافتراضي) */
-        :root {
-            --primary: #00f2fe;
-            --secondary: #4facfe;
-            --bg-main: #050b14;
-            --bg-grad-1: #1a1025;
-            --bg-grad-2: #090a0f;
-            --card-bg: rgba(20, 25, 40, 0.6);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --neon-glow: 0 0 15px rgba(0, 242, 254, 0.4);
-            --sidebar-bg: rgba(10, 15, 25, 0.95);
-            --textarea-bg: rgba(0, 0, 0, 0.5);
-        }
-
-        /* متغيرات (الوضع النهاري - الفاتح) */
-        body.light-mode {
-            --primary: #0078d4;
-            --secondary: #00b4db;
-            --bg-main: #eef2f3;
-            --bg-grad-1: #ffffff;
-            --bg-grad-2: #e0e5ec;
-            --card-bg: rgba(255, 255, 255, 0.85);
-            --glass-border: rgba(0, 0, 0, 0.1);
-            --text-main: #0f172a;
-            --text-muted: #475569;
-            --neon-glow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            --sidebar-bg: rgba(255, 255, 255, 0.95);
-            --textarea-bg: rgba(240, 244, 248, 0.8);
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; transition: background 0.3s, color 0.3s; }
-
-        body {
-            background: radial-gradient(circle at top right, var(--bg-grad-1), var(--bg-grad-2), var(--bg-main));
-            color: var(--text-main);
-            display: flex; justify-content: center; align-items: center;
-            min-height: 100vh; overflow-x: hidden; background-attachment: fixed;
-        }
-
-        body::before {
-            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            background-image: radial-gradient(var(--text-main) 1px, transparent 1px);
-            background-size: 50px 50px; opacity: 0.03; z-index: -1;
-        }
-
-        .app-container {
-            width: 100%; max-width: 1000px; height: 90vh;
-            background: var(--card-bg); backdrop-filter: blur(15px);
-            border: 1px solid var(--glass-border); border-radius: 20px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8), var(--neon-glow);
-            display: flex; flex-direction: column; overflow: hidden; position: relative;
-        }
-
-        .header {
-            padding: 15px 30px; background: var(--card-bg); display: flex;
-            justify-content: space-between; align-items: center; border-bottom: 1px solid var(--glass-border);
-            backdrop-filter: blur(10px); z-index: 10;
-        }
+        /* إعدادات المظهر الأساسية */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #1e1e2f; color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { background: #2a2a40; padding: 30px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 100%; max-width: 450px; text-align: center; }
+        h2 { margin-bottom: 5px; color: #4facfe; }
+        p { font-size: 14px; color: #a0a0b5; margin-bottom: 25px; }
+        input[type="url"], input[type="text"] { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #3f3f5a; border-radius: 8px; box-sizing: border-box; font-size: 16px; text-align: left; direction: ltr; background: #1e1e2f; color: #fff; outline: none; }
+        input:focus { border-color: #4facfe; }
+        button { background: linear-gradient(90deg, #00f2fe 0%, #4facfe 100%); color: white; border: none; padding: 14px 20px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; width: 100%; transition: 0.3s; margin-top: 10px; }
+        button:hover { opacity: 0.9; transform: translateY(-2px); }
+        button:disabled { background: #555; cursor: not-allowed; transform: none; }
         
-        /* --- تنسيقات الشعار الجديد --- */
-        .brand { 
-            font-size: 24px; 
-            font-weight: 800; 
-            display: flex; 
-            align-items: center; 
-            gap: 12px; 
-        }
-        .brand-logo-img {
-            height: 45px;
-            width: 45px;
-            border-radius: 10px;
-            object-fit: cover;
-            border: 2px solid var(--primary);
-            box-shadow: var(--neon-glow);
-            transition: 0.3s ease;
-        }
-        .brand:hover .brand-logo-img {
-            transform: scale(1.08) rotate(-3deg);
-            box-shadow: 0 0 25px var(--primary);
-        }
-        .brand-text {
-            background: linear-gradient(45deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0px 2px 10px rgba(0, 242, 254, 0.2);
-            letter-spacing: 1px;
-        }
+        .result-box { margin-top: 25px; display: none; background: #1e1e2f; padding: 20px; border-radius: 8px; border: 1px solid #4facfe; }
+        .result-box p { color: #fff; margin: 0 0 10px 0; font-weight: bold; }
+        .copy-btn { background: #28a745; margin-top: 15px; }
         
-        .menu-btn {
-            background: none; border: none; color: var(--text-main); font-size: 24px;
-            cursor: pointer; transition: 0.2s;
-        }
-        .menu-btn:hover { color: var(--primary); transform: rotate(90deg); }
-
-        .scripts-container {
-            flex: 1; padding: 30px; overflow-y: auto; display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 25px;
-            align-content: start;
-        }
-
-        .file-card {
-            background: var(--card-bg); border: 1px solid var(--glass-border);
-            border-radius: 15px; padding: 20px; transition: 0.3s; cursor: pointer;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            text-align: center; height: 180px; position: relative;
-        }
-        .file-card:hover { transform: translateY(-5px); border-color: var(--primary); box-shadow: var(--neon-glow); }
-        
-        .file-icon { font-size: 50px; color: var(--primary); margin-bottom: 15px; text-shadow: var(--neon-glow); }
-        .file-title { font-size: 16px; font-weight: bold; color: var(--text-main); }
-
-        /* --- الشريط الجانبي (Sidebar) --- */
-        .sidebar-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); backdrop-filter: blur(3px); z-index: 1000;
-            opacity: 0; visibility: hidden; transition: 0.3s;
-        }
-        .sidebar {
-            position: fixed; top: 0; right: -320px; width: 300px; height: 100%;
-            background: var(--sidebar-bg); backdrop-filter: blur(20px);
-            border-left: 1px solid var(--glass-border); z-index: 1001;
-            box-shadow: -10px 0 30px rgba(0,0,0,0.5); transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex; flex-direction: column;
-        }
-        .sidebar.active { right: 0; }
-        .sidebar-overlay.active { opacity: 1; visibility: visible; }
-        
-        .sidebar-header {
-            padding: 20px; border-bottom: 1px solid var(--glass-border);
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .sidebar-header h3 { color: var(--primary); font-size: 20px; display: flex; gap: 10px; align-items: center; }
-        .close-sidebar { background: none; border: none; color: var(--text-main); font-size: 20px; cursor: pointer; }
-        .close-sidebar:hover { color: #ef4444; }
-
-        .sidebar-content { padding: 20px; display: flex; flex-direction: column; gap: 15px; }
-
-        .sidebar-btn {
-            width: 100%; padding: 15px; border-radius: 12px; border: 1px solid var(--glass-border);
-            background: var(--card-bg); color: var(--text-main); font-size: 16px; font-weight: bold;
-            cursor: pointer; display: flex; align-items: center; gap: 12px; transition: 0.3s;
-        }
-        .sidebar-btn:hover { border-color: var(--primary); box-shadow: var(--neon-glow); }
-        .sidebar-btn i { font-size: 20px; }
-
-        .ig-btn {
-            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
-            color: white !important; border: none; text-decoration: none; justify-content: center;
-        }
-        .ig-btn:hover { transform: scale(1.02); box-shadow: 0 10px 20px rgba(220, 39, 67, 0.4); border: none; }
-
-        /* نافذة السكربت */
-        .modal {
-            display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px); z-index: 100;
-            justify-content: center; align-items: center;
-        }
-        .modal-content {
-            background: var(--card-bg); border: 1px solid var(--primary); border-radius: 15px;
-            width: 90%; max-width: 600px; padding: 20px; display: flex; flex-direction: column; gap: 15px;
-            box-shadow: 0 0 30px rgba(0, 242, 254, 0.2);
-        }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; }
-        .close-btn { background: none; border: none; color: #ef4444; font-size: 20px; cursor: pointer; }
-        
-        textarea {
-            width: 100%; height: 200px; background: var(--textarea-bg); color: var(--primary);
-            border: 1px solid var(--glass-border); border-radius: 10px; padding: 15px;
-            font-family: monospace; resize: none; direction: ltr; text-align: left;
-        }
-        textarea:focus { outline: none; border-color: var(--primary); }
-
-        .modal-actions { display: flex; gap: 10px; }
-        .btn-copy { 
-            flex: 1; padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; 
-            background: var(--primary); color: #fff; display: flex; justify-content: center; align-items: center; gap: 8px; 
-            transition: 0.2s;
-        }
-        body:not(.light-mode) .btn-copy { color: #000; }
-        .btn-copy:hover { transform: translateY(-2px); box-shadow: var(--neon-glow); opacity: 0.9; }
-
-        /* الإعلان */
-        .ad-overlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.9); z-index: 9999; justify-content: center; align-items: center; flex-direction: column;
-            text-align: center; backdrop-filter: blur(10px);
-        }
-        .ad-image { max-width: 90%; max-height: 60vh; border-radius: 15px; border: 2px solid var(--primary); box-shadow: var(--neon-glow); }
-        .ad-text { margin-top: 20px; font-size: 24px; font-weight: bold; color: white; }
-        .ad-link { margin-top: 15px; display: inline-block; padding: 10px 25px; background: var(--primary); color: #000; text-decoration: none; border-radius: 25px; font-weight: bold; }
-        .ad-timer { margin-top: 20px; font-size: 16px; color: #ccc; }
+        #loading { display: none; color: #4facfe; margin-top: 15px; font-size: 14px; }
+        .redirect-msg { text-align: center; padding: 50px; }
+        .spinner { border: 4px solid rgba(255,255,255,0.1); border-left-color: #4facfe; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-    <div class="ad-overlay" id="ad-overlay">
-        <div>
-            <img id="ad-image" class="ad-image" src="" alt="إعلان">
-            <div id="ad-text" class="ad-text"></div>
-            <a id="ad-link" class="ad-link" href="#" target="_blank" style="display: none;">اضغط هنا</a>
-            <div class="ad-timer" id="ad-timer">يغلق تلقائياً بعد <span>5</span> ثواني...</div>
-        </div>
-    </div>
-
-    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <h3><i class="fas fa-sliders-h"></i> الإعدادات</h3>
-            <button class="close-sidebar" onclick="toggleSidebar()"><i class="fas fa-times"></i></button>
-        </div>
-        <div class="sidebar-content">
-            <button class="sidebar-btn" onclick="toggleTheme()">
-                <i class="fas fa-moon" id="theme-icon"></i>
-                <span id="theme-text">الوضع النهاري</span>
-            </button>
-            
-            <a href="https://www.instagram.com/6i99n?igsh=MW1wMTNpamJpMWNxeg==" target="_blank" class="sidebar-btn ig-btn">
-                <i class="fab fa-instagram" style="font-size: 24px;"></i>
-                الدعم الفني والطلبات
-            </a>
-            
-            <a href="boost.html" class="sidebar-btn" style="background: linear-gradient(45deg, #00f2fe, #4facfe); color: white !important; border: none; text-decoration: none; justify-content: center; margin-top: 10px;">
-                <i class="fas fa-rocket" style="font-size: 24px;"></i>
-                قسم الرشق مجاني | Boost Section
-            </a>
-            <a href="modil.html" class="sidebar-btn" style="background: linear-gradient(45deg, #667eea, #764ba2); color: white !important; border: none; text-decoration: none; justify-content: center; margin-top: 10px; box-shadow: 0 0 15px rgba(102, 126, 234, 0.4);">
-                <i class="fas fa-mobile-screen-button" style="font-size: 24px;"></i>
-                ملتي للجوالات | Multi Mobile
-            </a>
-
-            <a href="premium-boost.html" class="sidebar-btn" style="background: linear-gradient(45deg, #ffd700, #ff8c00); color: black !important; border: none; text-decoration: none; justify-content: center; margin-top: 10px; box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);">
-                <i class="fas fa-crown" style="font-size: 24px;"></i>
-                الرشق بريميوم | Premium
-            </a>
+    <div class="container" id="main-container">
+        <h2>أداة اختصار الروابط</h2>
+        <p>اصنع رابطاً قصيراً ونادراً لموقعك بضغطة زر</p>
         
-            <div style="margin-top: auto; text-align: center; font-size: 12px; color: var(--text-muted);">
-                Powered by Remas Scripts © 2026
-            </div>
+        <input type="url" id="longUrl" placeholder="https://example.com/your-long-link..." required>
+        <button id="generateBtn">توليد الدومين القصير</button>
+        <div id="loading">جاري إنشاء الرابط...</div>
+
+        <div class="result-box" id="resultBox">
+            <p>تم الإنشاء! رابطك القصير هو:</p>
+            <input type="text" id="shortUrl" readonly>
+            <button class="copy-btn" id="copyBtn">نسخ الرابط</button>
         </div>
     </div>
 
-    <div class="app-container">
-        <div class="header">
-            <div class="brand">
-                <img src="logo.jpg" alt="Remas Logo" class="brand-logo-img">
-                <span class="brand-text">Remas Scripts</span>
-                <span id="files-count" style="font-size: 10px; background: var(--primary); color: #000; font-weight: bold; padding: 3px 8px; border-radius: 6px; margin-right: 5px;">0 Files</span>
-            </div>
-            <button class="menu-btn" onclick="toggleSidebar()"><i class="fas fa-cog"></i></button>
-        </div>
-        
-        <div class="scripts-container" id="scripts-container"></div>
+    <!-- استدعاء مكاتب فايربيس (الإصدار 10) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
 
-        <div class="modal" id="script-modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3 id="script-modal-title" style="color: var(--text-main); margin:0;"><i class="fas fa-file-code"></i> script</h3>
-                    <button class="close-btn" onclick="closeModal()"><i class="fas fa-times"></i></button>
-                </div>
-                <textarea id="script-content" readonly placeholder="جاري التحميل..."></textarea>
-                <div class="modal-actions">
-                    <button class="btn-copy" onclick="copyContent()"><i class="fas fa-copy"></i> نسخ السكربت</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        const BOT_TOKEN = "7894436976:AAFdg77dpzCgpeLnkwAQqP9POkwZMwWoikg";
-        const CHAT_ID = "-1003783270855";
-
+        // إعدادات مشروعك في فايربيس
         const firebaseConfig = {
-            apiKey: "AIzaSyApqVwnKmq0gJ7k-UM-jLNxaYlBPkRx1Go",
-            authDomain: "chatlive-4387e.firebaseapp.com",
-            databaseURL: "https://chatlive-4387e-default-rtdb.firebaseio.com",
-            projectId: "chatlive-4387e",
-            storageBucket: "chatlive-4387e.firebasestorage.app",
-            messagingSenderId: "722728428486",
-            appId: "1:722728428486:android:847b11a7743dfb7d5ac8c7"
+            apiKey: "AIzaSyBnKsxfa-R-K_wlAF1xhnyhGTu1CFyOGe4",
+            databaseURL: "https://fawakihai-default-rtdb.firebaseio.com",
+            projectId: "fawakihai"
         };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
 
-        let currentSlotId = null;
-        let lastAdTimestamp = 0;
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
 
-        // --- نظام الوضع الليلي/النهاري ---
-        function applyTheme(isLight) {
-            const icon = document.getElementById('theme-icon');
-            const text = document.getElementById('theme-text');
-            if (isLight) {
-                document.body.classList.add('light-mode');
-                icon.className = 'fas fa-moon';
-                text.innerText = 'الوضع الليلي';
-                document.querySelector('.btn-copy').style.color = '#fff';
-            } else {
-                document.body.classList.remove('light-mode');
-                icon.className = 'fas fa-sun';
-                text.innerText = 'الوضع النهاري';
-                document.querySelector('.btn-copy').style.color = '#000';
-            }
-        }
+        // 1. نظام التوجيه (Redirect System): فحص الرابط عند الفتح
+        const urlParams = new URLSearchParams(window.location.search);
+        const shortId = urlParams.get('id');
 
-        function toggleTheme() {
-            const isLight = !document.body.classList.contains('light-mode');
-            localStorage.setItem('remas_theme', isLight ? 'light' : 'dark');
-            applyTheme(isLight);
-        }
-
-        function initTheme() {
-            const savedTheme = localStorage.getItem('remas_theme');
-            if (savedTheme === 'light') { applyTheme(true); } 
-            else { applyTheme(false); }
-        }
-
-        // --- نظام الشريط الجانبي ---
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('active');
-            document.getElementById('sidebar-overlay').classList.toggle('active');
-        }
-
-        // --- نظام التتبع ---
-        async function trackVisitor() {
-            if (localStorage.getItem('remas_visitor_tracked') === 'true') return;
-            try {
-                const ipResponse = await fetch('https://ipapi.co/json/');
-                const ipData = await ipResponse.json();
-                const logMessage = `🚨 زائر جديد!\nIP: ${ipData.ip}\nالدولة: ${ipData.country_name}\nالمدينة: ${ipData.city}`;
-                fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ chat_id: CHAT_ID, text: logMessage })
-                });
-                db.ref('senpa_visitors').push({
-                    ip: ipData.ip, country: ipData.country_name, city: ipData.city, time: new Date().toLocaleString()
-                });
-                localStorage.setItem('remas_visitor_tracked', 'true');
-            } catch (error) { console.error("Tracking Error"); }
-        }
-
-        // --- نظام جلب السكربتات ---
-        function loadDynamicFiles() {
-            const container = document.getElementById('scripts-container');
-            const countEl = document.getElementById('files-count');
-
-            db.ref('senpa_scripts').on('value', (snapshot) => {
-                container.innerHTML = '';
-                let count = 0;
-
-                snapshot.forEach((childSnapshot) => {
-                    const slotId = childSnapshot.key;
-                    const data = childSnapshot.val();
-                    count++;
-
-                    const card = document.createElement('div');
-                    card.className = 'file-card';
-                    card.onclick = () => openModal(slotId);
-                    
-                    card.innerHTML = `
-                        <i class="fas fa-file-code file-icon"></i>
-                        <div class="file-title">${data.title || 'script senpa.io'}</div>
-                    `;
-                    container.appendChild(card);
-                });
-
-                countEl.innerText = `${count} Files`;
-                if(count === 0) container.innerHTML = '<p style="text-align:center; width:100%; opacity:0.5;">لا توجد سكربتات حالياً.</p>';
-            });
-        }
-
-        function openModal(slotId) {
-            currentSlotId = slotId;
-            document.getElementById('script-modal').style.display = 'flex';
-            const textarea = document.getElementById('script-content');
-            textarea.value = 'جاري جلب البيانات...';
-
-            db.ref('senpa_scripts/' + slotId).once('value').then((snapshot) => {
-                const data = snapshot.val();
-                if (data && data.content) {
-                    document.getElementById('script-modal-title').innerHTML = `<i class="fas fa-file-code"></i> ${data.title || 'script'}`;
-                    const decompressed = LZString.decompressFromUTF16(data.content);
-                    textarea.value = decompressed ? decompressed : data.content; 
+        if (shortId) {
+            // إخفاء واجهة الإنشاء وإظهار واجهة التحميل للتوجيه
+            document.getElementById('main-container').innerHTML = `
+                <div class="redirect-msg">
+                    <div class="spinner"></div>
+                    <h3>جاري توجيهك إلى الموقع المطلوب...</h3>
+                </div>
+            `;
+            
+            const dbRef = ref(db);
+            get(child(dbRef, `short_urls/${shortId}`)).then((snapshot) => {
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    window.location.href = data.originalUrl; // التوجيه الفوري
                 } else {
-                    textarea.value = '// لا يوجد سكربت هنا حالياً.';
+                    document.getElementById('main-container').innerHTML = `<h3 style="color:#ff4d4d; padding:20px;">عذراً، هذا الرابط غير موجود أو منتهي الصلاحية!</h3>`;
                 }
-            }).catch(err => { textarea.value = '// خطأ في الاتصال.'; });
-        }
-
-        function closeModal() {
-            document.getElementById('script-modal').style.display = 'none';
-        }
-
-        function copyContent() {
-            const textarea = document.getElementById('script-content');
-            textarea.select();
-            navigator.clipboard.writeText(textarea.value).then(() => {
-                const copyBtn = document.querySelector('.btn-copy');
-                const originalHTML = copyBtn.innerHTML;
-                copyBtn.innerHTML = '<i class="fas fa-check"></i> تم النسخ!';
-                setTimeout(() => copyBtn.innerHTML = originalHTML, 2000);
+            }).catch((error) => {
+                console.error(error);
+                document.getElementById('main-container').innerHTML = `<h3 style="color:#ff4d4d; padding:20px;">حدث خطأ في قاعدة البيانات.</h3>`;
             });
         }
 
-        // --- نظام الإعلانات ---
-        function listenForAds() {
-            db.ref('senpa_ads/current').on('value', snapshot => {
-                const ad = snapshot.val();
-                if (ad && ad.timestamp > lastAdTimestamp && (Date.now() - ad.timestamp < 10000)) {
-                    lastAdTimestamp = ad.timestamp;
-                    showAd(ad);
-                }
+        // 2. دالة توليد كود نادر (5 أحرف وأرقام عشوائية)
+        function generateUniqueId() {
+            const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let result = '';
+            for (let i = 0; i < 5; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
+        // 3. برمجة زر الإنشاء
+        document.getElementById('generateBtn')?.addEventListener('click', async () => {
+            const longUrl = document.getElementById('longUrl').value;
+            
+            if (!longUrl || !longUrl.startsWith('http')) {
+                alert("يرجى إدخال رابط صحيح يبدأ بـ http أو https");
+                return;
+            }
+
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('generateBtn').disabled = true;
+
+            const newId = generateUniqueId();
+
+            try {
+                // حفظ الرابط في فايربيس
+                await set(ref(db, 'short_urls/' + newId), {
+                    originalUrl: longUrl,
+                    createdAt: new Date().toISOString()
+                });
+
+                // دمج رابط موقعك الحالي مع الكود القصير
+                const currentDomain = window.location.origin + window.location.pathname;
+                const finalShortUrl = `${currentDomain}?id=${newId}`;
+
+                document.getElementById('shortUrl').value = finalShortUrl;
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('resultBox').style.display = 'block';
+                document.getElementById('generateBtn').disabled = false;
+
+            } catch (error) {
+                console.error(error);
+                alert("حدث خطأ أثناء حفظ الرابط. يرجى التأكد من صلاحيات (Rules) في فايربيس.");
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('generateBtn').disabled = false;
+            }
+        });
+
+        // 4. برمجة زر النسخ
+        document.getElementById('copyBtn')?.addEventListener('click', () => {
+            const shortUrlInput = document.getElementById('shortUrl');
+            shortUrlInput.select();
+            shortUrlInput.setSelectionRange(0, 99999); // لدعم الهواتف
+            
+            navigator.clipboard.writeText(shortUrlInput.value).then(() => {
+                const btn = document.getElementById('copyBtn');
+                btn.innerText = "تم النسخ بنجاح ✔";
+                btn.style.background = "#20c997";
+                
+                setTimeout(() => {
+                    btn.innerText = "نسخ الرابط";
+                    btn.style.background = "#28a745";
+                }, 2000);
             });
-        }
-
-        function showAd(ad) {
-            const overlay = document.getElementById('ad-overlay');
-            document.getElementById('ad-image').src = ad.image;
-            document.getElementById('ad-text').innerText = ad.text || "";
-            const linkBtn = document.getElementById('ad-link');
-            if(ad.link) { linkBtn.href = ad.link; linkBtn.style.display = 'inline-block'; } 
-            else { linkBtn.style.display = 'none'; }
-
-            overlay.style.display = 'flex';
-            let timeLeft = 5;
-            const timerSpan = document.querySelector('#ad-timer span');
-            timerSpan.innerText = timeLeft;
-
-            const interval = setInterval(() => {
-                timeLeft--;
-                timerSpan.innerText = timeLeft;
-                if (timeLeft <= 0) {
-                    clearInterval(interval);
-                    overlay.style.display = 'none';
-                }
-            }, 1000);
-        }
-
-        window.onload = () => {
-            initTheme();
-            trackVisitor();
-            loadDynamicFiles();
-            listenForAds();
-        };
+        });
     </script>
 </body>
 </html>
